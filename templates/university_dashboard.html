@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h2 {
+            color: #333;
+        }
+        .job-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .job-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .job-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .job-desc {
+            font-size: 14px;
+            color: #555;
+        }
+        .approve-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .approve-btn:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>University Dashboard - {{ university_name }}</h2>
+
+    {% if job_listings %}
+        <div class="job-container">
+            {% for job in job_listings %}
+                <div class="job-card">
+                    <div class="job-title">{{ job.job_title }}</div>
+                    <div class="job-desc">{{ job.job_desc }}</div>
+                    <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
+                    <div><strong>Company:</strong> {{ job.company_name }}</div>
+                    <p>{{job._id}}</p>
+                    {% if job.flag == 0 %}
+                        <form action="{{ url_for('approve_job', job_id=job._id) }}" method="POST">
+                            <button type="submit" class="approve-btn">Proceed</button>
+                        </form>
+                        {% endif %}
+                    {% if job.flag == 1 %}
+                        <p>Pending at Hod</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No job postings available for this university.</p>
+    {% endif %}
+
+</body>
+</html>

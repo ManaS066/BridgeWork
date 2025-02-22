@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .dashboard-container {
+            width: 80%;
+            margin: 30px auto;
+        }
+
+        .job-listings {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .job-listings li {
+            background-color: #fff;
+            margin-bottom: 15px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .job-listings li h3 {
+            font-size: 1.5em;
+            color: #333;
+            margin: 0;
+        }
+
+        .job-listings li p {
+            font-size: 1em;
+            color: #555;
+            margin: 10px 0;
+        }
+
+        .job-listings li em {
+            font-size: 1.1em;
+            color: #777;
+        }
+
+        .job-listings li .departments {
+            font-weight: bold;
+        }
+
+        .no-jobs {
+            text-align: center;
+            font-size: 1.2em;
+            color: #888;
+        }
+
+        .footer {
+            background-color: #4CAF50;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Welcome to the HOD Dashboard</h1>
+    <p>{{ university_name }} - {{ department }}</p>
+</header>
+
+<div class="dashboard-container">
+    {% if job_listings %}
+        <h2>Approved Job Postings</h2>
+        <ul class="job-listings">
+            {% for job in job_listings %}
+                <li>
+                    <h3>{{ job.job_title }}</h3>
+                    <em>{{ job.company_name }}</em>
+                    <p>{{ job.job_desc }}</p>
+                    <p><span class="departments">Departments: </span>{{ job.departments|join(', ') }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="no-jobs">No approved job postings available for this department.</p>
+    {% endif %}
+</div>
+
+<div class="footer">
+    <p>&copy; 2025 HOD Dashboard. All Rights Reserved.</p>
+</div>
+
+</body>
+</html>
