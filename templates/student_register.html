@@ -3,150 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Registration</title>
+    <title>Student Dashboard</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background-color: #f4f4f4;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             margin: 0;
         }
-        .container {
+        .dashboard-container {
             background: white;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
+            width: 600px;
+            text-align: center;
         }
         h2 {
-            text-align: center;
             color: #333;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
+        p {
+            font-size: 16px;
+            margin: 10px 0;
         }
-        select, input {
+        .logout-btn {
+            display: block;
+            margin-top: 20px;
+            padding: 10px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+        .section {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .section h3 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .section p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .section input, .section textarea {
             width: 100%;
             padding: 10px;
             margin-top: 5px;
             border: 1px solid #ccc;
             border-radius: 5px;
         }
-        button {
-            width: 100%;
+        .section button {
+            margin-top: 10px;
             padding: 10px;
             background: #007bff;
             color: white;
             border: none;
             border-radius: 5px;
-            margin-top: 15px;
             cursor: pointer;
-            font-size: 16px;
         }
-        button:hover {
+        .section button:hover {
             background: #0056b3;
         }
     </style>
-    <script>
-        async function fetchUniversities() {
-            const response = await fetch('/get_universities');
-            const universities = await response.json();
-            let universitySelect = document.getElementById('university');
-            universities.forEach(univ => {
-                let option = document.createElement('option');
-                option.value = univ.id;
-                option.textContent = univ.name;
-                universitySelect.appendChild(option);
-            });
-        }
-
-        async function fetchDepartments() {
-            let universityId = document.getElementById('university').value;
-            if (!universityId) return;
-            const response = await fetch(`/get_departments/${universityId}`);
-            const departments = await response.json();
-            let deptSelect = document.getElementById('department');
-            deptSelect.innerHTML = '<option value="">Select Department</option>';
-            departments.forEach(dept => {
-                let option = document.createElement('option');
-                option.value = dept;
-                option.textContent = dept;
-                deptSelect.appendChild(option);
-            });
-        }
-
-        async function registerStudent(event) {
-            event.preventDefault();
-            let universityId = document.getElementById('university').value;
-            let department = document.getElementById('department').value;
-            let name = document.getElementById('name').value;
-            let email = document.getElementById('email').value;
-            let password = document.getElementById('password').value;
-            let rollNumber = document.getElementById('roll_number').value;
-            let regNumber = document.getElementById('reg_number').value;
-            
-            if (!universityId || !department || !name || !email || !password || !rollNumber || !regNumber) {
-                alert('Please fill out all fields!');
-                return;
-            }
-            
-            let formData = new FormData();
-            formData.append("universityId", universityId);
-            formData.append("department", department);
-            formData.append("name", name);
-            formData.append("email", email);
-            formData.append("password", password);
-            formData.append("roll_number", rollNumber);
-            formData.append("reg_number", regNumber);
-            
-            const response = await fetch('/register_student', {
-                method: 'POST',
-                body: formData
-            });
-            
-            const result = await response.json();
-            alert(result.message);
-        }
-        
-        window.onload = fetchUniversities;
-    </script>
 </head>
 <body>
-    <div class="container">
-        <h2>Student Registration</h2>
-        <form onsubmit="registerStudent(event)" enctype="multipart/form-data">
-            <label for="university">Select University:</label>
-            <select id="university" name="university" onchange="fetchDepartments()" required>
-                <option value="">Select University</option>
-            </select>
 
-            <label for="department">Select Department:</label>
-            <select id="department" name="department" required>
-                <option value="">Select Department</option>
-            </select>
+    <div class="dashboard-container">
+        <h2>Welcome, {{ student.name }}</h2>
+        <p><strong>University:</strong> {{ student.university_name }}</p>
+        <p><strong>Department:</strong> {{ student.department }}</p>
+        <p><strong>Email:</strong> {{ student.email }}</p>
+        <p><strong>Roll Number:</strong> {{ student.rollno }}</p>
+        <p><strong>Registration Number:</strong> {{ student.registration_no }}</p>
 
-            <label for="name">Full Name:</label>
-            <input type="text" id="name" name="name" required>
-            <label for="roll_number">Roll Number:</label>
-            <input type="text" id="roll_number" name="roll_number" required>
+        <div class="section">
+            <h3>Academic Details</h3>
+            {% if student.gpa and student.courses and student.projects %}
+                <p><strong>GPA:</strong> {{ student.gpa }}</p>
+                <p><strong>Courses:</strong> {{ student.courses }}</p>
+                <p><strong>Projects:</strong> {{ student.projects }}</p>
+            {% else %}
+                <form id="academic-form">
+                    <label for="gpa">GPA:</label>
+                    <input type="text" id="gpa" name="gpa" placeholder="Enter your GPA">
+                    
+                    <label for="courses">Courses:</label>
+                    <textarea id="courses" name="courses" rows="4" placeholder="List your courses here..."></textarea>
+                    
+                    <label for="projects">Projects:</label>
+                    <textarea id="projects" name="projects" rows="4" placeholder="Describe your projects here..."></textarea>
+                    
+                    <button type="submit">Save Academic Details</button>
+                </form>
+            {% endif %}
+        </div>
 
-            <label for="reg_number">Registration Number:</label>
-            <input type="text" id="reg_number" name="reg_number" required>
+        <div class="section">
+            <h3>Skills</h3>
+            {% if student.skills %}
+                <p><strong>Skills:</strong> {{ student.skills }}</p>
+            {% else %}
+                <form id="skills-form">
+                    <label for="skills">Add Skills:</label>
+                    <textarea id="skills" name="skills" rows="4" placeholder="List your skills here..."></textarea>
+                    <button type="submit">Save Skills</button>
+                </form>
+            {% endif %}
+        </div>
 
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="password">Password:</label>z
-            <input type="password" id="password" name="password" required>
-            
-
-            <button type="submit">Register</button>
-        </form>
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
+
+    <script>
+        document.getElementById('academic-form')?.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let gpa = document.getElementById('gpa').value;
+            let courses = document.getElementById('courses').value;
+            let projects = document.getElementById('projects').value;
+
+            const response = await fetch('/save_academic_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ gpa: gpa, courses: courses, projects: projects })
+            });
+
+            if (response.ok) {
+                alert('Academic details saved successfully!');
+                location.reload();
+            } else {
+                alert('Failed to save academic details.');
+            }
+        });
+
+        document.getElementById('skills-form')?.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let skills = document.getElementById('skills').value;
+
+            const response = await fetch('/save_skills', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ skills: skills })
+            });
+
+            if (response.ok) {
+                alert('Skills saved successfully!');
+                location.reload();
+            } else {
+                alert('Failed to save skills.');
+            }
+        });
+    </script>
+
 </body>
 </html>

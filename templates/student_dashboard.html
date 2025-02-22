@@ -12,13 +12,14 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            margin: 0;
         }
         .dashboard-container {
             background: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 400px;
+            width: 600px;
             text-align: center;
         }
         h2 {
@@ -40,6 +41,37 @@
         .logout-btn:hover {
             background: #c82333;
         }
+        .section {
+            margin-top: 20px;
+            text-align: left;
+        }
+        .section h3 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .section p {
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .section input, .section textarea {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .section button {
+            margin-top: 10px;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .section button:hover {
+            background: #0056b3;
+        }
     </style>
 </head>
 <body>
@@ -52,8 +84,87 @@
         <p><strong>Roll Number:</strong> {{ student.rollno }}</p>
         <p><strong>Registration Number:</strong> {{ student.registration_no }}</p>
 
+        <div class="section">
+            <h3>Academic Details</h3>
+            {% if student.gpa and student.courses and student.projects %}
+                <p><strong>GPA:</strong> {{ student.gpa }}</p>
+                <p><strong>Courses:</strong> {{ student.courses }}</p>
+                <p><strong>Projects:</strong> {{ student.projects }}</p>
+            {% else %}
+                <form id="academic-form">
+                    <label for="gpa">GPA:</label>
+                    <input type="text" id="gpa" name="gpa" placeholder="Enter your GPA">
+                    
+                    <label for="courses">Courses:</label>
+                    <textarea id="courses" name="courses" rows="4" placeholder="List your courses here..."></textarea>
+                    
+                    <label for="projects">Projects:</label>
+                    <textarea id="projects" name="projects" rows="4" placeholder="Describe your projects here..."></textarea>
+                    
+                    <button type="submit">Save Academic Details</button>
+                </form>
+            {% endif %}
+        </div>
+
+        <div class="section">
+            <h3>Skills</h3>
+            {% if student.skills %}
+                <p><strong>Skills:</strong> {{ student.skills }}</p>
+            {% else %}
+                <form id="skills-form">
+                    <label for="skills">Add Skills:</label>
+                    <textarea id="skills" name="skills" rows="4" placeholder="List your skills here..."></textarea>
+                    <button type="submit">Save Skills</button>
+                </form>
+            {% endif %}
+        </div>
+
         <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
+
+    <script>
+        document.getElementById('academic-form')?.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let gpa = document.getElementById('gpa').value;
+            let courses = document.getElementById('courses').value;
+            let projects = document.getElementById('projects').value;
+
+            const response = await fetch('/save_academic_details', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ gpa: gpa, courses: courses, projects: projects })
+            });
+
+            if (response.ok) {
+                alert('Academic details saved successfully!');
+                location.reload();
+            } else {
+                alert('Failed to save academic details.');
+            }
+        });
+
+        document.getElementById('skills-form')?.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            let skills = document.getElementById('skills').value;
+
+            const response = await fetch('/save_skills', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ skills: skills })
+            });
+
+            if (response.ok) {
+                alert('Skills saved successfully!');
+                location.reload();
+            } else {
+                alert('Failed to save skills.');
+            }
+        });
+    </script>
 
 </body>
 </html>
