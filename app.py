@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, redirect, render_template, request, jsonify, url_for
 from flask_pymongo import PyMongo
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
+
 app = Flask(__name__)
 
 # MongoDB Configuration
@@ -11,12 +12,14 @@ app.config["MONGO_URI"] = MONGO_URI
 
 mongo = PyMongo(app)
 
-
 # References to collections
 db = mongo.db
 universities_collection = db.universities
-hod_collection = db.hods  # Collection to store HOD data
-students_collection = db.students 
+hod_collection = db.hods
+students_collection = db.students
+companies_collection = db.companies
+jobs = db.job
+
 @app.route('/hod_register', methods=['GET'])
 def hod_register_page():
     return render_template('hod_register.html')
@@ -29,9 +32,7 @@ def get_universities():
 @app.route('/get_departments/<university_id>', methods=['GET'])
 def get_departments(university_id):
     university = universities_collection.find_one({"_id": ObjectId(university_id)})
-    if university:
-        return jsonify(university.get("departments", []))
-    return jsonify([])
+    return jsonify(university.get("departments", [])) if university else jsonify([])
 
 @app.route('/register_hod', methods=['POST'])
 def register_hod():
@@ -39,16 +40,16 @@ def register_hod():
     university_id = data.get('universityId')
     department = data.get('department')
     email = data.get('email')
-    password = data.get('password')  # In production, store hashed passwords
+    password = data.get('password')
 
-    if not university_id or not department or not email or not password:
+    if not all([university_id, department, email, password]):
         return jsonify({"message": "All fields are required"}), 400
 
     hod_id = hod_collection.insert_one({
         "university_id": university_id,
         "department": department,
         "email": email,
-        "password": password  # Hash in production
+        "password": password
     }).inserted_id
 
     return jsonify({
@@ -56,46 +57,139 @@ def register_hod():
         "hod_id": str(hod_id)
     })
 
-
 @app.route('/student_register', methods=['GET'])
 def student_register_page():
     return render_template('student_register.html')
-
-
 @app.route('/register_student', methods=['POST'])
 def register_student():
     university_id = request.form.get('universityId')
     department = request.form.get('department')
     name = request.form.get('name')
     email = request.form.get('email')
-    password = request.form.get('password') 
+    password = request.form.get('password')
     rollno = request.form.get('roll_number')
     registration_no = request.form.get('reg_number')
-     # In production, hash this
-    
 
-    if not all([university_id, department, name, email, password,rollno,registration_no]):
+    if not all([university_id, department, name, email, password, rollno, registration_no]):
         return jsonify({"message": "All fields are required"}), 400
 
-    # Save document
-    
+    # Fetch university name from the database
+    university = universities_collection.find_one({"_id": ObjectId(university_id)})
+    university_name = university["name"] if university else "Unknown University"
 
+    # Insert student with university name
     student_id = students_collection.insert_one({
-        "university_id": university_id,
+        "university_name": university_name,  # Store name instead of ID
         "department": department,
         "name": name,
         "email": email,
-        "password": password, 
-         "rollno":rollno,
-         "registration_no":registration_no,
-           # Hash in production
-       
+        "password": password,
+        "rollno": rollno,
+        "registration_no": registration_no
     }).inserted_id
 
     return jsonify({
         "message": "Student registered successfully!",
         "student_id": str(student_id)
     })
+
+@app.route('/register_company', methods=['GET', 'POST'])
+def register_company():
+    if request.method == 'GET':
+        return render_template('company_registration.html')
+
+    data = request.form
+    company_name = data.get('company_name')
+    employee_size = data.get('employee_size')
+    email = data.get('email')
+    password = data.get('password')
+
+    if not all([company_name, employee_size, email, password]):
+        return jsonify({"message": "All fields are required"}), 400
+
+    company_id = companies_collection.insert_one({
+        "company_name": company_name,
+        "employee_size": employee_size,
+        "email": email,
+        "password": password
+    }).inserted_id
+
+    return jsonify({
+        "message": "Company registered successfully!",
+        "company_id": str(company_id)
+    })
+
+@app.route('/login_company', methods=['GET'])
+def company_login_page():
+    return render_template('company_login.html')
+
+@app.route('/login_company', methods=['POST'])
+def login_company():
+    data = request.form
+    email = data.get('email')
+    password = data.get('password')
+    
+    company = companies_collection.find_one({"email": email, "password": password})
+
+    if company: 
+        print("Acces")
+        return redirect(url_for('company_dashboard', company_name=company['company_name']))
+    else:
+        return render_template("company_login.html", error="Invalid email or password.")
+
+@app.route('/add_job', methods=['POST'])
+def add_job():
+    # Extract job details from the form
+    university_id = request.form.get('university')
+    departments = request.form.getlist('departments')  # List of selected departments
+    job_title = request.form.get('job_title')
+    job_desc = request.form.get('job_desc')
+
+    if not all([university_id, departments, job_title, job_desc]):
+        return jsonify({"message": "All fields are required"}), 400
+
+    # Fetch university name from the database
+    university = universities_collection.find_one({"_id": ObjectId(university_id)})
+    university_name = university["name"] if university else "Unknown University"
+
+    # Insert job posting with university name
+    job_id = db.jobs.insert_one({
+        "university_name": university_name,  # Store name instead of ID
+        "departments": departments,
+        "job_title": job_title,
+        "job_desc": job_desc,
+        "company_name": request.args.get('company_name')  # Logged-in company name
+    }).inserted_id
+
+    return jsonify({
+        "message": "Job posted successfully!",
+        "job_id": str(job_id)
+    })
+
+
+# Add job posting route to handle the form submission
+@app.route('/company_dashboard', methods=['GET'])
+def company_dashboard():
+    # You can fetch job listings for this company to show on the dashboard
+    company_name = request.args.get('company_name', '')
+    jobs = db.jobs.find()
+    job_listings = [{"job_title": job["job_title"], "job_desc": job["job_desc"]} for job in jobs]
+
+    return render_template('company_dashboard.html', company_name=company_name, job_listings=job_listings)
+
+
+
+
+# @app.route('/company_dashboard',methods=['GET'])
+# def company_dashboard():
+#     # company_name = request.args.get('company_name', '')
+#     return render_template('company_dashboard.html')
+
+@app.route('/logout', methods=['GET'])
+def logout():
+    # Logout functionality here
+    return redirect(url_for('login_company'))
+
 
 if __name__ == '__main__':
     app.run(debug=True)

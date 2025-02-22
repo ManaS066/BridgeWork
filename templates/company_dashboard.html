@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Company Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #007bff;
+            color: white;
+            padding: 15px;
+            text-align: right;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .section {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+
+        /* Modal Style */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0, 0, 0);
+            background-color: rgba(0, 0, 0, 0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        input[type="text"], input[type="textarea"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .checkbox-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .checkbox-group label {
+            margin-bottom: 5px;
+        }
+        .job-status {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .active-job {
+            background-color: #28a745;
+            color: white;
+        }
+        .closed-job {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <span>Welcome, <b>{{ company_name }}</b></span>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="container">
+        <h2>Company Dashboard</h2>
+        
+        <!-- Section 1: Job Postings -->
+        <div class="section">
+            <h3>Job Postings</h3>
+            <p>Manage and view all your job openings.</p>
+            <button onclick="openModal()">Add Jobs</button> 
+        </div>
+
+        <!-- Section 2: Job Listings -->
+        <div class="section">
+            <h3>Current Job Listings</h3>
+            <table border="1" width="100%" cellpadding="5">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Job Description</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in job_listings %}
+                        <tr>
+                            <td>{{ job.job_title }}</td>
+                            <td>{{ job.job_desc }}</td>
+                            <td>
+                                <span class="job-status 
+                                    {% if job.status == 'active' %}active-job{% else %}closed-job{% endif %}">
+                                    {{ job.status | capitalize }}
+                                </span>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal Form for Adding Job -->
+    <div id="jobModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h3>Add New Job</h3>
+            <form action="/add_job" method="POST">
+                <!-- University Dropdown -->
+                <label for="university">University</label>
+                <select id="university" name="university" onchange="loadDepartments()">
+                    <option value="">Select University</option>
+                    <!-- Universities will be populated here -->
+                </select><br>
+                
+                <!-- Department Checkboxes -->
+                <label>Departments</label>
+                <div id="departments" class="checkbox-group">
+                    <!-- Departments will be populated here -->
+                </div><br>
+
+                <label for="job_title">Job Title</label>
+                <input type="text" id="job_title" name="job_title" required><br>
+                
+                <label for="job_desc">Job Description</label>
+                <textarea id="job_desc" name="job_desc" rows="4" required></textarea><br>
+
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Function to open the modal
+        function openModal() {
+            document.getElementById("jobModal").style.display = "block";
+            loadUniversities();  // Load universities when modal opens
+        }
+
+        // Function to close the modal
+        function closeModal() {
+            document.getElementById("jobModal").style.display = "none";
+        }
+
+        // Close modal if clicked outside of it
+        window.onclick = function(event) {
+            if (event.target == document.getElementById("jobModal")) {
+                closeModal();
+            }
+        }
+
+        // Fetch universities from the database
+        function loadUniversities() {
+            fetch('/get_universities')
+                .then(response => response.json())
+                .then(data => {
+                    const universitySelect = document.getElementById("university");
+                    universitySelect.innerHTML = `<option value="">Select University</option>`; // Clear previous options
+                    data.forEach(u => {
+                        const option = document.createElement("option");
+                        option.value = u.id;
+                        option.textContent = u.name;
+                        universitySelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching universities:', error));
+        }
+
+        // Fetch and display departments based on the selected university
+        function loadDepartments() {
+            const universityId = document.getElementById("university").value;
+            if (universityId) {
+                fetch(`/get_departments/${universityId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const departmentsDiv = document.getElementById("departments");
+                        departmentsDiv.innerHTML = ""; // Clear previous checkboxes
+                        data.forEach(department => {
+                            const checkbox = document.createElement("input");
+                            checkbox.type = "checkbox";
+                            checkbox.id = department;
+                            checkbox.name = "departments";
+                            checkbox.value = department;
+                            const label = document.createElement("label");
+                            label.setAttribute("for", department);
+                            label.textContent = department;
+                            departmentsDiv.appendChild(checkbox);
+                            departmentsDiv.appendChild(label);
+                            departmentsDiv.appendChild(document.createElement("br"));
+                        });
+                    })
+                    .catch(error => console.error('Error fetching departments:', error));
+            }
+        }
+    </script>
+
+</body>
+</html>
