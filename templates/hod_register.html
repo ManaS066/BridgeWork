@@ -4,6 +4,54 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOD Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 350px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
     <script>
         async function fetchUniversities() {
             const response = await fetch('/get_universities');
@@ -19,10 +67,11 @@
 
         async function fetchDepartments() {
             let universityId = document.getElementById('university').value;
+            if (!universityId) return;
             const response = await fetch(`/get_departments/${universityId}`);
             const departments = await response.json();
             let deptSelect = document.getElementById('department');
-            deptSelect.innerHTML = '<option value="">Select Department</option>'; // Reset previous options
+            deptSelect.innerHTML = '<option value="">Select Department</option>';
             departments.forEach(dept => {
                 let option = document.createElement('option');
                 option.value = dept;
@@ -38,6 +87,11 @@
             let email = document.getElementById('email').value;
             let password = document.getElementById('password').value;
 
+            if (!universityId || !department || !email || !password) {
+                alert('Please fill out all fields!');
+                return;
+            }
+
             const response = await fetch('/register_hod', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -52,29 +106,27 @@
     </script>
 </head>
 <body>
-    <h2>HOD Registration</h2>
-    <form onsubmit="registerHOD(event)">
-        <label for="university">Select University:</label>
-        <select id="university" name="university" onchange="fetchDepartments()" required>
-            <option value="">Select University</option>
-        </select>
-        <br><br>
+    <div class="container">
+        <h2>HOD Registration</h2>
+        <form onsubmit="registerHOD(event)">
+            <label for="university">Select University:</label>
+            <select id="university" name="university" onchange="fetchDepartments()" required>
+                <option value="">Select University</option>
+            </select>
 
-        <label for="department">Select Department:</label>
-        <select id="department" name="department" required>
-            <option value="">Select Department</option>
-        </select>
-        <br><br>
+            <label for="department">Select Department:</label>
+            <select id="department" name="department" required>
+                <option value="">Select Department</option>
+            </select>
 
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <br><br>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
 
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required>
-        <br><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
 
-        <button type="submit">Register HOD</button>
-    </form>
+            <button type="submit">Register HOD</button>
+        </form>
+    </div>
 </body>
 </html>
