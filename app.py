@@ -95,10 +95,7 @@ def register_student():
         "registration_no": registration_no
     }).inserted_id
 
-    return jsonify({
-        "message": "Student registered successfully!",
-        "student_id": str(student_id)
-    })
+    return render_template('student_login.html', message="Student registered successfully!")
 
 @app.route('/register_company', methods=['GET', 'POST'])
 def register_company():
@@ -282,6 +279,35 @@ def hod_dashboard():
     return render_template('hod_dashboard.html', university_name=university_name, department=department, job_listings=job_listings)
 
 
+@app.route('/student_login', methods=['GET', 'POST'])
+def student_login():
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        student = students_collection.find_one({"email": email, "password": password})
+
+        if student:
+            session['student_id'] = str(student['_id'])
+            session['student_name'] = student['name']
+            return redirect(url_for('student_dashboard'))  # Redirect to student dashboard
+        else:
+            return render_template('student_login.html', error="Invalid Email or Password")
+
+    return render_template('student_login.html')
+
+@app.route('/student_dashboard')
+def student_dashboard():
+    if 'student_id' not in session:
+        return redirect(url_for('student_login'))
+
+    # Fetch student details from MongoDB
+    student = students_collection.find_one({"_id": ObjectId(session['student_id'])})
+
+    if not student:
+        return redirect(url_for('student_login'))
+
+    return render_template('student_dashboard.html', student=student)
 
 
 @app.route('/logout', methods=['GET'])

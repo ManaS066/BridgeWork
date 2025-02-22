@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .dashboard-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            text-align: center;
+        }
+        h2 {
+            color: #333;
+        }
+        p {
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        .logout-btn {
+            display: block;
+            margin-top: 20px;
+            padding: 10px;
+            background: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .logout-btn:hover {
+            background: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h2>Welcome, {{ student.name }}</h2>
+        <p><strong>University:</strong> {{ student.university_name }}</p>
+        <p><strong>Department:</strong> {{ student.department }}</p>
+        <p><strong>Email:</strong> {{ student.email }}</p>
+        <p><strong>Roll Number:</strong> {{ student.rollno }}</p>
+        <p><strong>Registration Number:</strong> {{ student.registration_no }}</p>
+
+        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+    </div>
+
+</body>
+</html>
