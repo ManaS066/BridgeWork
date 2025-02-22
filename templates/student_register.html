@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration</title>
+    <script>
+        async function fetchUniversities() {
+            const response = await fetch('/get_universities');
+            const universities = await response.json();
+            let universitySelect = document.getElementById('university');
+            universities.forEach(univ => {
+                let option = document.createElement('option');
+                option.value = univ.id;
+                option.textContent = univ.name;
+                universitySelect.appendChild(option);
+            });
+        }
+
+        async function fetchDepartments() {
+            let universityId = document.getElementById('university').value;
+            const response = await fetch(`/get_departments/${universityId}`);
+            const departments = await response.json();
+            let deptSelect = document.getElementById('department');
+            deptSelect.innerHTML = '<option value="">Select Department</option>'; // Reset
+            departments.forEach(dept => {
+                let option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptSelect.appendChild(option);
+            });
+        }
+
+        async function registerStudent(event) {
+            event.preventDefault();
+            let universityId = document.getElementById('university').value;
+            let department = document.getElementById('department').value;
+            let name = document.getElementById('name').value;
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+            let rollNumber = document.getElementById('roll_number').value;
+            let regNumber = document.getElementById('reg_number').value;
+           
+
+            let formData = new FormData();
+            formData.append("universityId", universityId);
+            formData.append("department", department);
+            formData.append("name", name);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("roll_number", rollNumber);
+            formData.append("reg_number", regNumber);
+            
+
+            const response = await fetch('/register_student', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        window.onload = fetchUniversities;
+    </script>
+</head>
+<body>
+    <h2>Student Registration</h2>
+    <form onsubmit="registerStudent(event)" enctype="multipart/form-data">
+        <label for="university">Select University:</label>
+        <select id="university" name="university" onchange="fetchDepartments()" required>
+            <option value="">Select University</option>
+        </select>
+        <br><br>
+
+        <label for="department">Select Department:</label>
+        <select id="department" name="department" required>
+            <option value="">Select Department</option>
+        </select>
+        <br><br>
+
+        <label for="name">Full Name:</label>
+        <input type="text" id="name" name="name" required>
+        <br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br><br>
+
+        <!-- Add Roll Number Field -->
+        <label for="roll_number">Roll Number:</label>
+        <input type="text" id="roll_number" name="roll_number" required>
+        <br><br>
+
+        <!-- Add Registration Number Field -->
+        <label for="reg_number">Registration Number:</label>
+        <input type="text" id="reg_number" name="reg_number" required>
+        <br><br>
+
+       
+        <br><br>
+
+        <button type="submit">Register</button>
+    </form>
+</body>
+</html>

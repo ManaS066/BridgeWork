@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOD Registration</title>
+    <script>
+        async function fetchUniversities() {
+            const response = await fetch('/get_universities');
+            const universities = await response.json();
+            let universitySelect = document.getElementById('university');
+            universities.forEach(univ => {
+                let option = document.createElement('option');
+                option.value = univ.id;
+                option.textContent = univ.name;
+                universitySelect.appendChild(option);
+            });
+        }
+
+        async function fetchDepartments() {
+            let universityId = document.getElementById('university').value;
+            const response = await fetch(`/get_departments/${universityId}`);
+            const departments = await response.json();
+            let deptSelect = document.getElementById('department');
+            deptSelect.innerHTML = '<option value="">Select Department</option>'; // Reset previous options
+            departments.forEach(dept => {
+                let option = document.createElement('option');
+                option.value = dept;
+                option.textContent = dept;
+                deptSelect.appendChild(option);
+            });
+        }
+
+        async function registerHOD(event) {
+            event.preventDefault();
+            let universityId = document.getElementById('university').value;
+            let department = document.getElementById('department').value;
+            let email = document.getElementById('email').value;
+            let password = document.getElementById('password').value;
+
+            const response = await fetch('/register_hod', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ universityId, department, email, password })
+            });
+
+            const result = await response.json();
+            alert(result.message);
+        }
+
+        window.onload = fetchUniversities;
+    </script>
+</head>
+<body>
+    <h2>HOD Registration</h2>
+    <form onsubmit="registerHOD(event)">
+        <label for="university">Select University:</label>
+        <select id="university" name="university" onchange="fetchDepartments()" required>
+            <option value="">Select University</option>
+        </select>
+        <br><br>
+
+        <label for="department">Select Department:</label>
+        <select id="department" name="department" required>
+            <option value="">Select Department</option>
+        </select>
+        <br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br><br>
+
+        <button type="submit">Register HOD</button>
+    </form>
+</body>
+</html>
