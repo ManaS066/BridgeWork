@@ -7,7 +7,7 @@ import os
 app = Flask(__name__)
 
 # MongoDB Configuration
-MONGO_URI = "mongodb+srv://manasranjanpradhan2004:pRZ0F9oyRoY1FHxs@university.m80kj.mongodb.net/University?retryWrites=true&w=majority"
+MONGO_URI = "mongodb://localhost:27017/bridge_work"
 app.config["MONGO_URI"] = MONGO_URI
 
 mongo = PyMongo(app)
@@ -19,7 +19,10 @@ hod_collection = db.hods
 students_collection = db.students
 companies_collection = db.companies
 jobs = db.jobs
-
+@app.get('/')
+def uni():
+    return render_template('uniReg.html')
+    
 @app.route('/hod_register', methods=['GET'])
 def hod_register_page():
     return render_template('hod_register.html')
