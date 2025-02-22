@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BridgeWork - Connecting Talent with Opportunities</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #5dadfc96;
+        }
+        .navbar {
+            background-color: #343a40;
+            color: white;
+        }
+        .navbar a {
+            color: white;
+        }
+        .hero {
+            background: url('https://via.placeholder.com/1920x600') no-repeat center center/cover;
+            height: 600px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 50px;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: 20px;
+            margin-bottom: 30px;
+        }
+        .hero a {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        .hero a:hover {
+            background-color: #0056b3;
+        }
+        .features {
+            padding: 50px 20px;
+            text-align: center;
+            background-color: #66c0f196;
+        }
+        .features h2 {
+            margin-bottom: 40px;
+            color: #333;
+        }
+        .feature {
+            margin-bottom: 30px;
+        }
+        .feature h3 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <a class="navbar-brand" href="#"><b>BridgeWork</b></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#features">Features</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#contact">Contact</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('university_login') }}">University Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('company_login_page') }}">Company Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student_login') }}">Student Login</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero">
+        <div>
+            <h1>Welcome to BridgeWork</h1>
+            <p>Connecting Talent with Opportunities</p>
+            <a href="#features">Learn More</a>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div id="features" class="features">
+        <h2>Our Features</h2>
+        <div class="row">
+            <div class="col-md-4 feature">
+                <h3>For Universities</h3>
+                <p>Manage job postings and student applications with ease.</p>
+            </div>
+            <div class="col-md-4 feature">
+                <h3>For Companies</h3>
+                <p>Find the best talent from top universities for your job openings.</p>
+            </div>
+            <div class="col-md-4 feature">
+                <h3>For Students</h3>
+                <p>Apply for job opportunities and track your application status.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div id="contact" class="footer">
+        <p>&copy; 2025 BridgeWork. All rights reserved.</p>
+        <p>Contact us: info@bridgework.com</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

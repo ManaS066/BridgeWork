@@ -1,6 +1,7 @@
-from flask import Flask
+from flask import Flask, render_template
 from flask_pymongo import PyMongo
 import os
+
 app = Flask(__name__)
 
 # MongoDB Configuration
@@ -18,11 +19,13 @@ students_collection = db.students
 companies_collection = db.companies
 jobs = db.jobs
 
+
 # Import routes
 from routes.hod_routes import *
 from routes.student_routes import *
 from routes.company_routes import *
 from routes.university_routes import *
+
 
 if __name__ == '__main__':
     app.run(debug=True)

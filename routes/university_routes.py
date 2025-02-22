@@ -131,3 +131,7 @@ def send_students_to_company():
 
     flash("Students' details sent to the company successfully!", "success")
     return redirect(url_for('university_dashboard'))
+
+@app.route('/', methods=['GET'])
+def index():
+    return render_template('index.html')
