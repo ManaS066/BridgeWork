@@ -32,21 +32,23 @@
 <body>
     <div class="container">
         <h2>University Details</h2>
-        <label for="name">Name:</label>
-        <input type="text" id="name" placeholder="Enter university name" required>
-        
-        <label for="email">Email:</label>
-        <input type="email" id="email" placeholder="Enter university email" required>
-        
-        <label for="password">Password:</label>
-        <input type="password" id="password" placeholder="Enter password" required>
-        
-        <label for="numDepartments">Number of Departments:</label>
-        <input type="number" id="numDepartments" placeholder="Enter number of departments" min="1" required oninput="generateDepartmentFields()">
-        
-        <div class="departments" id="departments"></div>
-        
-        <button onclick="submitForm()">Register</button>
+        <form id="registrationForm" action="{{ url_for('university_register') }}" method="POST">
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter university name" required>
+            
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter university email" required>
+            
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" placeholder="Enter password" required>
+            
+            <label for="numDepartments">Number of Departments:</label>
+            <input type="number" id="numDepartments" name="numDepartments" placeholder="Enter number of departments" min="1" required oninput="generateDepartmentFields()">
+            
+            <div class="departments" id="departments"></div>
+            
+            <button type="submit">Register</button>
+        </form>
     </div>
 
     <script>
@@ -59,30 +61,12 @@
                 for (let i = 1; i <= numDepartments; i++) {
                     const departmentInput = document.createElement("input");
                     departmentInput.type = "text";
-                    departmentInput.name = "department" + i;
+                    departmentInput.name = "departments";
                     departmentInput.placeholder = "Enter department name " + i;
                     departmentInput.required = true;
                     departmentsDiv.appendChild(departmentInput);
                 }
             }
-        }
-
-        function submitForm() {
-            const name = document.getElementById("name").value;
-            const email = document.getElementById("email").value;
-            const password = document.getElementById("password").value;
-            const numDepartments = document.getElementById("numDepartments").value;
-            const departments = Array.from(document.querySelectorAll(".departments input")).map(input => input.value);
-            
-            const data = { name, email, password, numDepartments, departments };
-            
-            fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            }).then(response => response.json())
-              .then(data => alert(data.message))
-              .catch(error => console.error('Error:', error));
         }
     </script>
 </body>

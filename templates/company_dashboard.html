@@ -15,7 +15,9 @@
             background-color: #007bff;
             color: white;
             padding: 15px;
-            text-align: right;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         .navbar a {
             color: white;
@@ -104,12 +106,16 @@
             border-radius: 5px;
             font-weight: bold;
         }
-        .active-job {
-            background-color: #28a745;
+        .pending-university {
+            background-color: #ffc107;
             color: white;
         }
-        .closed-job {
-            background-color: #dc3545;
+        .pending-department {
+            background-color: #17a2b8;
+            color: white;
+        }
+        .waiting-confirmation {
+            background-color: #6c757d;
             color: white;
         }
     </style>
@@ -118,13 +124,14 @@
 
     <!-- Navigation Bar -->
     <div class="navbar">
+        <span><b>BridgeWork</b></span>
         <span>Welcome, <b>{{ company_name }}</b></span>
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 
     <!-- Dashboard Content -->
     <div class="container">
-        <h2>Company Dashboard</h2>
+        
         
         <!-- Section 1: Job Postings -->
         <div class="section">
@@ -141,6 +148,8 @@
                     <tr>
                         <th>Job Title</th>
                         <th>Job Description</th>
+                        <th>Number of Openings</th>
+                        <th>Job Mode</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -149,10 +158,12 @@
                         <tr>
                             <td>{{ job.job_title }}</td>
                             <td>{{ job.job_desc }}</td>
+                            <td>{{ job.num_openings }}</td>
+                            <td>{{ job.job_mode }}</td>
                             <td>
                                 <span class="job-status 
-                                    {% if job.status == 'active' %}active-job{% else %}closed-job{% endif %}">
-                                    {{ job.status | capitalize }}
+                                    {% if job.flag == 0 %}pending-university{% elif job.flag == 1 %}pending-department{% elif job.flag == 2 %}waiting-confirmation{% endif %}">
+                                    {% if job.flag == 0 %}Pending at University{% elif job.flag == 1 %}Pending at Department{% elif job.flag == 2 %}Waiting for Confirmation{% endif %}
                                 </span>
                             </td>
                         </tr>
@@ -186,6 +197,16 @@
                 
                 <label for="job_desc">Job Description</label>
                 <textarea id="job_desc" name="job_desc" rows="4" required></textarea><br>
+
+                <label for="num_openings">Number of Openings</label>
+                <input type="number" id="num_openings" name="num_openings" required><br>
+
+                <label for="job_mode">Job Mode</label>
+                <select id="job_mode" name="job_mode" required>
+                    <option value="onsite">Onsite</option>
+                    <option value="remote">Remote</option>
+                    <option value="hybrid">Hybrid</option>
+                </select><br>
 
                 <button type="submit">Submit</button>
             </form>

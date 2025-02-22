@@ -4,15 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
+            margin: 0;
+            padding: 0;
             background-color: #f4f4f4;
         }
-        h2 {
-            color: #333;
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #007bff;
+            padding: 15px 20px;
+            color: white;
+        }
+        .navbar .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .container {
+            padding: 20px;
         }
         .job-container {
             display: flex;
@@ -34,6 +59,10 @@
             font-size: 14px;
             color: #555;
         }
+        .job-details {
+            font-size: 14px;
+            color: #333;
+        }
         .approve-btn {
             background-color: #28a745;
             color: white;
@@ -46,35 +75,136 @@
         .approve-btn:hover {
             background-color: #218838;
         }
+        .send-btn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .send-btn:hover {
+            background-color: #0056b3;
+        }
+        .view-btn {
+            background-color: #17a2b8;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        .view-btn:hover {
+            background-color: #138496;
+        }
     </style>
 </head>
 <body>
-
-    <h2>University Dashboard - {{ university_name }}</h2>
-
-    {% if job_listings %}
-        <div class="job-container">
-            {% for job in job_listings %}
-                <div class="job-card">
-                    <div class="job-title">{{ job.job_title }}</div>
-                    <div class="job-desc">{{ job.job_desc }}</div>
-                    <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
-                    <div><strong>Company:</strong> {{ job.company_name }}</div>
-                    <p>{{job._id}}</p>
-                    {% if job.flag == 0 %}
-                        <form action="{{ url_for('approve_job', job_id=job._id) }}" method="POST">
-                            <button type="submit" class="approve-btn">Proceed</button>
-                        </form>
-                        {% endif %}
-                    {% if job.flag == 1 %}
-                        <p>Pending at Hod</p>
-                    {% endif %}
-                </div>
-            {% endfor %}
+    <div class="navbar">
+        <div class="title">WorkBridge</div>
+        <span>University Dashboard - {{ university_name }}</span>
+        <div>
+            <a href="{{ url_for('logout') }}">
+                <button class="logout-btn">Logout</button>
+            </a>
         </div>
-    {% else %}
-        <p>No job postings available for this university.</p>
-    {% endif %}
+    </div>
 
+    <div class="container">
+        {% if job_listings %}
+            <div class="job-container">
+                <h2>Pending Job Postings</h2>
+                {% for job in job_listings %}
+                    {% if job.flag == 0 %}
+                        <div class="job-card">
+                            <div class="job-title">{{ job.job_title }}</div>
+                            <div class="job-desc">{{ job.job_desc }}</div>
+                            <div class="job-details">
+                                <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
+                                <div><strong>Company:</strong> {{ job.company_name }}</div>
+                                <div><strong>Number of Openings:</strong> {{ job.num_openings }}</div>
+                                <div><strong>Job Mode:</strong> {{ job.job_mode }}</div>
+                            </div>
+                            <form action="{{ url_for('approve_job', job_id=job._id) }}" method="POST">
+                                <button type="submit" class="approve-btn">Proceed</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            <div class="job-container">
+                <h2>Jobs with Selected Students</h2>
+                {% for job in job_listings %}
+                    {% if job.selected_students %}
+                        <div class="job-card">
+                            <div class="job-title">{{ job.job_title }}</div>
+                            <div class="job-desc">{{ job.job_desc }}</div>
+                            <div class="job-details">
+                                <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
+                                <div><strong>Company:</strong> {{ job.company_name }}</div>
+                                <div><strong>Number of Openings:</strong> {{ job.num_openings }}</div>
+                                <div><strong>Job Mode:</strong> {{ job.job_mode }}</div>
+                                <button type="button" class="view-btn" data-toggle="modal" data-target="#viewStudentsModal" data-job-id="{{ job._id }}">View</button>
+                            </div>
+                            <form action="{{ url_for('send_students_to_company', job_id=job._id) }}" method="POST">
+                                <input type="hidden" name="job_id" value="{{ job._id }}">
+                                <button type="submit" class="send-btn">Send to Company</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <p>No job postings available for this university.</p>
+        {% endif %}
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="viewStudentsModal" tabindex="-1" role="dialog" aria-labelledby="viewStudentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewStudentsModalLabel">Selected Students</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul id="studentDetailsList"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script type="application/json" id="jobListingsData">
+        {{ job_listings|tojson }}
+    </script>
+    <script>
+        $('#viewStudentsModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var jobId = button.data('job-id');
+            var modal = $(this);
+            var studentDetailsList = modal.find('#studentDetailsList');
+            studentDetailsList.empty();
+
+            var jobs = JSON.parse(document.getElementById('jobListingsData').textContent);
+            var selectedJob = jobs.find(j => j._id === jobId);
+
+            if (selectedJob && selectedJob.selected_students) {
+                selectedJob.selected_students.forEach(student => {
+                    studentDetailsList.append('<li>' + student.name + ' (' + student.email + ') - ' + student.course + ' - GPA: ' + student.gpa + '</li>');
+                });
+            }
+        });
+    </script>
 </body>
 </html>

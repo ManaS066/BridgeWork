@@ -1,5 +1,5 @@
 from flask import render_template, request, session, redirect, url_for, flash, jsonify
-from app import app, hod_collection, jobs, universities_collection
+from app import app, hod_collection, jobs, universities_collection, students_collection
 from bson.objectid import ObjectId
 
 @app.route('/hod_register', methods=['GET'])
@@ -20,6 +20,11 @@ def register_hod():
     university = universities_collection.find_one({"_id": ObjectId(university_id)})
     university_name = university["name"] if university else "Unknown University"
 
+    # Check if the HOD already exists
+    existing_hod = hod_collection.find_one({"email": email})
+    if existing_hod:
+        return jsonify({"message": "HOD with this email already exists"}), 400
+
     hod_id = hod_collection.insert_one({
         "university_name": university_name,
         "department": department,
@@ -33,7 +38,7 @@ def register_hod():
     })
 
 @app.route('/hod_login', methods=['GET'])
-def hod_logn():
+def hod_login_page():
     return render_template('hod_login.html')
 
 @app.route('/hod_login', methods=['POST'])
@@ -69,4 +74,24 @@ def hod_dashboard():
     for job in job_listings:
         job['_id'] = str(job['_id'])
 
-    return render_template('hod_dashboard.html', university_name=university_name, department=department, job_listings=job_listings)
+    students = list(students_collection.find({"department": department}))
+
+    return render_template('hod_dashboard.html', university_name=university_name, department=department, job_listings=job_listings, students=students)
+
+@app.route('/submit_students', methods=['POST'])
+def submit_students():
+    job_id = request.form['job_id']
+    selected_students = request.form.getlist('students')
+
+    job = jobs.find_one({"_id": ObjectId(job_id)})
+    if not job:
+        flash("Job not found", "danger")
+        return redirect(url_for('hod_dashboard'))
+
+    jobs.update_one(
+        {"_id": ObjectId(job_id)},
+        {"$set": {"flag": 2, "selected_students": selected_students}}
+    )
+
+    flash("Students submitted successfully!", "success")
+    return redirect(url_for('hod_dashboard'))

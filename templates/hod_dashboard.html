@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOD Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,11 +13,32 @@
             padding: 0;
         }
 
-        header {
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             background-color: #4CAF50;
             color: white;
-            padding: 20px;
-            text-align: center;
+            padding: 15px 20px;
+        }
+
+        .navbar .title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        .logout-btn:hover {
+            background-color: #c82333;
         }
 
         .dashboard-container {
@@ -35,6 +57,7 @@
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
         }
 
         .job-listings li h3 {
@@ -73,14 +96,36 @@
             bottom: 0;
             width: 100%;
         }
+
+        .select-students-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+
+        .select-students-btn:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
 
-<header>
-    <h1>Welcome to the HOD Dashboard</h1>
-    <p>{{ university_name }} - {{ department }}</p>
-</header>
+<div class="navbar">
+    <div class="title">WorkBridge</div>
+    <span>HOD Dashboard - {{ university_name }} - {{ department }}</span>
+    <div>
+        <a href="{{ url_for('logout') }}">
+            <button class="logout-btn">Logout</button>
+        </a>
+    </div>
+</div>
 
 <div class="dashboard-container">
     {% if job_listings %}
@@ -92,6 +137,9 @@
                     <em>{{ job.company_name }}</em>
                     <p>{{ job.job_desc }}</p>
                     <p><span class="departments">Departments: </span>{{ job.departments|join(', ') }}</p>
+                    <p><strong>Number of Openings:</strong> {{ job.num_openings }}</p>
+                    <p><strong>Job Mode:</strong> {{ job.job_mode }}</p>
+                    <button class="select-students-btn" data-toggle="modal" data-target="#selectStudentsModal" data-job-id="{{ job._id }}">Select Students</button>
                 </li>
             {% endfor %}
         </ul>
@@ -100,9 +148,51 @@
     {% endif %}
 </div>
 
+<!-- Modal -->
+<div class="modal fade" id="selectStudentsModal" tabindex="-1" role="dialog" aria-labelledby="selectStudentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="selectStudentsModalLabel">Select Students</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ url_for('submit_students') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="job_id" id="modalJobId">
+                    <h4>Select Students:</h4>
+                    {% for student in students %}
+                        <div>
+                            <input type="checkbox" name="students" value="{{ student._id }}">
+                            {{ student.name }} - {{ student.skills }} - CGPA: {{ student.gpa }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Submit Selected Students</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="footer">
     <p>&copy; 2025 HOD Dashboard. All Rights Reserved.</p>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    $('#selectStudentsModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var jobId = button.data('job-id');
+        var modal = $(this);
+        modal.find('#modalJobId').val(jobId);
+    });
+</script>
 
 </body>
 </html>
