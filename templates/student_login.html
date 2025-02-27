@@ -46,6 +46,15 @@
         .error {
             color: red;
         }
+        .register-link {
+            margin-top: 10px;
+            display: inline;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .register-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -60,6 +69,7 @@
         {% if error %}
             <p class="error">{{ error }}</p>
         {% endif %}
+        <p>Don't have an account? <a href="{{ url_for('student_register_page') }}" class="register-link">Register</a></p>
     </div>
 
 </body>

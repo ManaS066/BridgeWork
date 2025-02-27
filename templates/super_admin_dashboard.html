@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-top: 6%;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            background-color: white;
+            position: relative;
+        }
+        .stat-card {
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            cursor: pointer;
+        }
+        .stat-card h3 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .stat-card p {
+            margin: 5px 0 0;
+            font-size: 18px;
+        }
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        .notification-bell img {
+            width: 30px;
+            height: 30px;
+        }
+        .notification-count {
+            position: absolute;
+            bottom: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 10px;
+        }
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+        }
+        .navbar .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">WORK Bridge</div>
+        <div class="notification-bell" onclick="showPendingRequests()">
+            <img src="https://img.icons8.com/ios-filled/50/000000/bell.png" alt="Notification Bell">
+            <span id="notificationCount" class="notification-count"></span>
+        </div>
+    </div>
+    <div class="container">
+        <h2>Super Admin Dashboard</h2>
+        <div class="stat-card" onclick="showCompanies()">
+            <h3>Number of Companies</h3>
+            <p>{{ num_companies }}</p>
+        </div>
+        <div class="stat-card" onclick="showUniversities()">
+            <h3>Number of Universities</h3>
+            <p>{{ num_universities }}</p>
+        </div>
+        <div class="stat-card" onclick="showStudents()">
+            <h3>Number of Students</h3>
+            <p>{{ num_students }}</p>
+        </div>
+    </div>
+
+    <!-- Modal for Companies -->
+    <div class="modal fade" id="companiesModal" tabindex="-1" aria-labelledby="companiesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="companiesModalLabel">Registered Companies</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Email</th>
+                                <th>Employee Size</th>
+                            </tr>
+                        </thead>
+                        <tbody id="companiesTableBody">
+                            <!-- Company details will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Universities -->
+    <div class="modal fade" id="universitiesModal" tabindex="-1" aria-labelledby="universitiesModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="universitiesModalLabel">Registered Universities</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>University Name</th>
+                                <th>Email</th>
+                                <th>Address</th>
+                            </tr>
+                        </thead>
+                        <tbody id="universitiesTableBody">
+                            <!-- University details will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Students -->
+    <div class="modal fade" id="studentsModal" tabindex="-1" aria-labelledby="studentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentsModalLabel">Registered Students</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Email</th>
+                                <th>University</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Student details will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for Pending Requests -->
+    <div class="modal fade" id="pendingRequestsModal" tabindex="-1" aria-labelledby="pendingRequestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pendingRequestsModalLabel">Pending Requests</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="pendingRequestsContent">
+                        <!-- Pending requests will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        async function showCompanies() {
+            const response = await fetch('/get_companies');
+            const companies = await response.json();
+            const companiesTableBody = document.getElementById('companiesTableBody');
+            companiesTableBody.innerHTML = '';
+            companies.forEach(company => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${company.company_name}</td>
+                    <td>${company.email}</td>
+                    <td>${company.employee_size}</td>
+                `;
+                companiesTableBody.appendChild(row);
+            });
+            $('#companiesModal').modal('show');
+        }
+
+        async function showUniversities() {
+            const response = await fetch('/get_universities');
+            const universities = await response.json();
+            const universitiesTableBody = document.getElementById('universitiesTableBody');
+            universitiesTableBody.innerHTML = '';
+            universities.forEach(university => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${university.name}</td>
+                    <td>${university.email}</td>
+                    <td>${university.address}</td>
+                `;
+                universitiesTableBody.appendChild(row);
+            });
+            $('#universitiesModal').modal('show');
+        }
+
+        async function showStudents() {
+            const response = await fetch('/get_students');
+            const students = await response.json();
+            const studentsTableBody = document.getElementById('studentsTableBody');
+            studentsTableBody.innerHTML = '';
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${student.name}</td>
+                    <td>${student.email}</td>
+                    <td>${student.university_name}</td>
+                `;
+                studentsTableBody.appendChild(row);
+            });
+            $('#studentsModal').modal('show');
+        }
+
+        async function showPendingRequests() {
+            const response = await fetch('/get_pending_requests');
+            const data = await response.json();
+            const pendingRequestsContent = document.getElementById('pendingRequestsContent');
+            pendingRequestsContent.innerHTML = '';
+
+            if (data.pending_universities.length === 0 && data.pending_companies.length === 0) {
+                pendingRequestsContent.innerHTML = '<p>No pending requests.</p>';
+                $('#pendingRequestsModal').modal('show');
+                return;
+            }
+
+            if (data.pending_companies.length > 0) {
+                const companyTable = document.createElement('table');
+                companyTable.className = 'table table-bordered';
+                companyTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>Company Name</th>
+                            <th>Email</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.pending_companies.map(company => `
+                            <tr>
+                                <td>${company.name}</td>
+                                <td>${company.email}</td>
+                                <td>
+                                    <button class="btn btn-success" onclick="approveCompany('${company._id}')">Approve</button>
+                                    <button class="btn btn-danger" onclick="rejectCompany('${company._id}')">Reject</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                pendingRequestsContent.appendChild(companyTable);
+            }
+
+            if (data.pending_universities.length > 0) {
+                const universityTable = document.createElement('table');
+                universityTable.className = 'table table-bordered';
+                universityTable.innerHTML = `
+                    <thead>
+                        <tr>
+                            <th>University Name</th>
+                            <th>Email</th>
+                            <th>Departments</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${data.pending_universities.map(university => `
+                            <tr>
+                                <td>${university.name}</td>
+                                <td>${university.email}</td>
+                                <td>${university.departments.join(', ')}</td>
+                                <td>
+                                    <button class="btn btn-success" onclick="approveUniversity('${university._id}')">Approve</button>
+                                    <button class="btn btn-danger" onclick="rejectUniversity('${university._id}')">Reject</button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                `;
+                pendingRequestsContent.appendChild(universityTable);
+            }
+
+            $('#pendingRequestsModal').modal('show');
+        }
+
+        async function approveCompany(companyId) {
+            const response = await fetch(`/approve_company/${companyId}`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            alert(result.message);
+            showPendingRequests();
+        }
+
+        async function rejectCompany(companyId) {
+            const response = await fetch(`/reject_company/${companyId}`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            alert(result.message);
+            showPendingRequests();
+        }
+
+        async function approveUniversity(universityId) {
+            const response = await fetch(`/approve_university/${universityId}`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            alert(result.message);
+            showPendingRequests();
+        }
+
+        async function rejectUniversity(universityId) {
+            const response = await fetch(`/reject_university/${universityId}`, {
+                method: 'POST'
+            });
+            const result = await response.json();
+            alert(result.message);
+            showPendingRequests();
+        }
+
+        async function updateNotificationCount() {
+            const response = await fetch('/get_pending_requests_count');
+            const data = await response.json();
+            const notificationCount = document.getElementById('notificationCount');
+            notificationCount.textContent = data.count;
+            notificationCount.style.display = data.count > 0 ? 'block' : 'none';
+        }
+
+        // Update notification count on page load
+        document.addEventListener('DOMContentLoaded', updateNotificationCount);
+    </script>
+</body>
+</html>

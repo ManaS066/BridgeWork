@@ -72,6 +72,18 @@
         .section button:hover {
             background: #0056b3;
         }
+        .edit-btn {
+            background: #ffc107;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            padding: 5px 10px;
+            margin-top: 10px;
+        }
+        .edit-btn:hover {
+            background: #e0a800;
+        }
     </style>
 </head>
 <body>
@@ -90,39 +102,44 @@
                 <p><strong>GPA:</strong> {{ student.gpa }}</p>
                 <p><strong>Courses:</strong> {{ student.courses }}</p>
                 <p><strong>Projects:</strong> {{ student.projects }}</p>
-            {% else %}
-                <form id="academic-form">
-                    <label for="gpa">GPA:</label>
-                    <input type="text" id="gpa" name="gpa" placeholder="Enter your GPA">
-                    
-                    <label for="courses">Courses:</label>
-                    <textarea id="courses" name="courses" rows="4" placeholder="List your courses here..."></textarea>
-                    
-                    <label for="projects">Projects:</label>
-                    <textarea id="projects" name="projects" rows="4" placeholder="Describe your projects here..."></textarea>
-                    
-                    <button type="submit">Save Academic Details</button>
-                </form>
+                <button class="edit-btn" onclick="toggleEdit('academic')">Edit Academic Details</button>
             {% endif %}
+            <form id="academic-form" style="display: {% if student.gpa and student.courses and student.projects %}none{% else %}block{% endif %};">
+                <label for="gpa">GPA:</label>
+                <input type="text" id="gpa" name="gpa" placeholder="Enter your GPA" value="{{ student.gpa }}">
+                
+                <label for="courses">Courses:</label>
+                <textarea id="courses" name="courses" rows="4" placeholder="List your courses here...">{{ student.courses }}</textarea>
+                
+                <label for="projects">Projects:</label>
+                <textarea id="projects" name="projects" rows="4" placeholder="Describe your projects here...">{{ student.projects }}</textarea>
+                
+                <button type="submit">Save Academic Details</button>
+            </form>
         </div>
 
         <div class="section">
             <h3>Skills</h3>
             {% if student.skills %}
                 <p><strong>Skills:</strong> {{ student.skills }}</p>
-            {% else %}
-                <form id="skills-form">
-                    <label for="skills">Add Skills:</label>
-                    <textarea id="skills" name="skills" rows="4" placeholder="List your skills here..."></textarea>
-                    <button type="submit">Save Skills</button>
-                </form>
+                <button class="edit-btn" onclick="toggleEdit('skills')">Edit Skills</button>
             {% endif %}
+            <form id="skills-form" style="display: {% if student.skills %}none{% else %}block{% endif %};">
+                <label for="skills">Add Skills:</label>
+                <textarea id="skills" name="skills" rows="4" placeholder="List your skills here...">{{ student.skills }}</textarea>
+                <button type="submit">Save Skills</button>
+            </form>
         </div>
 
         <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
     </div>
 
     <script>
+        function toggleEdit(section) {
+            const form = document.getElementById(`${section}-form`);
+            form.style.display = form.style.display === 'none' ? 'block' : 'none';
+        }
+
         document.getElementById('academic-form')?.addEventListener('submit', async function(event) {
             event.preventDefault();
             let gpa = document.getElementById('gpa').value;

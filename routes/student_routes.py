@@ -5,7 +5,9 @@ import os
 
 @app.route('/student_register', methods=['GET'])
 def student_register_page():
-    return render_template('student_register.html')
+    universities = list(universities_collection.find({}))
+    return render_template('student_register.html', universities=universities)
+
 
 @app.route('/register_student', methods=['POST'])
 def register_student():
@@ -67,7 +69,7 @@ def student_dashboard():
 @app.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('student_login'))
+    return redirect(url_for('index'))
 
 @app.route('/save_academic_details', methods=['POST'])
 def save_academic_details():
@@ -102,3 +104,10 @@ def save_skills():
         )
         return jsonify({"message": "Skills saved successfully!"}), 200
     return jsonify({"message": "Failed to save skills."}), 400
+
+@app.route('/showAllStudent', methods=['POST'])
+def showAllStudent():
+    students = list(students_collection.find({}))
+    for student in students:
+        student['_id'] = str(student['_id'])
+    return jsonify(students)

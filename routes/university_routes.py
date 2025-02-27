@@ -1,18 +1,18 @@
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
-from app import app, universities_collection, jobs, students_collection
+from app import app, universities_collection, jobs, students_collection,pending_universities_collection
 from bson.objectid import ObjectId
 
 @app.route('/get_universities', methods=['GET'])
 def get_universities():
-    universities = universities_collection.find({}, {"_id": 1, "name": 1})
-    return jsonify([{"id": str(u["_id"]), "name": u["name"]} for u in universities])
+    universities = universities_collection.find({})
+    return jsonify([{"id": str(u["_id"]), "name": u["name"], "email": u["email"], "address": u["address"]} for u in universities])
 
 @app.route('/get_departments/<university_id>', methods=['GET'])
 def get_departments(university_id):
     university = universities_collection.find_one({"_id": ObjectId(university_id)})
     return jsonify(university.get("departments", [])) if university else jsonify([])
 
-@app.route('/university_login', methods=['GET', 'POST'])
+@app.route('/login_university', methods=['GET', 'POST'])
 def university_login():
     if request.method == 'POST':
         email = request.form['email']
@@ -21,7 +21,12 @@ def university_login():
         university = universities_collection.find_one({"email": email, "password": password})
         
         if university:
+            session['university_id'] = str(university['_id'])
             session['university_name'] = university['name']
+            
+            if not university.get('info_completed'):
+                return redirect(url_for('university_info'))
+            
             return redirect(url_for('university_dashboard'))
         else:
             flash("Invalid email or password", "danger")
@@ -43,15 +48,16 @@ def university_register():
             flash("University with this email already exists", "danger")
             return redirect(url_for('university_register'))
 
-        # Insert new university
-        universities_collection.insert_one({
+        # Insert new university registration request
+        pending_universities_collection.insert_one({
             "name": name,
             "email": email,
             "password": password,
-            "departments": departments
+            "departments": departments,
+            "status": "pending"
         })
 
-        flash("University registered successfully!", "success")
+        flash("University registration request submitted successfully!", "success")
         return redirect(url_for('university_login'))
 
     return render_template('uniReg.html')
@@ -123,14 +129,54 @@ def send_students_to_company():
                 "name": student.get('name', ''),
                 "email": student.get('email', ''),
                 "course": student.get('course', ''),
-                "cgpa": student.get('cgpa', '')
+                "gpa": student.get('gpa', '')
             })
+
+    # Update the flag to 3
+    jobs.update_one({"_id": ObjectId(job_id)}, {"$set": {"flag": 3}})
 
     # Logic to send the selected students' details to the company
     # ...
 
     flash("Students' details sent to the company successfully!", "success")
     return redirect(url_for('university_dashboard'))
+
+@app.route('/university_info', methods=['GET', 'POST'])
+def university_info():
+    if request.method == 'POST':
+        university_id = session.get('university_id')
+        if not university_id:
+            flash("You need to log in first.", "danger")
+            return redirect(url_for('university_login'))
+
+        address = request.form['address']
+        first_year = request.form['first_year']
+        second_year = request.form['second_year']
+        third_year = request.form['third_year']
+        fourth_year = request.form['fourth_year']
+        contact_person = request.form['contact_person']
+        contact_email = request.form['contact_email']
+        contact_phone = request.form['contact_phone']
+
+        universities_collection.update_one(
+            {"_id": ObjectId(university_id)},
+            {"$set": {
+                "address": address,
+                "first_year": first_year,
+                "second_year": second_year,
+                "third_year": third_year,
+                "fourth_year": fourth_year,
+                "contact_person": contact_person,
+                "contact_email": contact_email,
+                "contact_phone": contact_phone,
+                "info_completed": True
+            }}
+        )
+
+        flash("Information saved successfully.", "success")
+        return redirect(url_for('university_dashboard'))
+
+    return render_template('university_info.html')
 
 @app.route('/', methods=['GET'])
 def index():

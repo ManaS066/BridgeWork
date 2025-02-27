@@ -118,6 +118,10 @@
             background-color: #6c757d;
             color: white;
         }
+        .response {
+            background-color: #28a745;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -126,12 +130,11 @@
     <div class="navbar">
         <span><b>BridgeWork</b></span>
         <span>Welcome, <b>{{ company_name }}</b></span>
-        <a href="{{ url_for('logout') }}">Logout</a>
+        <a href="/logout">Logout</a>
     </div>
 
     <!-- Dashboard Content -->
     <div class="container">
-        
         
         <!-- Section 1: Job Postings -->
         <div class="section">
@@ -155,18 +158,55 @@
                 </thead>
                 <tbody>
                     {% for job in job_listings %}
-                        <tr>
-                            <td>{{ job.job_title }}</td>
-                            <td>{{ job.job_desc }}</td>
-                            <td>{{ job.num_openings }}</td>
-                            <td>{{ job.job_mode }}</td>
-                            <td>
-                                <span class="job-status 
-                                    {% if job.flag == 0 %}pending-university{% elif job.flag == 1 %}pending-department{% elif job.flag == 2 %}waiting-confirmation{% endif %}">
-                                    {% if job.flag == 0 %}Pending at University{% elif job.flag == 1 %}Pending at Department{% elif job.flag == 2 %}Waiting for Confirmation{% endif %}
-                                </span>
-                            </td>
-                        </tr>
+                        {% if job.flag != 3 %}
+                            <tr>
+                                <td>{{ job.job_title }}</td>
+                                <td>{{ job.job_desc }}</td>
+                                <td>{{ job.num_openings }}</td>
+                                <td>{{ job.job_mode }}</td>
+                                <td>
+                                    <span class="job-status 
+                                        {% if job.flag == 0 %}pending-university{% elif job.flag == 2 %}waiting-confirmation{% endif %}">
+                                        {% if job.flag == 0 %}Pending at University{% elif job.flag == 2 %}Waiting for Confirmation{% endif %}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Section 3: Responses -->
+        <div class="section">
+            <h3>Responses</h3>
+            <table border="1" width="100%" cellpadding="5">
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Job Description</th>
+                        <th>Number of Openings</th>
+                        <th>Job Mode</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for job in job_listings %}
+                        {% if job.flag == 3 %}
+                            <tr>
+                                <td>{{ job.job_title }}</td>
+                                <td>{{ job.job_desc }}</td>
+                                <td>{{ job.num_openings }}</td>
+                                <td>{{ job.job_mode }}</td>
+                                <td>
+                                    <span class="job-status response">Response Received</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
+                                </td>
+                            </tr>
+                        {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
@@ -213,6 +253,15 @@
         </div>
     </div>
 
+    <!-- Modal for Showing Students -->
+    <div id="studentsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStudentsModal()">&times;</span>
+            <h3>Selected Students</h3>
+            <ul id="studentDetailsList"></ul>
+        </div>
+    </div>
+
     <script>
         // Function to open the modal
         function openModal() {
@@ -229,6 +278,9 @@
         window.onclick = function(event) {
             if (event.target == document.getElementById("jobModal")) {
                 closeModal();
+            }
+            if (event.target == document.getElementById("studentsModal")) {
+                closeStudentsModal();
             }
         }
 
@@ -274,6 +326,31 @@
                     })
                     .catch(error => console.error('Error fetching departments:', error));
             }
+        }
+
+        // Function to show students modal
+        function showStudents(jobId) {
+            fetch(`/get_selected_students/${jobId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const studentDetailsList = document.getElementById("studentDetailsList");
+                    // studentDetailsList.innerHTML = ""; // Clear previous details
+                    data.forEach(student => {
+                        const li = document.createElement("li");
+                        const a = document.createElement("a");
+                        a.href = `/student_details/${student._id}`;
+                        a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
+                        li.appendChild(a);
+                        studentDetailsList.appendChild(li);
+                    });
+                    document.getElementById("studentsModal").style.display = "block";
+                })
+                .catch(error => console.error('Error fetching students:', error));
+        }
+
+        // Function to close the students modal
+        function closeStudentsModal() {
+            document.getElementById("studentsModal").style.display = "none";
         }
     </script>
 

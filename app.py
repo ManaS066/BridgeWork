@@ -18,14 +18,16 @@ hod_collection = db.hods
 students_collection = db.students
 companies_collection = db.companies
 jobs = db.jobs
-
+super_admins_collection = db.super_admin
+pending_universities_collection = db.pending_universities
+pending_companies_collection = db.pending_companies
 
 # Import routes
 from routes.hod_routes import *
 from routes.student_routes import *
 from routes.company_routes import *
 from routes.university_routes import *
-
+from routes.superadmin_routes import *
 
 if __name__ == '__main__':
     app.run(debug=True)
