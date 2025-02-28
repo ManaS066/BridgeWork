@@ -82,7 +82,7 @@ def hod_dashboard():
 def submit_students():
     job_id = request.form['job_id']
     selected_students = request.form.getlist('students')
-
+    
     job = jobs.find_one({"_id": ObjectId(job_id)})
     if not job:
         flash("Job not found", "danger")

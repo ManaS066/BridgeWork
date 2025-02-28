@@ -2,7 +2,6 @@ from flask import render_template, request, session, redirect, url_for, jsonify,
 from app import app, companies_collection, jobs, universities_collection, students_collection, pending_companies_collection
 from bson.objectid import ObjectId
 
-
 @app.route('/register_company', methods=['GET', 'POST'])
 def company_register():
     if request.method == 'POST':
@@ -114,3 +113,4 @@ def get_selected_students(job_id):
             })
 
     return jsonify(student_details)
+

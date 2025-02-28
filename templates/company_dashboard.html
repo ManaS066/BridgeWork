@@ -153,7 +153,10 @@
                         <th>Job Description</th>
                         <th>Number of Openings</th>
                         <th>Job Mode</th>
+                        <th>University</th>
+                        <th>Branch</th>
                         <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -164,11 +167,18 @@
                                 <td>{{ job.job_desc }}</td>
                                 <td>{{ job.num_openings }}</td>
                                 <td>{{ job.job_mode }}</td>
+                                <td>{{ job.university_name }}</td>
+                                <td>{{ job.departments | join(', ') }}</td>
                                 <td>
                                     <span class="job-status 
                                         {% if job.flag == 0 %}pending-university{% elif job.flag == 2 %}waiting-confirmation{% endif %}">
                                         {% if job.flag == 0 %}Pending at University{% elif job.flag == 2 %}Waiting for Confirmation{% endif %}
                                     </span>
+                                </td>
+                                <td>
+                                    {% if job.flag == 3 %}
+                                        <button class="btn btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% endif %}
@@ -205,6 +215,10 @@
                                 <td>
                                     <button class="btn btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
                                 </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="6">No responses found for this job.</td>
                             </tr>
                         {% endif %}
                     {% endfor %}
@@ -334,13 +348,10 @@
                 .then(response => response.json())
                 .then(data => {
                     const studentDetailsList = document.getElementById("studentDetailsList");
-                    // studentDetailsList.innerHTML = ""; // Clear previous details
+                    studentDetailsList.innerHTML = ""; // Clear previous details
                     data.forEach(student => {
                         const li = document.createElement("li");
-                        const a = document.createElement("a");
-                        a.href = `/student_details/${student._id}`;
-                        a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
-                        li.appendChild(a);
+                        li.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
                         studentDetailsList.appendChild(li);
                     });
                     document.getElementById("studentsModal").style.display = "block";
