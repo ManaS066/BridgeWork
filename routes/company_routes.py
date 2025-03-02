@@ -1,6 +1,7 @@
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
 from app import app, companies_collection, jobs, universities_collection, students_collection, pending_companies_collection
 from bson.objectid import ObjectId
+from datetime import datetime, timezone
 
 @app.route('/register_company', methods=['GET', 'POST'])
 def company_register():
@@ -16,13 +17,14 @@ def company_register():
             flash("Company with this email already exists", "danger")
             return redirect(url_for('company_registration'))
 
-        # Insert new company registration request
+        # Insert new company registration request with a timestamp
         pending_companies_collection.insert_one({
             "company_name": company_name,
             "email": email,
             "password": password,
             "employee_size": employee_size,
-            "status": "pending"
+            "status": "pending",
+            "created_at": datetime.now(timezone.utc)
         })
 
         flash("Company registration request submitted successfully!", "success")
@@ -55,7 +57,7 @@ def login_company():
 @app.route('/add_job', methods=['POST'])
 def add_job():
     if 'company_name' not in session:
-        return redirect(url_for('company_login'))
+        return redirect(url_for('login_company'))
 
     university_id = request.form.get('university')
     departments = request.form.getlist('departments')
@@ -90,8 +92,9 @@ def company_dashboard():
 
     company_name = session.get('company_name', '')
     job_listings = jobs.find({"company_name": company_name})
+    response = jobs.find({"company_name": company_name, "flag": 3})
 
-    return render_template('company_dashboard.html', company_name=company_name, job_listings=job_listings)
+    return render_template('company_dashboard.html', company_name=company_name, job_listings=job_listings, response=response)
 
 @app.route('/get_selected_students/<job_id>', methods=['GET'])
 def get_selected_students(job_id):

@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from flask_pymongo import PyMongo
+from flask_pymongo import ASCENDING, PyMongo
 import os
 
 app = Flask(__name__)
@@ -21,7 +21,7 @@ jobs = db.jobs
 super_admins_collection = db.super_admin
 pending_universities_collection = db.pending_universities
 pending_companies_collection = db.pending_companies
-
+pending_companies_collection.create_index([("created_at", ASCENDING)], expireAfterSeconds=86400)
 # Import routes
 from routes.hod_routes import *
 from routes.student_routes import *

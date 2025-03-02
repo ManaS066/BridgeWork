@@ -202,7 +202,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for job in job_listings %}
+                    {% for job in response %}
                         {% if job.flag == 3 %}
                             <tr>
                                 <td>{{ job.job_title }}</td>
@@ -351,7 +351,11 @@
                     studentDetailsList.innerHTML = ""; // Clear previous details
                     data.forEach(student => {
                         const li = document.createElement("li");
-                        li.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
+                        const a = document.createElement("a");
+                        a.href = `/student_details/${student._id}`;
+                        a.target = "_blank";
+                        a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
+                        li.appendChild(a);
                         studentDetailsList.appendChild(li);
                     });
                     document.getElementById("studentsModal").style.display = "block";

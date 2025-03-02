@@ -111,3 +111,11 @@ def showAllStudent():
     for student in students:
         student['_id'] = str(student['_id'])
     return jsonify(students)
+
+@app.route('/student_details/<student_id>', methods=['GET'])
+def student_details(student_id):
+    student = students_collection.find_one({"_id": ObjectId(student_id)})
+    if not student:
+        return jsonify({"message": "Student not found"}), 404
+
+    return render_template('student_details.html', student=student)

@@ -67,7 +67,7 @@ def approve_company(company_id):
     if pending_company:
         # Move the company from pending to approved
         companies_collection.insert_one({
-            "name": pending_company['name'],
+            "company_name": pending_company['company_name'],
             "email": pending_company['email'],
             "password": pending_company['password'],
             "employee_size": pending_company['employee_size']
