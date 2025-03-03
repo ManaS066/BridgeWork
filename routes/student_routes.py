@@ -18,8 +18,9 @@ def register_student():
     password = request.form.get('password')
     rollno = request.form.get('roll_number')
     registration_no = request.form.get('reg_number')
+    mobile_no = request.form.get('Mobile')
 
-    if not all([university_id, department, name, email, password, rollno, registration_no]):
+    if not all([university_id, department, name, email, password, rollno, registration_no,mobile_no]):
         return jsonify({"message": "All fields are required"}), 400
 
     university = universities_collection.find_one({"_id": ObjectId(university_id)})
@@ -32,7 +33,8 @@ def register_student():
         "email": email,
         "password": password,
         "rollno": rollno,
-        "registration_no": registration_no
+        "registration_no": registration_no,
+        "mobile_no": mobile_no
     }).inserted_id
 
     return redirect(url_for('student_login'))
@@ -119,3 +121,4 @@ def student_details(student_id):
         return jsonify({"message": "Student not found"}), 404
 
     return render_template('student_details.html', student=student)
+

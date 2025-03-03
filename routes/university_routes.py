@@ -1,5 +1,5 @@
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
-from app import app, universities_collection, jobs, students_collection,pending_universities_collection
+from app import app, universities_collection, jobs, students_collection, pending_universities_collection
 from bson.objectid import ObjectId
 
 @app.route('/get_universities', methods=['GET'])
@@ -94,8 +94,20 @@ def university_dashboard():
                     "cgpa": student.get('gpa', '')
                 })
         job['selected_students'] = student_details
-    
-    return render_template('university_dashboard.html', university_name=university_name, job_listings=job_listings)
+
+    # Fetch all students associated with the university
+    students = list(students_collection.find({"university_name": university_name}))
+    for student in students:
+        student['_id'] = str(student['_id'])
+        student['name'] = student.get('name', '')
+        student['email'] = student.get('email', '')
+        student['course'] = student.get('course', '')
+        student['gpa'] = student.get('gpa', '')
+        student['rollno'] = student.get('rollno', '')
+       
+    student_count = len(students)
+    job_count = len(job_listings)
+    return render_template('university_dashboard.html', university_name=university_name, job_listings=job_listings, students=students)
 
 @app.route('/approve_job/<job_id>', methods=['POST'])
 def approve_job(job_id):

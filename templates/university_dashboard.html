@@ -99,6 +99,27 @@
         .view-btn:hover {
             background-color: #138496;
         }
+        .students-box {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .students-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .students-list li {
+            margin-bottom: 10px;
+        }
+        .students-list a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .students-list a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -113,6 +134,9 @@
     </div>
 
     <div class="container">
+        <!-- New section for displaying the number of students and the list -->
+      
+
         {% if job_listings %}
             <div class="job-container">
                 <h2>Pending Job Postings</h2>

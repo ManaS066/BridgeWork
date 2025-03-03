@@ -84,15 +84,24 @@
         .edit-btn:hover {
             background: #e0a800;
         }
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
 
     <div class="dashboard-container">
+        <img src="https://gietuerp.in//StudentDocuments/{{ student.rollno }}/{{ student.rollno }}.JPG?v=WhphMn0i-ZchO0tW4CBxwEWKnU4gOyo2Xm26wiifU6c" alt="Profile Picture" class="profile-picture">
         <h2>Welcome, {{ student.name }}</h2>
         <p><strong>University:</strong> {{ student.university_name }}</p>
         <p><strong>Department:</strong> {{ student.department }}</p>
         <p><strong>Email:</strong> {{ student.email }}</p>
+        <p><strong>Mobile No:</strong>{{student.mobile_no}}</p>
         <p><strong>Roll Number:</strong> {{ student.rollno }}</p>
         <p><strong>Registration Number:</strong> {{ student.registration_no }}</p>
 
