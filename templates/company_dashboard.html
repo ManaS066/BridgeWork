@@ -1,282 +1,967 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Company Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root {
+            --primary-color: #007bff;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+        }
+
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f4f6f9;
+            color: #333;
         }
+
+        /* Navbar Styles */
         .navbar {
-            background-color: #007bff;
+            background-color: var(--primary-color);
             color: white;
-            padding: 15px;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white !important;
+        }
+
+        .navbar .welcome-text {
+            font-size: 1rem;
+            margin: 0 15px;
+        }
+
+        .navbar-nav .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        .navbar-nav .nav-link:hover {
+            color: white !important;
+        }
+
+        .navbar-toggler {
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .navbar-toggler-icon {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+        }
+
+        .add-job-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .add-job-btn:hover {
+            background-color: #218838;
+        }
+
+        /* Dashboard Cards */
+        .dashboard-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .card-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        /* Charts Section */
+        .chart-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            height: 500px; /* Fixed height */
+        }
+
+        .chart-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--dark-color);
+        }
+
+        /* Tables Section */
+        .table-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .table-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            margin: 0 15px;
-            font-weight: bold;
-        }
-        .container {
-            max-width: 1000px;
-            margin: 20px auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        h2 {
-            color: #333;
-        }
-        .section {
-            margin-top: 20px;
-            padding: 15px;
-            background: #e9ecef;
-            border-radius: 8px;
+            margin-bottom: 15px;
         }
 
-        /* Modal Style */
+        .table-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
+        .download-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: 500;
+            transition: background-color 0.3s;
+        }
+
+        .download-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* DataTables Customization */
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter {
+            margin-bottom: 15px;
+        }
+
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            margin-top: 15px;
+        }
+
+        /* Job Listings Table */
+        .job-listings-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .job-listings-table th {
+            background-color: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .job-listings-table td {
+            padding: 12px;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .job-status {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .status-open {
+            background-color: #e6f7ff;
+            color: #0070f3;
+        }
+
+        .status-closed {
+            background-color: #ffeaea;
+            color: #ff4d4f;
+        }
+
+        .pending-university {
+            background-color: var(--warning-color);
+            color: white;
+        }
+
+        .pending-department {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .waiting-confirmation {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .response {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1050;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgb(0, 0, 0);
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(0, 0, 0, 0.5);
         }
+
         .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
-            max-width: 500px;
+            background-color: white;
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            position: relative;
+            animation: modalFadeIn 0.3s;
         }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            margin: 0;
+        }
+
         .close {
+            font-size: 1.8rem;
+            font-weight: 700;
             color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
+            background: none;
+            border: none;
             cursor: pointer;
+            padding: 0;
+            line-height: 1;
         }
-        input[type="text"], input[type="textarea"], select, textarea {
+
+        .close:hover {
+            color: #333;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
             width: 100%;
-            padding: 10px;
-            margin: 5px 0 10px 0;
-            border: 1px solid #ccc;
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
             border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
-        button[type="submit"] {
-            background-color: #007bff;
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+
+        .checkbox-item input {
+            margin-right: 5px;
+        }
+
+        .submit-btn {
+            background-color: var(--primary-color);
             color: white;
             border: none;
             padding: 10px 20px;
-            cursor: pointer;
             border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
         }
-        button[type="submit"]:hover {
+
+        .submit-btn:hover {
             background-color: #0056b3;
         }
-        .checkbox-group {
+
+        /* Footer */
+        .footer {
+            background-color: var(--light-color);
+            padding: 20px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--secondary-color);
+            border-top: 1px solid #dee2e6;
+            margin-top: 30px;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 992px) {
+            .navbar-collapse {
+                background-color: var(--primary-color);
+                padding: 15px;
+                border-radius: 0 0 10px 10px;
+                margin-top: 10px;
+            }
+
+            .chart-container {
+                margin-bottom: 50px;
+                padding: 15px;           }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-card {
+                margin-bottom: 20px;
+            }
+
+            .modal-content {
+                margin: 15% auto;
+                width: 95%;
+            }
+
+            .table-responsive {
+                overflow-x: auto;
+            }
+
+            .job-status {
+                padding: 3px 8px;
+                font-size: 0.75rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .navbar {
+                padding: 10px 15px;
+            }
+
+            .navbar-brand {
+                font-size: 1.2rem;
+            }
+
+            .card-value {
+                font-size: 1.5rem;
+            }
+
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .download-btn {
+                width: 100%;
+            }
+        }
+
+        /* Student List Styles */
+        .student-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .student-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .student-list li:last-child {
+            border-bottom: none;
+        }
+
+        .student-list a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .student-list a:hover {
+            text-decoration: underline;
+        }
+
+        /* Student Profile Styles */
+        .profile-container {
             display: flex;
             flex-direction: column;
+            align-items: center;
+            text-align: center;
         }
-        .checkbox-group label {
-            margin-bottom: 5px;
+
+        .profile-picture {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 20px;
+            border: 5px solid white;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .job-status {
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-weight: bold;
+
+        .profile-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            width: 100%;
         }
-        .pending-university {
-            background-color: #ffc107;
-            color: white;
+
+        .profile-section h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            font-weight: 600;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
         }
-        .pending-department {
-            background-color: #17a2b8;
-            color: white;
+
+        /* Loading Spinner */
+        .spinner-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 30px;
         }
-        .waiting-confirmation {
-            background-color: #6c757d;
-            color: white;
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: var(--primary-color);
+            animation: spin 1s linear infinite;
         }
-        .response {
-            background-color: #28a745;
-            color: white;
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Flash Messages */
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 8px;
         }
     </style>
 </head>
+
 <body>
-
     <!-- Navigation Bar -->
-    <div class="navbar">
-        <span><b>BridgeWork</b></span>
-        <span>Welcome, <b>{{ company_name }}</b></span>
-        <a href="/logout">Logout</a>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">BridgeWork</a>
+            <div class="welcome-text d-none d-md-block">Welcome, <b>{{ company_name }}</b></div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <div class="welcome-text d-block d-md-none mb-3">Welcome, <b>{{ company_name }}</b></div>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('company_dashboard') }}">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <button class="add-job-btn" onclick="openModal()">Add Jobs</button>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" onclick="showJobListings()">Job Listings</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="container mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="container mt-4">
+        <!-- Overview Cards -->
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+                <div class="dashboard-card bg-primary text-white p-4 text-center">
+                    <i class="fas fa-briefcase card-icon"></i>
+                    <div class="card-title">Total Posted Jobs</div>
+                    <div class="card-value" id="totalJobs">0</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+                <div class="dashboard-card bg-warning text-white p-4 text-center">
+                    <i class="fas fa-clock card-icon"></i>
+                    <div class="card-title">Pending Applications</div>
+                    <div class="card-value" id="pendingApps">0</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3 mb-3 mb-lg-0">
+                <div class="dashboard-card bg-success text-white p-4 text-center">
+                    <i class="fas fa-check-circle card-icon"></i>
+                    <div class="card-title">Accepted Applications</div>
+                    <div class="card-value" id="acceptedApps">0</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="dashboard-card bg-danger text-white p-4 text-center">
+                    <i class="fas fa-university card-icon"></i>
+                    <div class="card-title">University Collaborations</div>
+                    <div class="card-value" id="collaborations">0</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row mb-4">
+            <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="chart-container">
+                    <h4 class="chart-title">Jobs Posted (Monthly)</h4>
+                    <canvas id="jobsChart"></canvas>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="chart-container">
+                    <h4 class="chart-title">Application Status</h4>
+                    <canvas id="applicationsChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Job Postings Table -->
+        <div class="table-section">
+            <div class="table-header">
+                <h4 class="table-title">Recent Job Postings</h4>
+                <button id="downloadCsv" class="download-btn">
+                    <i class="fas fa-download me-2"></i>Download CSV
+                </button>
+            </div>
+            <div class="table-responsive">
+                <table id="jobsTable" class="display table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Department</th>
+                            <th>Openings</th>
+                            <th>Mode</th>
+                            <th>University</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in job_listings %}
+                        <tr>
+                            <td>{{ job.job_title }}</td>
+                            <td>{{ job.departments|join(', ') }}</td>
+                            <td>{{ job.num_openings }}</td>
+                            <td>{{ job.job_mode }}</td>
+                            <td>{{ job.university_name }}</td>
+                            <td>
+                                {% if job.flag == 0 %}
+                                <span class="job-status pending-university">Pending at University</span>
+                                {% elif job.flag == 2 %}
+                                <span class="job-status waiting-confirmation">Waiting for Confirmation</span>
+                                {% elif job.flag == 3 %}
+                                <span class="job-status response">Response Received</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if job.flag == 3 %}
+                                <button class="btn btn-sm btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
+                                {% else %}
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Pending</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Job Listings Container (Initially Hidden) -->
+        <div id="jobListingsContainer" class="table-section mt-4" style="display: none;">
+            <h3 class="mb-4">Current Job Listings and Responses</h3>
+            <div class="table-responsive">
+                <table class="job-listings-table table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Job Description</th>
+                            <th>Number of Openings</th>
+                            <th>Job Mode</th>
+                            <th>University</th>
+                            <th>Branch</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for job in job_listings %}
+                        <tr>
+                            <td>{{ job.job_title }}</td>
+                            <td>{{ job.job_desc }}</td>
+                            <td>{{ job.num_openings }}</td>
+                            <td>{{ job.job_mode }}</td>
+                            <td>{{ job.university_name }}</td>
+                            <td>{{ job.departments|join(', ') }}</td>
+                            <td>
+                                {% if job.flag == 0 %}
+                                <span class="job-status pending-university">Pending at University</span>
+                                {% elif job.flag == 2 %}
+                                <span class="job-status waiting-confirmation">Waiting for Confirmation</span>
+                                {% elif job.flag == 3 %}
+                                <span class="job-status response">Response Received</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if job.flag == 3 %}
+                                <button class="btn btn-sm btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
+                                {% else %}
+                                <button class="btn btn-sm btn-outline-secondary" disabled>Pending</button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Dashboard Content -->
-    <div class="container">
-        
-        <!-- Section 1: Job Postings -->
-        <div class="section">
-            <h3>Job Postings</h3>
-            <p>Manage and view all your job openings.</p>
-            <button onclick="openModal()">Add Jobs</button> 
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2023 BridgeWork. All rights reserved.</p>
         </div>
-
-        <!-- Section 2: Job Listings -->
-        <div class="section">
-            <h3>Current Job Listings</h3>
-            <table border="1" width="100%" cellpadding="5">
-                <thead>
-                    <tr>
-                        <th>Job Title</th>
-                        <th>Job Description</th>
-                        <th>Number of Openings</th>
-                        <th>Job Mode</th>
-                        <th>University</th>
-                        <th>Branch</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job in job_listings %}
-                        {% if job.flag != 3 %}
-                            <tr>
-                                <td>{{ job.job_title }}</td>
-                                <td>{{ job.job_desc }}</td>
-                                <td>{{ job.num_openings }}</td>
-                                <td>{{ job.job_mode }}</td>
-                                <td>{{ job.university_name }}</td>
-                                <td>{{ job.departments | join(', ') }}</td>
-                                <td>
-                                    <span class="job-status 
-                                        {% if job.flag == 0 %}pending-university{% elif job.flag == 2 %}waiting-confirmation{% endif %}">
-                                        {% if job.flag == 0 %}Pending at University{% elif job.flag == 2 %}Waiting for Confirmation{% endif %}
-                                    </span>
-                                </td>
-                                <td>
-                                    {% if job.flag == 3 %}
-                                        <button class="btn btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
-                                    {% endif %}
-                                </td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Section 3: Responses -->
-        <div class="section">
-            <h3>Responses</h3>
-            <table border="1" width="100%" cellpadding="5">
-                <thead>
-                    <tr>
-                        <th>Job Title</th>
-                        <th>Job Description</th>
-                        <th>Number of Openings</th>
-                        <th>Job Mode</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for job in response %}
-                        {% if job.flag == 3 %}
-                            <tr>
-                                <td>{{ job.job_title }}</td>
-                                <td>{{ job.job_desc }}</td>
-                                <td>{{ job.num_openings }}</td>
-                                <td>{{ job.job_mode }}</td>
-                                <td>
-                                    <span class="job-status response">Response Received</span>
-                                </td>
-                                <td>
-                                    <button class="btn btn-primary" onclick="showStudents('{{ job._id }}')">Show</button>
-                                </td>
-                            </tr>
-                        {% else %}
-                            <tr>
-                                <td colspan="6">No responses found for this job.</td>
-                            </tr>
-                        {% endif %}
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+    </footer>
 
     <!-- Modal Form for Adding Job -->
     <div id="jobModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal()">&times;</span>
-            <h3>Add New Job</h3>
-            <form action="/add_job" method="POST">
-                <!-- University Dropdown -->
-                <label for="university">University</label>
-                <select id="university" name="university" onchange="loadDepartments()">
-                    <option value="">Select University</option>
-                    <!-- Universities will be populated here -->
-                </select><br>
-                
-                <!-- Department Checkboxes -->
-                <label>Departments</label>
-                <div id="departments" class="checkbox-group">
-                    <!-- Departments will be populated here -->
-                </div><br>
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Job</h3>
+                <button type="button" class="close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addJobForm" action="{{ url_for('add_job') }}" method="POST">
+                    <div class="form-group">
+                        <label for="university" class="form-label">University</label>
+                        <select id="university" name="university" class="form-control" onchange="loadDepartments()" required>
+                            <option value="">Select University</option>
+                            <!-- Universities will be populated here -->
+                        </select>
+                    </div>
 
-                <label for="job_title">Job Title</label>
-                <input type="text" id="job_title" name="job_title" required><br>
-                
-                <label for="job_desc">Job Description</label>
-                <textarea id="job_desc" name="job_desc" rows="4" required></textarea><br>
+                    <div class="form-group">
+                        <label class="form-label">Departments</label>
+                        <div id="departments" class="checkbox-group">
+                            <!-- Departments will be populated here -->
+                        </div>
+                    </div>
 
-                <label for="num_openings">Number of Openings</label>
-                <input type="number" id="num_openings" name="num_openings" required><br>
+                    <div class="form-group">
+                        <label for="job_title" class="form-label">Job Title</label>
+                        <input type="text" id="job_title" name="job_title" class="form-control" required>
+                    </div>
 
-                <label for="job_mode">Job Mode</label>
-                <select id="job_mode" name="job_mode" required>
-                    <option value="onsite">Onsite</option>
-                    <option value="remote">Remote</option>
-                    <option value="hybrid">Hybrid</option>
-                </select><br>
+                    <div class="form-group">
+                        <label for="job_desc" class="form-label">Job Description</label>
+                        <textarea id="job_desc" name="job_desc" rows="4" class="form-control" required></textarea>
+                    </div>
 
-                <button type="submit">Submit</button>
-            </form>
+                    <div class="form-group">
+                        <label for="num_openings" class="form-label">Number of Openings</label>
+                        <input type="number" id="num_openings" name="num_openings" class="form-control" min="1" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="job_mode" class="form-label">Job Mode</label>
+                        <select id="job_mode" name="job_mode" class="form-control" required>
+                            <option value="onsite">Onsite</option>
+                            <option value="remote">Remote</option>
+                            <option value="hybrid">Hybrid</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit</button>
+                </form>
+            </div>
         </div>
     </div>
 
     <!-- Modal for Showing Students -->
     <div id="studentsModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeStudentsModal()">&times;</span>
-            <h3>Selected Students</h3>
-            <ul id="studentDetailsList"></ul>
+            <div class="modal-header">
+                <h3 class="modal-title">Selected Students</h3>
+                <button type="button" class="close" onclick="closeStudentsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="studentsLoading" class="spinner-container">
+                    <div class="spinner"></div>
+                </div>
+                <ul id="studentDetailsList" class="student-list" style="display: none;">
+                    <!-- Student details will be populated here -->
+                </ul>
+                <div id="noStudentsMessage" style="display: none;" class="text-center py-4">
+                    <p>No students have been selected for this job posting yet.</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Modal for Showing Student Profile -->
+    <div id="studentProfileModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Student Profile</h3>
+                <button type="button" class="close" onclick="closeStudentProfileModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="studentProfileLoading" class="spinner-container">
+                    <div class="spinner"></div>
+                </div>
+                <div id="studentProfileDetails" class="profile-container" style="display: none;">
+                    <!-- Student profile details will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
     <script>
+        // Initialize DataTable
+        $(document).ready(function() {
+            $('#jobsTable').DataTable({
+                responsive: true,
+                language: {
+                    search: "Search jobs:",
+                    lengthMenu: "Show _MENU_ jobs per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ jobs"
+                }
+            });
+
+            // Update dashboard stats
+            updateDashboardStats();
+        });
+
+        // Update dashboard statistics
+        function updateDashboardStats() {
+            // Count total jobs
+            const totalJobs = {{ job_listings|length }};
+            document.getElementById('totalJobs').textContent = totalJobs;
+
+            // Count pending applications (flag = 0)
+            const pendingApps = {{ job_listings|selectattr('flag', 'eq', 0)|list|length }};
+            document.getElementById('pendingApps').textContent = pendingApps;
+
+            // Count accepted applications (flag = 3)
+            const acceptedApps = {{ job_listings|selectattr('flag', 'eq', 3)|list|length }};
+            document.getElementById('acceptedApps').textContent = acceptedApps;
+
+            // Count unique universities
+            const universities = new Set();
+            {% for job in job_listings %}
+                universities.add("{{ job.university_name }}");
+            {% endfor %}
+            document.getElementById('collaborations').textContent = universities.size;
+        }
+
+        // Chart.js - Jobs Chart
+        const jobsChartCtx = document.getElementById('jobsChart').getContext('2d');
+        const jobsChart = new Chart(jobsChartCtx, {
+            type: 'bar',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'Jobs Posted',
+                    data: [10, 15, 8, 12, 20, 18],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+
+        // Chart.js - Applications Chart
+        const applicationsChartCtx = document.getElementById('applicationsChart').getContext('2d');
+        const applicationsChart = new Chart(applicationsChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Pending', 'Accepted', 'Rejected'],
+                datasets: [{
+                    data: [
+                        {{ job_listings|selectattr('flag', 'eq', 0)|list|length }},
+                        {{ job_listings|selectattr('flag', 'eq', 3)|list|length }},
+                        {{ job_listings|selectattr('flag', 'eq', 2)|list|length }}
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 193, 7, 0.8)',
+                        'rgba(40, 167, 69, 0.8)',
+                        'rgba(220, 53, 69, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 193, 7, 1)',
+                        'rgba(40, 167, 69, 1)',
+                        'rgba(220, 53, 69, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top'
+                    }
+                }
+            }
+        });
+
+        // CSV Download Function
+        document.getElementById('downloadCsv').addEventListener('click', function() {
+            let csv = 'Job Title,Department,Openings,Mode,University,Status\n';
+            document.querySelectorAll('#jobsTable tbody tr').forEach(row => {
+                let cols = row.querySelectorAll('td');
+                let rowData = [];
+                cols.forEach((col, index) => {
+                    // Skip the Actions column
+                    if (index < 6) {
+                        // For status column, get the text inside the span
+                        if (index === 5) {
+                            rowData.push(col.querySelector('span').innerText);
+                        } else {
+                            rowData.push(col.innerText);
+                        }
+                    }
+                });
+                csv += rowData.join(',') + '\n';
+            });
+            
+            let hiddenElement = document.createElement('a');
+            hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
+            hiddenElement.target = '_blank';
+            hiddenElement.download = 'job_postings.csv';
+            hiddenElement.click();
+        });
+
         // Function to open the modal
         function openModal() {
             document.getElementById("jobModal").style.display = "block";
@@ -288,6 +973,18 @@
             document.getElementById("jobModal").style.display = "none";
         }
 
+        // Function to show job listings
+        function showJobListings() {
+            const container = document.getElementById("jobListingsContainer");
+            if (container.style.display === "none") {
+                container.style.display = "block";
+                // Scroll to the container
+                container.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                container.style.display = "none";
+            }
+        }
+
         // Close modal if clicked outside of it
         window.onclick = function(event) {
             if (event.target == document.getElementById("jobModal")) {
@@ -296,78 +993,223 @@
             if (event.target == document.getElementById("studentsModal")) {
                 closeStudentsModal();
             }
+            if (event.target == document.getElementById("studentProfileModal")) {
+                closeStudentProfileModal();
+            }
         }
 
         // Fetch universities from the database
         function loadUniversities() {
             fetch('/get_universities')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const universitySelect = document.getElementById("university");
                     universitySelect.innerHTML = `<option value="">Select University</option>`; // Clear previous options
                     data.forEach(u => {
                         const option = document.createElement("option");
-                        option.value = u.id;
+                        option.value = u._id;
                         option.textContent = u.name;
                         universitySelect.appendChild(option);
                     });
                 })
-                .catch(error => console.error('Error fetching universities:', error));
+                .catch(error => {
+                    console.error('Error fetching universities:', error);
+                    alert('Failed to load universities. Please try again later.');
+                });
         }
 
         // Fetch and display departments based on the selected university
         function loadDepartments() {
             const universityId = document.getElementById("university").value;
+            
             if (universityId) {
                 fetch(`/get_departments/${universityId}`)
-                    .then(response => response.json())
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
                     .then(data => {
                         const departmentsDiv = document.getElementById("departments");
                         departmentsDiv.innerHTML = ""; // Clear previous checkboxes
+                        
                         data.forEach(department => {
+                            const checkboxItem = document.createElement("div");
+                            checkboxItem.className = "checkbox-item";
+                            
                             const checkbox = document.createElement("input");
                             checkbox.type = "checkbox";
-                            checkbox.id = department;
+                            checkbox.id = department.replace(/\s+/g, '-').toLowerCase();
                             checkbox.name = "departments";
                             checkbox.value = department;
+                            
                             const label = document.createElement("label");
-                            label.setAttribute("for", department);
+                            label.setAttribute("for", checkbox.id);
                             label.textContent = department;
-                            departmentsDiv.appendChild(checkbox);
-                            departmentsDiv.appendChild(label);
-                            departmentsDiv.appendChild(document.createElement("br"));
+                            
+                            checkboxItem.appendChild(checkbox);
+                            checkboxItem.appendChild(label);
+                            departmentsDiv.appendChild(checkboxItem);
                         });
                     })
-                    .catch(error => console.error('Error fetching departments:', error));
+                    .catch(error => {
+                        console.error('Error fetching departments:', error);
+                        alert('Failed to load departments. Please try again later.');
+                    });
             }
         }
 
         // Function to show students modal
         function showStudents(jobId) {
+            document.getElementById("studentsModal").style.display = "block";
+            document.getElementById("studentsLoading").style.display = "block";
+            document.getElementById("studentDetailsList").style.display = "none";
+            document.getElementById("noStudentsMessage").style.display = "none";
+            
             fetch(`/get_selected_students/${jobId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    document.getElementById("studentsLoading").style.display = "none";
+                    
+                    if (data.length === 0) {
+                        document.getElementById("noStudentsMessage").style.display = "block";
+                        return;
+                    }
+                    
                     const studentDetailsList = document.getElementById("studentDetailsList");
                     studentDetailsList.innerHTML = ""; // Clear previous details
+                    
                     data.forEach(student => {
                         const li = document.createElement("li");
                         const a = document.createElement("a");
-                        a.href = `/student_details/${student._id}`;
-                        a.target = "_blank";
+                        a.href = "#";
+                        a.onclick = function(e) {
+                            e.preventDefault();
+                            showStudentProfile(student._id);
+                        };
                         a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
                         li.appendChild(a);
                         studentDetailsList.appendChild(li);
                     });
-                    document.getElementById("studentsModal").style.display = "block";
+                    
+                    document.getElementById("studentDetailsList").style.display = "block";
                 })
-                .catch(error => console.error('Error fetching students:', error));
+                .catch(error => {
+                    console.error('Error fetching students:', error);
+                    document.getElementById("studentsLoading").style.display = "none";
+                    alert('Failed to load student data. Please try again later.');
+                });
         }
 
         // Function to close the students modal
         function closeStudentsModal() {
             document.getElementById("studentsModal").style.display = "none";
         }
-    </script>
 
+        // Function to show student profile modal
+        function showStudentProfile(studentId) {
+            document.getElementById("studentProfileModal").style.display = "block";
+            document.getElementById("studentProfileLoading").style.display = "block";
+            document.getElementById("studentProfileDetails").style.display = "none";
+            
+            fetch(`/student_details/${studentId}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById("studentProfileLoading").style.display = "none";
+                    
+                    const studentProfileDetails = document.getElementById("studentProfileDetails");
+                    studentProfileDetails.innerHTML = `
+                        <img src="/static/images/profile-placeholder.jpg" alt="Profile Picture" class="profile-picture">
+                        <h2>${data.name}</h2>
+                        <p><strong>University:</strong> ${data.university_name}</p>
+                        <p><strong>Department:</strong> ${data.department}</p>
+                        <p><strong>Email:</strong> <a href="mailto:${data.email}">${data.email}</a></p>
+                        <p><strong>Mobile No:</strong> ${data.mobile_no}</p>
+                        <p><strong>Roll Number:</strong> ${data.rollno}</p>
+                        <p><strong>Registration Number:</strong> ${data.registration_no}</p>
+                        
+                        <div class="profile-section">
+                            <h3>Academic Details</h3>
+                            <p><strong>GPA:</strong> ${data.gpa}</p>
+                            <p><strong>Courses:</strong> ${data.courses || 'Not specified'}</p>
+                            <p><strong>Projects:</strong> ${data.projects || 'Not specified'}</p>
+                        </div>
+                        
+                        <div class="profile-section">
+                            <h3>Skills</h3>
+                            <p>${data.skills || 'Not specified'}</p>
+                        </div>
+                    `;
+                    
+                    document.getElementById("studentProfileDetails").style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Error fetching student profile:', error);
+                    document.getElementById("studentProfileLoading").style.display = "none";
+                    alert('Failed to load student profile. Please try again later.');
+                });
+        }
+
+        // Function to close the student profile modal
+        function closeStudentProfileModal() {
+            document.getElementById("studentProfileModal").style.display = "none";
+        }
+
+        // Form validation
+        document.getElementById('addJobForm').addEventListener('submit', function(e) {
+            const university = document.getElementById('university').value;
+            const departments = document.querySelectorAll('input[name="departments"]:checked');
+            const jobTitle = document.getElementById('job_title').value;
+            const jobDesc = document.getElementById('job_desc').value;
+            const numOpenings = document.getElementById('num_openings').value;
+            
+            if (!university) {
+                e.preventDefault();
+                alert('Please select a university');
+                return;
+            }
+            
+            if (departments.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one department');
+                return;
+            }
+            
+            if (!jobTitle.trim()) {
+                e.preventDefault();
+                alert('Please enter a job title');
+                return;
+            }
+            
+            if (!jobDesc.trim()) {
+                e.preventDefault();
+                alert('Please enter a job description');
+                return;
+            }
+            
+            if (!numOpenings || numOpenings < 1) {
+                e.preventDefault();
+                alert('Please enter a valid number of openings');
+                return;
+            }
+        });
+    </script>
 </body>
+
 </html>
