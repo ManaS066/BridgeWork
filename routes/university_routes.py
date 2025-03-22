@@ -67,8 +67,6 @@ def university_register():
 def university_dashboard():
     university_id = session.get('university_id', '')
     university_name = session.get('university_name', '')
-    print(university_id)
-    print(university_name)
     if not university_id or not university_name:
         return jsonify({"message": "University ID and name are required"}), 400
 
