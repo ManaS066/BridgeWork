@@ -26,6 +26,7 @@
             padding: 0;
             background-color: #f4f6f9;
             color: #333;
+            overflow:var(--dark-color);
         }
 
         /* Navbar Styles */
@@ -50,6 +51,11 @@
             margin: 0 15px;
         }
 
+        .add-job-btn{
+            color: rgba(255, 255, 255, 0.9) !important;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
         .navbar-nav .nav-link {
             color: rgba(255, 255, 255, 0.9) !important;
             margin: 0 10px;
@@ -68,24 +74,15 @@
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.9)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
         }
 
-        .add-job-btn {
-            background-color: var(--success-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 500;
-            transition: background-color 0.3s;
-        }
+    /* Updated Add Job & Add Project Button Styles */
 
-        .add-job-btn:hover {
-            background-color: #218838;
-        }
+       
 
         /* Dashboard Cards */
         .dashboard-card {
             border-radius: 10px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
             transition: transform 0.3s, box-shadow 0.3s;
             height: 100%;
             overflow: hidden;
@@ -243,13 +240,14 @@
             top: 0;
             width: 100%;
             height: 100%;
-            overflow: auto;
+            overflow: hidden; /* Hide the scrollbar */
             background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
         }
 
         .modal-content {
             background-color: white;
-            margin: 10% auto;
             padding: 25px;
             border-radius: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -270,22 +268,6 @@
             }
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .modal-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--dark-color);
-            margin: 0;
-        }
-
         .close {
             font-size: 1.8rem;
             font-weight: 700;
@@ -301,52 +283,6 @@
             color: #333;
         }
 
-        .modal-body {
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid #ced4da;
-            border-radius: 4px;
-            font-size: 1rem;
-            transition: border-color 0.3s;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            margin-right: 15px;
-        }
-
-        .checkbox-item input {
-            margin-right: 5px;
-        }
-
         .submit-btn {
             background-color: var(--primary-color);
             color: white;
@@ -360,6 +296,11 @@
 
         .submit-btn:hover {
             background-color: #0056b3;
+        }
+
+        /* Hide scrollbar when modal is open */
+        body.modal-open {
+            overflow: hidden;
         }
 
         /* Footer */
@@ -442,6 +383,9 @@
             border-bottom: 1px solid #eee;
         }
 
+        .container mt-4{
+            background-color: white;
+        }
         .student-list li:last-child {
             border-bottom: none;
         }
@@ -542,11 +486,12 @@
                         <a class="nav-link" href="{{ url_for('company_dashboard') }}">Home</a>
                     </li>
                     <li class="nav-item">
-                        <button class="add-job-btn" onclick="openModal()">Add Jobs</button>
+                        <button class="nav-link" onclick="openModal()">Add Jobs</button>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#" onclick="showJobListings()">Job Listings</a>
+                        <button class="nav-link" onclick="openProjectModal()">Add Project</button>
                     </li>
+                   
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
                     </li>
@@ -615,6 +560,43 @@
                     <h4 class="chart-title">Application Status</h4>
                     <canvas id="applicationsChart"></canvas>
                 </div>
+            </div>
+        </div>
+        <div class="container mt-4">
+            <h2>Project Details</h2>
+            <div class="table-responsive">
+                <table id="projectsTable" class="display table table-striped table-hover">
+                    <thead>
+                        <tr>
+                            <th>Project Overview</th>
+                            <th>Challenge Details</th>
+                            <th>Incentive</th>
+                            <th>Date Posted</th>
+                            <th>Time Frame</th>
+                            <th>Assigned University</th>
+                            <th>Current Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for project in project_listings %}
+                        <tr>
+                            <td>{{ project.project_desc }}</td>
+                            <td>{{ project.problem_statement }}</td>
+                            <td>{{ project.reward }}</td>
+                            <td>{{ project.created_at }}</td>
+                            <td>{{ project.duration }}</td>
+                            <td>
+                                {% if project.assigned_to %}
+                                    {{ project.assigned_to }}
+                                {% else %}
+                                    NaN
+                                {% endif %}
+                            </td>
+                            <td>{{ project.status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
 
@@ -820,6 +802,65 @@
         </div>
     </div>
 
+    <!-- Modal Form for Adding Project -->
+    <div id="projectModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add New Project</h3>
+                <button type="button" class="close" onclick="closeProjectModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="addProjectForm" action="{{ url_for('add_project') }}" method="POST">
+                    <div class="form-group">
+                        <label for="university1" class="form-label">1st Preference University</label>
+                        <select id="university1" name="university1" class="form-control" required>
+                            <option value="">Select University</option>
+                            <!-- Universities will be populated here -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="university2" class="form-label">2nd Preference University</label>
+                        <select id="university2" name="university2" class="form-control" required>
+                            <option value="">Select University</option>
+                            <!-- Universities will be populated here -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="university3" class="form-label">3rd Preference University</label>
+                        <select id="university3" name="university3" class="form-control" required>
+                            <option value="">Select University</option>
+                            <!-- Universities will be populated here -->
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="project_desc" class="form-label">Project Description</label>
+                        <textarea id="project_desc" name="project_desc" rows="4" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="problem_statement" class="form-label">Project/Problem Statement</label>
+                        <textarea id="problem_statement" name="problem_statement" rows="4" class="form-control" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="reward" class="form-label">Reward</label>
+                        <input type="text" id="reward" name="reward" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="duration" class="form-label">Time Duration</label>
+                        <input type="date" id="duration" name="duration" class="form-control" required>
+                    </div>
+
+                    <button type="submit" class="submit-btn">Submit</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -840,6 +881,18 @@
 
             // Update dashboard stats
             updateDashboardStats();
+        });
+
+        // Initialize DataTable for Projects
+        $(document).ready(function() {
+            $('#projectsTable').DataTable({
+                responsive: true,
+                language: {
+                    search: "Search projects:",
+                    lengthMenu: "Show _MENU_ projects per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ projects"
+                }
+            });
         });
 
         // Update dashboard statistics
@@ -948,13 +1001,15 @@
                         if (index === 5) {
                             rowData.push(col.querySelector('span').innerText);
                         } else {
-                            rowData.push(col.innerText);
+                            rowData.push(col.innerText.replace(/,/g, '')); // Remove commas to avoid CSV issues
                         }
                     }
                 });
+                console.log('Row Data:', rowData); // Debugging log
                 csv += rowData.join(',') + '\n';
             });
             
+            console.log('CSV Data:', csv); // Debugging log
             let hiddenElement = document.createElement('a');
             hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
             hiddenElement.target = '_blank';
@@ -964,7 +1019,7 @@
 
         // Function to open the modal
         function openModal() {
-            document.getElementById("jobModal").style.display = "block";
+            document.getElementById("jobModal").style.display = "flex"; // Use flex to center the modal
             loadUniversities();  // Load universities when modal opens
         }
 
@@ -987,7 +1042,8 @@
 
         // Close modal if clicked outside of it
         window.onclick = function(event) {
-            if (event.target == document.getElementById("jobModal")) {
+            const modal = document.getElementById("jobModal");
+            if (event.target == modal) {
                 closeModal();
             }
             if (event.target == document.getElementById("studentsModal")) {
@@ -998,117 +1054,77 @@
             }
         }
 
-        // Fetch universities from the database
         function loadUniversities() {
             fetch('/get_universities')
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
                     const universitySelect = document.getElementById("university");
                     universitySelect.innerHTML = `<option value="">Select University</option>`; // Clear previous options
                     data.forEach(u => {
                         const option = document.createElement("option");
-                        option.value = u._id;
+                        option.value = u.id;
                         option.textContent = u.name;
                         universitySelect.appendChild(option);
                     });
                 })
-                .catch(error => {
-                    console.error('Error fetching universities:', error);
-                    alert('Failed to load universities. Please try again later.');
-                });
+                .catch(error => console.error('Error fetching universities:', error));
         }
 
         // Fetch and display departments based on the selected university
         function loadDepartments() {
             const universityId = document.getElementById("university").value;
-            
             if (universityId) {
                 fetch(`/get_departments/${universityId}`)
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        return response.json();
-                    })
+                    .then(response => response.json())
                     .then(data => {
                         const departmentsDiv = document.getElementById("departments");
                         departmentsDiv.innerHTML = ""; // Clear previous checkboxes
-                        
                         data.forEach(department => {
-                            const checkboxItem = document.createElement("div");
-                            checkboxItem.className = "checkbox-item";
-                            
                             const checkbox = document.createElement("input");
                             checkbox.type = "checkbox";
-                            checkbox.id = department.replace(/\s+/g, '-').toLowerCase();
+                            checkbox.id = department;
                             checkbox.name = "departments";
                             checkbox.value = department;
-                            
                             const label = document.createElement("label");
-                            label.setAttribute("for", checkbox.id);
+                            label.setAttribute("for", department);
                             label.textContent = department;
-                            
-                            checkboxItem.appendChild(checkbox);
-                            checkboxItem.appendChild(label);
-                            departmentsDiv.appendChild(checkboxItem);
+                            departmentsDiv.appendChild(checkbox);
+                            departmentsDiv.appendChild(label);
+                            departmentsDiv.appendChild(document.createElement("br"));
                         });
                     })
-                    .catch(error => {
-                        console.error('Error fetching departments:', error);
-                        alert('Failed to load departments. Please try again later.');
-                    });
+                    .catch(error => console.error('Error fetching departments:', error));
             }
         }
 
         // Function to show students modal
         function showStudents(jobId) {
-            document.getElementById("studentsModal").style.display = "block";
-            document.getElementById("studentsLoading").style.display = "block";
-            document.getElementById("studentDetailsList").style.display = "none";
-            document.getElementById("noStudentsMessage").style.display = "none";
-            
             fetch(`/get_selected_students/${jobId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(data => {
-                    document.getElementById("studentsLoading").style.display = "none";
-                    
-                    if (data.length === 0) {
-                        document.getElementById("noStudentsMessage").style.display = "block";
-                        return;
-                    }
-                    
                     const studentDetailsList = document.getElementById("studentDetailsList");
                     studentDetailsList.innerHTML = ""; // Clear previous details
-                    
-                    data.forEach(student => {
-                        const li = document.createElement("li");
-                        const a = document.createElement("a");
-                        a.href = "#";
-                        a.onclick = function(e) {
-                            e.preventDefault();
-                            showStudentProfile(student._id);
-                        };
-                        a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
-                        li.appendChild(a);
-                        studentDetailsList.appendChild(li);
-                    });
-                    
-                    document.getElementById("studentDetailsList").style.display = "block";
+                    if (data.length === 0) {
+                        document.getElementById("noStudentsMessage").style.display = "block";
+                        studentDetailsList.style.display = "none";
+                    } else {
+                        document.getElementById("noStudentsMessage").style.display = "none";
+                        studentDetailsList.style.display = "block";
+                        data.forEach(student => {
+                            const li = document.createElement("li");
+                            const a = document.createElement("a");
+                            a.href = `/student_details/${student._id}`;
+                            a.target = "_blank";
+                            a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
+                            li.appendChild(a);
+                            studentDetailsList.appendChild(li);
+                        });
+                    }
+                    document.getElementById("studentsModal").style.display = "block";
                 })
                 .catch(error => {
                     console.error('Error fetching students:', error);
-                    document.getElementById("studentsLoading").style.display = "none";
-                    alert('Failed to load student data. Please try again later.');
+                    alert('Failed to load students. Please try again later.');
                 });
         }
 
@@ -1206,6 +1222,89 @@
             if (!numOpenings || numOpenings < 1) {
                 e.preventDefault();
                 alert('Please enter a valid number of openings');
+                return;
+            }
+        });
+
+        // Function to open the project modal
+        function openProjectModal() {
+            document.getElementById("projectModal").style.display = "flex"; // Use flex to center the modal
+            loadUniversitiesForProject();  // Load universities when modal opens
+        }
+
+        // Function to close the project modal
+        function closeProjectModal() {
+            document.getElementById("projectModal").style.display = "none";
+        }
+
+        // Load universities for the project modal
+        function loadUniversitiesForProject() {
+            fetch('/get_universities')
+                .then(response => response.json())
+                .then(data => {
+                    const universitySelect1 = document.getElementById("university1");
+                    const universitySelect2 = document.getElementById("university2");
+                    const universitySelect3 = document.getElementById("university3");
+                    universitySelect1.innerHTML = `<option value="">Select University</option>`; // Clear previous options
+                    universitySelect2.innerHTML = `<option value="">Select University</option>`; // Clear previous options
+                    universitySelect3.innerHTML = `<option value="">Select University</option>`; // Clear previous options
+                    data.forEach(u => {
+                        const option1 = document.createElement("option");
+                        option1.value = u.id;
+                        option1.textContent = u.name;
+                        universitySelect1.appendChild(option1);
+
+                        const option2 = document.createElement("option");
+                        option2.value = u.id;
+                        option2.textContent = u.name;
+                        universitySelect2.appendChild(option2);
+
+                        const option3 = document.createElement("option");
+                        option3.value = u.id;
+                        option3.textContent = u.name;
+                        universitySelect3.appendChild(option3);
+                    });
+                })
+                .catch(error => console.error('Error fetching universities:', error));
+        }
+
+        // Form validation for adding a project
+        document.getElementById('addProjectForm').addEventListener('submit', function(e) {
+            const university1 = document.getElementById('university1').value;
+            const university2 = document.getElementById('university2').value;
+            const university3 = document.getElementById('university3').value;
+            const projectDesc = document.getElementById('project_desc').value;
+            const problemStatement = document.getElementById('problem_statement').value;
+            const reward = document.getElementById('reward').value;
+            const duration = document.getElementById('duration').value;
+
+            if (!university1 || !university2 || !university3) {
+                e.preventDefault();
+                alert('Please select all three universities');
+                return;
+            }
+
+            if (!projectDesc.trim()) {
+                e.preventDefault();
+                alert('Please enter a project description');
+                return;
+            }
+
+            if (!problemStatement.trim()) {
+                e.preventDefault();
+                alert('Please enter a project/problem statement');
+                return;
+            }
+
+            if (!reward.trim()) {
+                e.preventDefault();
+                alert('Please enter a reward');
+                return;
+            }
+
+            if (!duration) {
+                e.preventDefault();
+                alert('Please select a valid date for the time duration');
                 return;
             }
         });
