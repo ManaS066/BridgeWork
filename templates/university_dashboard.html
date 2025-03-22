@@ -120,6 +120,42 @@
         .students-list a:hover {
             text-decoration: underline;
         }
+        .project-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            margin-bottom: 15px;
+        }
+        .project-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .project-details {
+            font-size: 14px;
+            color: #333;
+        }
+        .accept-btn, .reject-btn {
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            border: none;
+            color: white;
+        }
+        .accept-btn {
+            background-color: #28a745;
+        }
+        .accept-btn:hover {
+            background-color: #218838;
+        }
+        .reject-btn {
+            background-color: #dc3545;
+        }
+        .reject-btn:hover {
+            background-color: #c82333;
+        }
     </style>
 </head>
 <body>
@@ -184,6 +220,13 @@
         {% else %}
             <p>No job postings available for this university.</p>
         {% endif %}
+
+        <!-- New section for displaying project requests -->
+        <div class="project-container">
+            <h2>Project Requests</h2>
+            <div id="project-requests"></div>
+        </div>
+
     </div>
 
     <!-- Modal -->
@@ -206,28 +249,49 @@
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script type="application/json" id="jobListingsData">
-        {{ job_listings|tojson }}
-    </script>
     <script>
-        $('#viewStudentsModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var jobId = button.data('job-id');
-            var modal = $(this);
-            var studentDetailsList = modal.find('#studentDetailsList');
-            studentDetailsList.empty();
+        $(document).ready(function() {
+            $.ajax({
+                url: "{{ url_for('get_project_requests') }}",
+                method: "GET",
+                success: function(data) {
+                    var projectRequestsContainer = $('#project-requests');
+                    projectRequestsContainer.empty();
 
-            var jobs = JSON.parse(document.getElementById('jobListingsData').textContent);
-            var selectedJob = jobs.find(j => j._id === jobId);
-
-            if (selectedJob && selectedJob.selected_students) {
-                selectedJob.selected_students.forEach(student => {
-                    studentDetailsList.append('<li>' + student.name + ' (' + student.email + ') - ' + student.course + ' - GPA: ' + student.gpa + '</li>');
-                });
-            }
+                    if (data.length > 0) {
+                        data.forEach(function(project) {
+                            var projectCard = `
+                                <div class="project-card">
+                                    <div class="project-title">Project ID: ${project._id}</div>
+                                    <div class="project-details">
+                                        
+                                        <div><strong>Problem Statement:</strong> ${project.problem_statement}</div>
+                                        <div><strong>Project Description:</strong> ${project.project_desc}</div>
+                                        <div><strong>Reward:</strong> ${project.reward}</div>
+                                        <div><strong>Duration:</strong> ${project.duration}</div>
+                                        <div><strong>Company:</strong> ${project.company_name}</div>
+                                    </div>
+                                    <form action="{{ url_for('accept_project', project_id='') }}${project._id}" method="POST" style="display:inline;">
+                                        <button type="submit" class="accept-btn">Accept</button>
+                                    </form>
+                                    <form action="{{ url_for('reject_project', project_id='') }}${project._id}" method="POST" style="display:inline;">
+                                        <button type="submit" class="reject-btn">Reject</button>
+                                    </form>
+                                </div>
+                            `;
+                            projectRequestsContainer.append(projectCard);
+                        });
+                    } else {
+                        projectRequestsContainer.append('<p>No project requests available.</p>');
+                    }
+                },
+                error: function(error) {
+                    console.log("Error fetching project requests:", error);
+                }
+            });
         });
     </script>
 </body>

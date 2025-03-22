@@ -1,6 +1,7 @@
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
-from app import app, universities_collection, jobs, students_collection, pending_universities_collection
+from app import app, universities_collection, jobs, students_collection, pending_universities_collection, projects_collection
 from bson.objectid import ObjectId
+from datetime import datetime, timedelta
 
 @app.route('/get_universities', methods=['GET'])
 def get_universities():
@@ -64,10 +65,12 @@ def university_register():
 
 @app.route('/university_dashboard', methods=['GET'])
 def university_dashboard():
+    university_id = session.get('university_id', '')
     university_name = session.get('university_name', '')
-
-    if not university_name:
-        return jsonify({"message": "University name is required"}), 400
+    print(university_id)
+    print(university_name)
+    if not university_id or not university_name:
+        return jsonify({"message": "University ID and name are required"}), 400
 
     job_listings = list(jobs.find({"university_name": university_name}))
 
@@ -107,6 +110,7 @@ def university_dashboard():
        
     student_count = len(students)
     job_count = len(job_listings)
+
     return render_template('university_dashboard.html', university_name=university_name, job_listings=job_listings, students=students)
 
 @app.route('/approve_job/<job_id>', methods=['POST'])
@@ -153,6 +157,36 @@ def send_students_to_company():
     flash("Students' details sent to the company successfully!", "success")
     return redirect(url_for('university_dashboard'))
 
+@app.route('/accept_project/<project_id>', methods=['POST'])
+def accept_project(project_id):
+    university_name = session.get('university_name', '')
+
+    if not university_name:
+        flash("University name is required", "danger")
+        return redirect(url_for('university_dashboard'))
+
+    project = projects_collection.find_one({"_id": ObjectId(project_id)})
+
+    if project:
+        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "assigned", "assigned_to": university_name}})
+        flash("Project accepted successfully!", "success")
+    else:
+        flash("Project not found!", "danger")
+
+    return redirect(url_for('university_dashboard'))
+
+@app.route('/reject_project/<project_id>', methods=['POST'])
+def reject_project(project_id):
+    project = projects_collection.find_one({"_id": ObjectId(project_id)})
+
+    if project:
+        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "rejected"}})
+        flash("Project rejected successfully!", "success")
+    else:
+        flash("Project not found!", "danger")
+
+    return redirect(url_for('university_dashboard'))
+
 @app.route('/university_info', methods=['GET', 'POST'])
 def university_info():
     if request.method == 'POST':
@@ -189,6 +223,36 @@ def university_info():
         return redirect(url_for('university_dashboard'))
 
     return render_template('university_info.html')
+
+@app.route('/get_project_requests', methods=['GET'])
+def get_project_requests():
+    university_id = session.get('university_id')
+    university_name = session.get('university_name')
+    if not university_id:
+        return jsonify({"message": "University ID is required"}), 400
+
+    # Debug print to check university ID
+    
+
+    # Query the projects collection to find projects for the university
+    project_requests = list(projects_collection.find({
+        "$or": [
+            {"university1": (university_id)},
+            {"university2": (university_id)},
+            {"university3": (university_id)}
+        ],
+        "status": "not_assigned"
+    }))
+
+    # Debug print to check fetched project requests
+   
+
+    # Convert ObjectId to string for each project
+    for project in project_requests:
+        project['_id'] = str(project['_id'])
+
+    # Return the project requests as JSON
+    return jsonify(project_requests)
 
 @app.route('/', methods=['GET'])
 def index():
