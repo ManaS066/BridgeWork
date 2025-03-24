@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .profile-header {
+            background-color: #3498db;
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .stats-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+        .department-badge {
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .contact-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid profile-header">
+        <div class="container">
+            <h1>{{ university.name }}</h1>
+            <p><i class="fas fa-map-marker-alt"></i> {{ university.address }}</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4>University Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">University Name:</div>
+                            <div class="col-md-8">{{ university.name }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Email:</div>
+                            <div class="col-md-8">{{ university.email }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Address:</div>
+                            <div class="col-md-8">{{ university.address }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Departments:</div>
+                            <div class="col-md-8">
+                                {% for department in university.departments %}
+                                <span class="badge bg-info department-badge">{{ department | upper }}</span>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4>Student Statistics</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5>First Year</h5>
+                                        <h2>{{ university.first_year }}</h2>
+                                        <p>Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Second Year</h5>
+                                        <h2>{{ university.second_year }}</h2>
+                                        <p>Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-warning text-dark">
+                                    <div class="card-body text-center">
+                                        <h5>Third Year</h5>
+                                        <h2>{{ university.third_year }}</h2>
+                                        <p>Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <h5>Fourth Year</h5>
+                                        <h2>{{ university.fourth_year }}</h2>
+                                        <p>Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Total Students</h5>
+                                        <h3>{{ university.first_year|int + university.second_year|int + university.third_year|int + university.fourth_year|int }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4>Projects and Jobs Overview</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="projectsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4>Contact Information</h4>
+                    </div>
+                    <div class="card-body contact-info">
+                        <div class="mb-3">
+                            <h5><i class="fas fa-user"></i> Contact Person</h5>
+                            <p>{{ university.contact_person }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5><i class="fas fa-envelope"></i> Contact Email</h5>
+                            <p><a href="mailto:{{ university.contact_email }}">{{ university.contact_email }}</a></p>
+                        </div>
+                        <div class="mb-3">
+                            <h5><i class="fas fa-phone"></i> Contact Phone</h5>
+                            <p><a href="tel:{{ university.contact_phone }}">{{ university.contact_phone }}</a></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>{{ university.name }}</h5>
+                    <p><i class="fas fa-map-marker-alt"></i> {{ university.address }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 {{ university.name }}. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('projectsChart').getContext('2d');
+            var projectsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Projects', 'Jobs'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [{{ project_count }}, {{ job_count }}],
+                        backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(75, 192, 192, 0.2)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(75, 192, 192, 1)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: 20
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,3 +1,4 @@
+import bson
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
 from app import app, universities_collection, jobs, students_collection, pending_universities_collection, projects_collection
 from bson.objectid import ObjectId
@@ -70,6 +71,10 @@ def university_dashboard():
     if not university_id or not university_name:
         return jsonify({"message": "University ID and name are required"}), 400
 
+    university = universities_collection.find_one({"_id": ObjectId(university_id)})
+    if not university:
+        return jsonify({"message": "University not found"}), 404
+
     job_listings = list(jobs.find({"university_name": university_name}))
 
     for job in job_listings:
@@ -81,6 +86,7 @@ def university_dashboard():
         job['job_mode'] = job.get('job_mode', '')
         job['company_name'] = job.get('company_name', '')
         job['flag'] = job.get('flag', 0)
+        job['count'] = job.get('count', 0)  # Ensure 'count' is included
         
         # Fetch student details
         selected_students = job.get('selected_students', [])
@@ -109,7 +115,18 @@ def university_dashboard():
     student_count = len(students)
     job_count = len(job_listings)
 
-    return render_template('university_dashboard.html', university_name=university_name, job_listings=job_listings, students=students)
+    # Fetch the number of projects for the university
+    project_count = projects_collection.count_documents({"assigned_to_id": ObjectId(university_id)})
+
+    # Fetch all projects assigned to the university
+    current_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "assigned"}))
+    pending_review_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "done"}))
+    completed_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "completed"}))
+
+    # Convert ObjectId to string for JSON serialization
+    university['_id'] = str(university['_id'])
+
+    return render_template('university_dashboard.html', university=university, job_listings=job_listings, students=students, student_count=student_count, job_count=job_count, project_count=project_count, current_projects=current_projects, pending_review_projects=pending_review_projects, completed_projects=completed_projects)
 
 @app.route('/approve_job/<job_id>', methods=['POST'])
 def approve_job(job_id):
@@ -158,7 +175,7 @@ def send_students_to_company():
 @app.route('/accept_project/<project_id>', methods=['POST'])
 def accept_project(project_id):
     university_name = session.get('university_name', '')
-
+    university_id = session.get('university_id', '')
     if not university_name:
         flash("University name is required", "danger")
         return redirect(url_for('university_dashboard'))
@@ -166,7 +183,7 @@ def accept_project(project_id):
     project = projects_collection.find_one({"_id": ObjectId(project_id)})
 
     if project:
-        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "assigned", "assigned_to": university_name}})
+        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "assigned", "assigned_to": university_name, "assigned_to_id":ObjectId(university_id)}})
         flash("Project accepted successfully!", "success")
     else:
         flash("Project not found!", "danger")
@@ -251,6 +268,114 @@ def get_project_requests():
 
     # Return the project requests as JSON
     return jsonify(project_requests)
+
+@app.route('/get_job_history', methods=['GET'])
+def get_job_history():
+    university_id = session.get('university_id', '')
+    if not university_id:
+        return jsonify({"message": "University ID is required"}), 400
+
+    job_history = list(jobs_collection.find({"university_id": ObjectId(university_id), "status": "completed"}))
+    for job in job_history:
+        job['_id'] = str(job['_id'])
+    return jsonify(job_history)
+
+@app.route('/get_project_history', methods=['GET'])
+def get_project_history():
+    university_id = session.get('university_id', '')
+    if not university_id:
+        return jsonify({"message": "University ID is required"}), 400
+
+    completed_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "completed"}))
+    for project in completed_projects:
+        project['_id'] = str(project['_id'])
+        project['assigned_to_id'] = str(project['assigned_to_id'])
+    return jsonify(completed_projects)
+
+@app.route('/university_profile/<university_id>', methods=['GET'])
+def university_profile(university_id):
+    try:
+        university = universities_collection.find_one({"_id": ObjectId(university_id)})
+    except bson.errors.InvalidId:
+        return "Invalid University ID", 400
+
+    if not university:
+        return "University not found", 404
+
+    # Fetch the number of projects for the university
+    project_count = projects_collection.count_documents({"assigned_to_id": ObjectId(university_id)})
+
+    # Fetch the number of jobs assigned to the university
+    job_count = jobs.count_documents({"university_name": university['name']})
+
+    # Convert ObjectId to string for JSON serialization
+    university['_id'] = str(university['_id'])
+
+    return render_template('universityProfile.html', university=university, project_count=project_count, job_count=job_count)
+
+@app.route("/done_project/<project_id>",methods=['POST'])
+def done_project(project_id):
+    
+    project = projects_collection.find_one({"_id": ObjectId(project_id)})
+    if project:
+        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "done"}})
+        flash("Project completed successfully!", "success")
+    else:
+        flash("Project not found!", "danger")
+    return redirect(url_for('university_dashboard'))
+
+@app.route('/complete_project/<project_id>', methods=['POST'])
+def complete_project(project_id):
+    projects_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": {"status": "done"}}
+    )
+    return redirect(url_for('university_dashboard'))
+
+@app.route('/confirm_project/<project_id>', methods=['POST'])
+def confirm_project(project_id):
+    projects_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": {"status": "completed"}}
+    )
+    return redirect(url_for('university_dashboard'))
+
+@app.route('/project_history', methods=['GET'])
+def project_history():
+    university_id = session.get('university_id', '')
+    if not university_id:
+        flash("University ID is required", "danger")
+        return redirect(url_for('university_dashboard'))
+
+    completed_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "completed"}))
+    for project in completed_projects:
+        project['_id'] = str(project['_id'])
+        project['assigned_to_id'] = str(project['assigned_to_id'])
+
+    return render_template('project_history.html', completed_projects=completed_projects)
+
+@app.route('/get_selected_students', methods=['GET'])
+def get_selected_students():
+    job_id = request.args.get('job_id')
+    job = jobs.find_one({"_id": ObjectId(job_id)})
+
+    if not job:
+        return jsonify([])
+
+    selected_students = job.get('selected_students', [])
+    student_details = []
+
+    for student_id in selected_students:
+        student = students_collection.find_one({"_id": ObjectId(student_id)})
+        if student:
+            student_details.append({
+                "name": student.get('name', ''),
+                "email": student.get('email', ''),
+                "course": student.get('course', ''),
+                "gpa": student.get('gpa', '')
+            })
+
+    return jsonify(student_details)
 
 @app.route('/', methods=['GET'])
 def index():

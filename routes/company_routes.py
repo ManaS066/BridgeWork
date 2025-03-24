@@ -124,26 +124,7 @@ def company_dashboard():
                           
                            project_listings=project_listings)
 
-@app.route('/get_selected_students/<job_id>', methods=['GET'])
-def get_selected_students(job_id):
-    job = jobs.find_one({"_id": ObjectId(job_id)})
-    if not job:
-        return jsonify([])
 
-    selected_students = job.get('selected_students', [])
-    student_details = []
-    for student_id in selected_students:
-        student = students_collection.find_one({"_id": ObjectId(student_id)})
-        if student:
-            student_details.append({
-                "_id": str(student['_id']),
-                "name": student.get('name', ''),
-                "email": student.get('email', ''),
-                "course": student.get('course', ''),
-                "gpa": student.get('gpa', '')
-            })
-
-    return jsonify(student_details)
 
 @app.route('/add_project', methods=['POST'])
 def add_project():
@@ -206,3 +187,11 @@ def project_details():
     project_listings = list(project_listings_cursor)
 
     return render_template('project_details.html', project_listings=project_listings)
+
+@app.route('/complet_project/<project_id>', methods=['POST'])
+def complet_project(project_id):
+    projects_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": {"status": "completed"}}
+    )
+    return redirect(url_for('company_dashboard'))
