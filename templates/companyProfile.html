@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ company_name }} - Company Profile</title>
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --text-color: #333;
+            --background-color: #f4f4f4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-logo {
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-logo img {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .navbar-links a {
+            margin-left: 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: color 0.3s ease;
+        }
+
+        .navbar-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .company-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: var(--secondary-color);
+        }
+
+        .section-title {
+            text-align: center;
+            margin: 40px 0 20px;
+            color: var(--primary-color);
+        }
+
+        .job-listings, .project-listings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .job-card, .project-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .job-card:hover, .project-card:hover {
+            transform: scale(1.05);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 500px;
+            position: relative;
+        }
+
+        .close-btn {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .footer {
+            background-color: #333;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <div class="navbar-logo">
+                <!-- <img src="https://via.placeholder.com/50" alt="Company Logo"> -->
+                <h1 id="company-name">{{ company_name }}</h1>
+            </div>
+            <div class="navbar-links">
+                <a href="#">Home</a>
+                <a href="#">Jobs</a>
+                <a href="#">Projects</a>
+                <a href="#">Contact</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Company Stats -->
+    <div class="container">
+        <div class="company-stats">
+            <div class="stat-card">
+                <h3>Total Job Postings</h3>
+                <div class="stat-value" id="job-postings">{{ total_job_postings }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Total Applications</h3>
+                <div class="stat-value" id="total-applications">{{ total_applications }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Partnered Universities</h3>
+                <div class="stat-value" id="universities">{{ total_universities }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Active Projects</h3>
+                <div class="stat-value" id="active-projects">{{ project_listings|length }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Job Listings -->
+    <div class="container">
+        <h2 class="section-title">Job Listings</h2>
+        <div class="job-listings" id="job-listings-container">
+            {% for job in job_listings %}
+            <div class="job-card">
+                <h3>{{ job.job_title }}</h3>
+                <p>Openings: {{ job.num_openings }}</p>
+                <button onclick="openJobModal({{ loop.index0 }})">View Details</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Project Listings -->
+    <div class="container">
+        <h2 class="section-title">Company Projects</h2>
+        <div class="project-listings" id="project-listings-container">
+            {% for project in project_listings %}
+            <div class="project-card">
+                <h3>{{ project.project_desc }}</h3>
+                <button onclick="openProjectModal({{ loop.index0 }})">View Details</button>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Job Details Modal -->
+    <div id="job-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-job-modal">&times;</span>
+            <h2 id="job-modal-title">Job Title</h2>
+            <p id="job-modal-description">Job Description</p>
+        </div>
+    </div>
+
+    <!-- Project Details Modal -->
+    <div id="project-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="close-project-modal">&times;</span>
+            <h2 id="project-modal-title">Project Title</h2>
+            <p id="project-modal-description">Project Description</p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2024 {{ company_name }}. All Rights Reserved</p>
+    </footer>
+
+    <script>
+        // Job and Project Data from Jinja2 Template
+        const jobListings = [
+            {% for job in job_listings %}
+            {
+                title: "{{ job.job_title }}",
+                openings: {{ job.num_openings }},
+                description: "{{ job.get('job_desc', 'No description available') }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        const projectListings = [
+            {% for project in project_listings %}
+            {
+                title: "{{ project.project_desc }}",
+                description: "{{ project.problem_statement }}"
+            }{% if not loop.last %},{% endif %}
+            {% endfor %}
+        ];
+
+        // Job Modal Functionality
+        function openJobModal(index) {
+            const job = jobListings[index];
+            document.getElementById('job-modal-title').textContent = job.title;
+            document.getElementById('job-modal-description').textContent = job.description;
+            document.getElementById('job-modal').style.display = 'block';
+        }
+
+        // Project Modal Functionality
+        function openProjectModal(index) {
+            const project = projectListings[index];
+            document.getElementById('project-modal-title').textContent = project.title;
+            document.getElementById('project-modal-description').textContent = project.description;
+            document.getElementById('project-modal').style.display = 'block';
+        }
+
+        // Close Modal Functions
+        document.getElementById('close-job-modal').onclick = function() {
+            document.getElementById('job-modal').style.display = 'none';
+        }
+
+        document.getElementById('close-project-modal').onclick = function() {
+            document.getElementById('project-modal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const jobModal = document.getElementById('job-modal');
+            const projectModal = document.getElementById('project-modal');
+            if (event.target == jobModal) jobModal.style.display = 'none';
+            if (event.target == projectModal) projectModal.style.display = 'none';
+        }
+    </script>
+</body>
+</html>

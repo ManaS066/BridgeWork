@@ -805,47 +805,50 @@
         $(document).ready(function () {
             // Fetch project requests
             $.ajax({
-                url: "{{ url_for('get_project_requests') }}",
-                method: "GET",
-                success: function (data) {
-                    var projectRequestsContainer = $('#project-requests');
-                    var projectHeading = $('#project-heading');
-                    projectRequestsContainer.empty();
+    url: "{{ url_for('get_project_requests') }}",
+    method: "GET",
+    success: function (data) {
+        var projectRequestsContainer = $('#project-requests');
+        var projectHeading = $('#project-heading');
+        projectRequestsContainer.empty();
 
-                    if (data.length > 0) {
-                        data.forEach(function (project) {
-                            var projectCard = `
-                                <div class="col-lg-6 mb-3">
-                                    <div class="project-card">
-                                        <div class="project-title">${project.problem_statement}</div>
-                                        <div class="project-details">
-                                           
-                                            <div><strong>Project Description:</strong> ${project.project_desc}</div>
-                                            <div><strong>Reward:</strong> ${project.reward}</div>
-                                            <div><strong>Duration:</strong> ${project.duration}</div>
-                                            <div><strong>Company:</strong> ${project.company_name}</div>
-                                        </div>
-                                        <div class="d-flex flex-wrap">
-                                            <form action="{{ url_for('accept_project', project_id='') }}${project._id}" method="POST" class="me-2">
-                                                <button type="submit" class="accept-btn"><i class="fas fa-check me-1"></i> Accept</button>
-                                            </form>
-                                            <form action="{{ url_for('reject_project', project_id='') }}${project._id}" method="POST">
-                                                <button type="submit" class="reject-btn"><i class="fas fa-times me-1"></i> Reject</button>
-                                            </form>
-                                        </div>
-                                    </div>
+        if (data.length > 0) {
+            data.forEach(function (project) {
+                var projectCard = `
+                    <div class="col-lg-6 mb-3">
+                        <div class="project-card">
+                            <div class="project-title">${project.problem_statement}</div>
+                            <div class="project-details">
+                                <div><strong>Project Description:</strong> ${project.project_desc}</div>
+                                <div><strong>Reward:</strong> ${project.reward}</div>
+                                <div><strong>Duration:</strong> ${project.duration}</div>
+                                <div><strong>Company:</strong> 
+                                    <a href="/company_profile/${project.company_name}" class="company-btn">
+                                        ${project.company_name}
+                                    </a>
                                 </div>
-                            `;
-                            projectRequestsContainer.append(projectCard);
-                        });
-                    } else {
-                        projectHeading.hide();
-                    }
-                },
-                error: function (error) {
-                    console.log("Error fetching project requests:", error);
-                }
+                            </div>
+                            <div class="d-flex flex-wrap">
+                                <form action="{{ url_for('accept_project', project_id='') }}${project._id}" method="POST" class="me-2">
+                                    <button type="submit" class="accept-btn"><i class="fas fa-check me-1"></i> Accept</button>
+                                </form>
+                                <form action="{{ url_for('reject_project', project_id='') }}${project._id}" method="POST">
+                                    <button type="submit" class="reject-btn"><i class="fas fa-times me-1"></i> Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                projectRequestsContainer.append(projectCard);
             });
+        } else {
+            projectHeading.hide();
+        }
+    },
+    error: function (error) {
+        console.log("Error fetching project requests:", error);
+    }
+});
 
             // Hide job headings if no jobs are available
             var jobContainer = $('#job-container');

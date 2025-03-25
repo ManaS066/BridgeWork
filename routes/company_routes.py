@@ -1,4 +1,5 @@
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
+import requests
 from app import app, companies_collection, jobs, universities_collection, students_collection, pending_companies_collection, projects_collection
 from bson.objectid import ObjectId
 from datetime import datetime, timezone, timedelta
@@ -190,3 +191,67 @@ def complet_project(project_id):
         {"$set": {"status": "completed"}}
     )
     return redirect(url_for('company_dashboard'))
+
+
+
+# # Fetch cover photo from Unsplash
+# UNSPLASH_ACCESS_KEY = "uirLXmzwo12nm_CP24o-tMQtcZgagCJHMKeFlXfKoYA"
+# def get_cover_photo(company_name):
+#     url = f"https://api.unsplash.com/search/photos?query={company_name}&client_id={UNSPLASH_ACCESS_KEY}&per_page=1"
+#     response = requests.get(url)
+#     if response.status_code == 200 and response.json()["results"]:
+#         return response.json()["results"][0]["urls"]["regular"]
+#     return "https://via.placeholder.com/1200x400?text=No+Image+Found"
+
+@app.route('/company_profile/<name>', methods=['GET'])
+def company_profile(name):
+    try:
+        # Convert the id to ObjectId
+        company_obj = companies_collection.find_one({"company_name": name})
+        
+        # Check if company exists
+        if not company_obj:
+            flash('Company not found', 'error')
+            return redirect(url_for('index'))  # Assume you have an index route
+        
+        # Extract company name
+        company_name = company_obj['company_name']
+        
+        # Fetch job listings
+        job_listings_cursor = jobs.find({"company_name": company_name})
+        job_listings = list(job_listings_cursor)
+        
+        # Calculate job-related statistics
+        total_job_postings = len(job_listings)
+        total_applications = sum([
+            int(job.get('num_openings', 0)) for job in job_listings
+        ])
+        
+        # Get unique universities
+        total_universities = len(set([
+            job.get('university_name', '') 
+            for job in job_listings 
+            if job.get('university_name')
+        ]))
+        
+        # Fetch project listings
+        project_listings_cursor = projects_collection.find({"company_name": company_name})
+        project_listings = list(project_listings_cursor)
+        
+        return render_template('companyProfile.html',
+                               company_name=company_name,
+                               total_job_postings=total_job_postings,
+                               total_applications=total_applications,
+                               total_universities=total_universities,
+                               job_listings=job_listings,
+                               project_listings=project_listings)
+    
+    except Exception as e:
+        # Log the error for debugging
+        app.logger.error(f"Error in company profile route: {str(e)}")
+        
+        # Flash a user-friendly error message
+        flash('An error occurred while fetching company profile', 'error')
+        
+        # Redirect to a safe page
+        return redirect(url_for('index'))  # Assume you have an index route
