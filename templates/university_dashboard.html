@@ -371,6 +371,34 @@
                 width: 100%;
             }
         }
+
+        .notification-btn {
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .notification-btn:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
     </style>
 </head>
 
@@ -379,8 +407,11 @@
         <div class="title">BridgeWork</div>
         <span>University Dashboard - {{ university.name }}</span>
         <div>
-            <a href="{{ url_for('project_history') }}" class="btn btn-primary me-2"><i
-                    class="fas fa-history me-2"></i> View Projects</a>
+            <button class="notification-btn" data-bs-toggle="modal" data-bs-target="#hodRequestsModal">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count" id="notification-count">0</span>
+            </button>
+            <a href="{{ url_for('project_history') }}" class="btn btn-primary me-2"><i class="fas fa-history me-2"></i> View Projects</a>
             <a href="{{ url_for('logout') }}" class="btn btn-danger">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
@@ -423,7 +454,7 @@
                             <div class="col-md-4 fw-bold">Departments:</div>
                             <div class="col-md-8">
                                 {% for department in university.departments %}
-                                <span class="badge bg-info department-badge">{{ department | upper }}</span>
+                                <a href="{{ url_for('dept_profile', dept_name=department) }}" class="badge bg-info department-badge">{{ department | upper }}</a>
                                 {% endfor %}
                             </div>
                         </div>
@@ -736,6 +767,24 @@
         </div>
     </div>
 
+    <!-- Modal for HOD Requests -->
+    <div class="modal fade" id="hodRequestsModal" tabindex="-1" aria-labelledby="hodRequestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="hodRequestsModalLabel"><i class="fas fa-bell me-2"></i>HOD Requests</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="hod-requests-list" class="list-group"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <footer class="bg-dark text-white py-4 mt-5">
         <div class="container">
             <div class="row">
@@ -893,7 +942,70 @@
                     }
                 });
             });
+
+            // Fetch HOD requests count
+            fetchHodRequestsCount();
+
+            // Fetch HOD requests when the modal is opened
+            $('#hodRequestsModal').on('show.bs.modal', function (e) {
+                fetchHodRequests();
+            });
         });
+
+        function fetchHodRequestsCount() {
+            $.ajax({
+                url: "{{ url_for('get_hod_requests_count') }}",
+                method: "GET",
+                success: function (data) {
+                    $('#notification-count').text(data.count);
+                },
+                error: function (error) {
+                    console.log("Error fetching HOD requests count:", error);
+                }
+            });
+        }
+
+        function fetchHodRequests() {
+            $.ajax({
+                url: "{{ url_for('get_hod_requests') }}",
+                method: "GET",
+                success: function (data) {
+                    var hodRequestsList = $('#hod-requests-list');
+                    hodRequestsList.empty();
+
+                    if (data.length > 0) {
+                        data.forEach(function (hod) {
+                            var hodRequestItem = `
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-1">${hod.name}</h5>
+                                            <p class="mb-1">Department: ${hod.department}</p>
+                                            <p class="mb-1">Email: ${hod.email}</p>
+                                            <p class="mb-1">Contact: ${hod.contact}</p>
+                                        </div>
+                                        <div>
+                                            <form action="{{ url_for('approve_hod', hod_id='') }}${hod._id}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                            </form>
+                                            <form action="{{ url_for('reject_hod', hod_id='') }}${hod._id}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            hodRequestsList.append(hodRequestItem);
+                        });
+                    } else {
+                        hodRequestsList.append('<p class="text-center text-muted">No HOD requests available.</p>');
+                    }
+                },
+                error: function (error) {
+                    console.log("Error fetching HOD requests:", error);
+                }
+            });
+        }
 
         document.addEventListener('DOMContentLoaded', function () {
             var ctx = document.getElementById('projectsChart').getContext('2d');

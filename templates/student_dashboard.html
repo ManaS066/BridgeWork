@@ -541,12 +541,12 @@
               <div class="card-header">
                 <h3 class="card-title text-xl font-bold">Congratulations!</h3>
               </div>
-              <div class="card-content space-y-4">
+              <div class="card-content space-y-4"> 
                 <p>You have been assigned to the following project:</p>
                 <p><strong>Project Title:</strong> {{ assigned_project.project_title }}</p>
                 <p><strong>Problem Statement:</strong> {{ assigned_project.problem_statement }}</p>
                 <p><strong>Project Description:</strong> {{ assigned_project.project_desc }}</p>
-                <p><strong>Reward:</strong> {{ assigned_project.reward }}</p>
+                <!-- <p><strong>Reward:</strong> {{ assigned_project.reward }}</p> -->
                 <p><strong>Duration:</strong> {{ assigned_project.duration }}</p>
                 <p><strong>Company:</strong> {{ assigned_project.company_name }}</p>
               </div>
@@ -736,11 +736,11 @@
         projects: "{{ student.projects }}",
         skills: "{{ student.skills }}",
       };
-  
+    
       // Tab functionality
       const tabTriggers = document.querySelectorAll('.tab-trigger');
       const tabContents = document.querySelectorAll('.tab-content');
-  
+    
       tabTriggers.forEach(trigger => {
         trigger.addEventListener('click', () => {
           const tabName = trigger.getAttribute('data-tab');
@@ -763,7 +763,7 @@
           });
         });
       });
-  
+    
       // Academic edit functionality
       const editAcademicBtn = document.querySelector('.edit-academic-btn');
       const saveAcademicControls = document.querySelector('.save-academic-controls');
@@ -771,14 +771,14 @@
       const saveAcademicBtn = document.querySelector('.save-academic-btn');
       const academicView = document.querySelector('.academic-view');
       const academicEdit = document.querySelector('.academic-edit');
-  
+    
       editAcademicBtn.addEventListener('click', () => {
         editAcademicBtn.style.display = 'none';
         saveAcademicControls.style.display = 'flex';
         academicView.style.display = 'none';
         academicEdit.style.display = 'block';
       });
-  
+    
       cancelAcademicBtn.addEventListener('click', () => {
         editAcademicBtn.style.display = 'inline-flex';
         saveAcademicControls.style.display = 'none';
@@ -790,51 +790,72 @@
         document.getElementById('courses').value = student.courses;
         document.getElementById('projects').value = student.projects;
       });
-  
+    
       saveAcademicBtn.addEventListener('click', () => {
         // Get form values
         const gpa = document.getElementById('gpa').value;
         const courses = document.getElementById('courses').value;
         const projects = document.getElementById('projects').value;
         
-        // Update student data
-        student.gpa = gpa;
-        student.courses = courses;
-        student.projects = projects;
-        
-        // Update UI
-        document.querySelector('.academic-view .font-bold').textContent = gpa;
-        
-        // Update courses badges
-        const coursesList = document.querySelector('.courses-list');
-        coursesList.innerHTML = '';
-        courses.split(',').forEach(course => {
-          const badge = document.createElement('span');
-          badge.className = 'badge badge-secondary text-xs';
-          badge.textContent = course.trim();
-          coursesList.appendChild(badge);
+        // Send data to server
+        fetch('/save_academic_details', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            gpa: gpa,
+            courses: courses,
+            projects: projects
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            // Update student data
+            student.gpa = gpa;
+            student.courses = courses;
+            student.projects = projects;
+            
+            // Update UI
+            document.querySelector('.academic-view .font-bold').textContent = gpa;
+            
+            // Update courses list
+            const coursesList = document.querySelector('.courses-list');
+            coursesList.innerHTML = '';
+            courses.split(',').forEach(course => {
+              const li = document.createElement('li');
+              li.className = 'text-sm';
+              li.textContent = course.trim();
+              coursesList.appendChild(li);
+            });
+            
+            // Update projects list
+            const projectsList = document.querySelector('.projects-list');
+            projectsList.innerHTML = '';
+            projects.split(',').forEach(project => {
+              const li = document.createElement('li');
+              li.className = 'text-sm';
+              li.textContent = project.trim();
+              projectsList.appendChild(li);
+            });
+            
+            // Show success toast
+            showToast('Success', data.message);
+            
+            // Reset UI state
+            editAcademicBtn.style.display = 'inline-flex';
+            saveAcademicControls.style.display = 'none';
+            academicView.style.display = 'block';
+            academicEdit.style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showToast('Error', 'Failed to save academic details');
         });
-        
-        // Update projects list
-        const projectsList = document.querySelector('.projects-list');
-        projectsList.innerHTML = '';
-        projects.split(',').forEach(project => {
-          const li = document.createElement('li');
-          li.className = 'text-sm';
-          li.textContent = project.trim();
-          projectsList.appendChild(li);
-        });
-        
-        // Show success toast
-        showToast('Success', 'Academic details saved successfully!');
-        
-        // Reset UI state
-        editAcademicBtn.style.display = 'inline-flex';
-        saveAcademicControls.style.display = 'none';
-        academicView.style.display = 'block';
-        academicEdit.style.display = 'none';
       });
-  
+    
       // Skills edit functionality
       const editSkillsBtn = document.querySelector('.edit-skills-btn');
       const saveSkillsControls = document.querySelector('.save-skills-controls');
@@ -842,14 +863,14 @@
       const saveSkillsBtn = document.querySelector('.save-skills-btn');
       const skillsView = document.querySelector('.skills-view');
       const skillsEdit = document.querySelector('.skills-edit');
-  
+    
       editSkillsBtn.addEventListener('click', () => {
         editSkillsBtn.style.display = 'none';
         saveSkillsControls.style.display = 'flex';
         skillsView.style.display = 'none';
         skillsEdit.style.display = 'block';
       });
-  
+    
       cancelSkillsBtn.addEventListener('click', () => {
         editSkillsBtn.style.display = 'inline-flex';
         saveSkillsControls.style.display = 'none';
@@ -859,34 +880,53 @@
         // Reset form value
         document.getElementById('skills').value = student.skills;
       });
-  
+    
       saveSkillsBtn.addEventListener('click', () => {
         // Get form value
         const skills = document.getElementById('skills').value;
         
-        // Update student data
-        student.skills = skills;
-        
-        // Update UI
-        const skillsList = document.querySelector('.skills-list');
-        skillsList.innerHTML = '';
-        skills.split(',').forEach(skill => {
-          const badge = document.createElement('span');
-          badge.className = 'badge text-xs py-1 px-3';
-          badge.textContent = skill.trim();
-          skillsList.appendChild(badge);
+        // Send data to server
+        fetch('/save_skills', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            skills: skills
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.message) {
+            // Update student data
+            student.skills = skills;
+            
+            // Update UI
+            const skillsList = document.querySelector('.skills-list');
+            skillsList.innerHTML = '';
+            skills.split(',').forEach(skill => {
+              const badge = document.createElement('span');
+              badge.className = 'badge text-xs py-1 px-3';
+              badge.textContent = skill.trim();
+              skillsList.appendChild(badge);
+            });
+            
+            // Show success toast
+            showToast('Success', data.message);
+            
+            // Reset UI state
+            editSkillsBtn.style.display = 'inline-flex';
+            saveSkillsControls.style.display = 'none';
+            skillsView.style.display = 'block';
+            skillsEdit.style.display = 'none';
+          }
+        })
+        .catch(error => {
+          console.error('Error:', error);
+          showToast('Error', 'Failed to save skills');
         });
-        
-        // Show success toast
-        showToast('Success', 'Skills saved successfully!');
-        
-        // Reset UI state
-        editSkillsBtn.style.display = 'inline-flex';
-        saveSkillsControls.style.display = 'none';
-        skillsView.style.display = 'block';
-        skillsEdit.style.display = 'none';
       });
-  
+    
       // Toast functionality
       function showToast(title, message) {
         const toastContainer = document.querySelector('.toast-container');

@@ -257,7 +257,7 @@ def get_project_requests():
         return jsonify({"message": "University ID is required"}), 400
 
     # Debugging: Print the university_id
-    print(f"University ID: {university_id}")
+   
 
     project_requests = list(projects_collection.find({
         "universities": ObjectId(university_id),
@@ -271,7 +271,7 @@ def get_project_requests():
             project['assigned_to'] = str(project['assigned_to'])
 
     # Debugging: Print the project requests
-    print(f"Project Requests: {project_requests}")
+  
 
     # Return the project requests as JSON
     return jsonify(project_requests)
@@ -402,6 +402,55 @@ def assign_to_hod():
     )
 
     flash("Project assigned to HODs successfully!", "success")
+    return redirect(url_for('university_dashboard'))
+
+@app.route('/dept_profile/<dept_name>', methods=['GET'])
+def dept_profile(dept_name):
+    university_id = session.get('university_id')
+    university_name = session.get('university_name')
+    if not university_id or not university_name:
+        return redirect(url_for('university_login'))
+
+    university = universities_collection.find_one({"_id": ObjectId(university_id)})
+    hod = hod_collection.find_one({"department": dept_name, "university_name": university_name})
+    students = list(students_collection.find({"department": dept_name, "university_name": university_name}))
+
+    return render_template('deptProfile.html', 
+                           university=university, 
+                           dept_name=dept_name, 
+                           hod=hod, 
+                           students=students)
+
+@app.route('/get_hod_requests_count', methods=['GET'])
+def get_hod_requests_count():
+    university_name = session.get('university_name')
+    if not university_name:
+        return jsonify({"count": 0})
+
+    count = hod_collection.count_documents({"university_name": university_name, "approved": False})
+    return jsonify({"count": count})
+
+@app.route('/get_hod_requests', methods=['GET'])
+def get_hod_requests():
+    university_name = session.get('university_name')
+    if not university_name:
+        return jsonify([])
+
+    hod_requests = list(hod_collection.find({"university_name": university_name, "approved": False}))
+    for hod in hod_requests:
+        hod['_id'] = str(hod['_id'])
+    return jsonify(hod_requests)
+
+@app.route('/approve_hod/<hod_id>', methods=['POST'])
+def approve_hod(hod_id):
+    hod_collection.update_one({"_id": ObjectId(hod_id)}, {"$set": {"approved": True}})
+    flash("HOD approved successfully!", "success")
+    return redirect(url_for('university_dashboard'))
+
+@app.route('/reject_hod/<hod_id>', methods=['POST'])
+def reject_hod(hod_id):
+    hod_collection.delete_one({"_id": ObjectId(hod_id)})
+    flash("HOD rejected successfully!", "success")
     return redirect(url_for('university_dashboard'))
 
 @app.route('/', methods=['GET'])

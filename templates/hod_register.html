@@ -84,10 +84,13 @@
             event.preventDefault();
             let universityId = document.getElementById('university').value;
             let department = document.getElementById('department').value;
+            let name = document.getElementById('name').value;
+            let contact = document.getElementById('contact').value;
+            let employeeCode = document.getElementById('employee_code').value;
             let email = document.getElementById('email').value;
             let password = document.getElementById('password').value;
 
-            if (!universityId || !department || !email || !password) {
+            if (!universityId || !department || !name || !contact || !employeeCode || !email || !password) {
                 alert('Please fill out all fields!');
                 return;
             }
@@ -95,7 +98,7 @@
             const response = await fetch('/register_hod', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ universityId, department, email, password })
+                body: JSON.stringify({ universityId, department, name, contact, employeeCode, email, password })
             });
 
             const result = await response.json();
@@ -118,6 +121,15 @@
             <select id="department" name="department" required>
                 <option value="">Select Department</option>
             </select>
+
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="contact">Contact Number:</label>
+            <input type="text" id="contact" name="contact" required>
+
+            <label for="employee_code">Employee Code:</label>
+            <input type="text" id="employee_code" name="employee_code" required>
 
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required>

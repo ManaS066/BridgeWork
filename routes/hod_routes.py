@@ -11,31 +11,37 @@ def register_hod():
     data = request.json
     university_id = data.get('universityId')
     department = data.get('department')
+    name = data.get('name')
+    contact = data.get('contact')
+    employee_code = data.get('employeeCode')
     email = data.get('email')
     password = data.get('password')
 
-    if not all([university_id, department, email, password]):
+    if not all([university_id, department, name, contact, employee_code, email, password]):
         return jsonify({"message": "All fields are required"}), 400
 
     university = universities_collection.find_one({"_id": ObjectId(university_id)})
-    university_name = university["name"] if university else "Unknown University"
+    if not university:
+        return jsonify({"message": "University not found"}), 404
 
-    # Check if the HOD already exists
-    existing_hod = hod_collection.find_one({"email": email})
-    if existing_hod:
-        return jsonify({"message": "HOD with this email already exists"}), 400
+    # Assuming the correct field name is 'name'
+    university_name = university.get('name') or university.get('university_name')
+    if not university_name:
+        return jsonify({"message": "University name not found"}), 404
 
-    hod_id = hod_collection.insert_one({
+    hod = {
         "university_name": university_name,
         "department": department,
+        "name": name,
+        "contact": contact,
+        "employee_code": employee_code,
         "email": email,
-        "password": password
-    }).inserted_id
+        "password": password,  # Note: In a real application, ensure to hash the password before storing it
+        "approved": False  # Mark as pending approval
+    }
 
-    return jsonify({
-        "message": "HOD registered successfully!",
-        "hod_id": str(hod_id)
-    })
+    hod_collection.insert_one(hod)
+    return jsonify({"message": "HOD registration request submitted successfully"}), 201
 
 @app.route('/hod_login', methods=['GET'])
 def hod_login_page():
@@ -49,6 +55,10 @@ def hod_login():
     hod = hod_collection.find_one({"email": email, "password": password})
     
     if hod:
+        if not hod.get('approved', False):
+            flash("Your registration is pending approval.", "warning")
+            return redirect(url_for('hod_login'))
+        
         session['hod_id'] = str(hod['_id'])
         session['hod_email'] = email
         session['university_name'] = hod['university_name']
