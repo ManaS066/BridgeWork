@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HOD Dashboard</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -113,19 +114,80 @@
         .select-students-btn:hover, .assign-students-btn:hover {
             background-color: #0056b3;
         }
+
+        /* New styles for notification bell */
+        .notification-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+            color: white;
+            font-size: 20px;
+        }
+
+        .notification-bell .badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+        }
+
+        .registration-requests {
+            background-color: #fff;
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .registration-request {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+
+        .registration-request .actions {
+            display: flex;
+            gap: 10px;
+        }
     </style>
 </head>
 <body>
 
-<div class="navbar">
-    <div class="title">BridgeWork</div>
-    <span>HOD Dashboard - {{ university_name }} - {{ department }}</span>
-    <div>
-        <a href="{{ url_for('logout') }}">
-            <button class="logout-btn">Logout</button>
-        </a>
+    <div class="navbar">
+        <div class="title">BridgeWork</div>
+        <span>HOD Dashboard - {{ university_name }} - {{ department }}</span>
+        <div class="notification-container">
+            <div class="notification-bell" data-toggle="modal" data-target="#registrationRequestsModal">
+                <i class="fas fa-bell"></i>
+                {% if pending_registrations %}
+                    <span class="badge">{{ pending_registrations|length }}</span>
+                {% endif %}
+            </div>
+            <!-- New Students Icon -->
+            <div class="students-icon ml-3" data-toggle="modal" data-target="#studentsDetailsModal">
+                <i class="fas fa-users"></i>
+                {% if students %}
+                    <span class="badge badge-info">{{ students|length }}</span>
+                {% endif %}
+            </div>
+            <a href="{{ url_for('logout') }}">
+                <button class="logout-btn">Logout</button>
+            </a>
+        </div>
     </div>
-</div>
 
 <div class="dashboard-container">
     {% if job_listings %}
@@ -227,6 +289,99 @@
     </div>
 </div>
 
+<div class="modal fade" id="studentsDetailsModal" tabindex="-1" role="dialog" aria-labelledby="studentsDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentsDetailsModalLabel">Department Students</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Skills</th>
+                            <th>CGPA</th>
+                            <th>Department</th>
+                            <th>Batch</th>
+                            <th>Contact</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for student in students %}
+                        <tr>
+                            <td>{{ student.name }}</td>
+                            <td>{{ student.email }}</td>
+                            <td>{{ student.skills }}</td>
+                            <td>{{ student.gpa }}</td>
+                            <td>{{ student.department }}</td>
+                            <td>{{ student.batch }}</td>
+                            <td>{{ student.contact }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% if not students %}
+                    <p class="text-center">No students found in the department.</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal for Registration Requests -->
+<div class="modal fade" id="registrationRequestsModal" tabindex="-1" role="dialog" aria-labelledby="registrationRequestsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="registrationRequestsModalLabel">Registration Requests</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                {% if pending_registrations %}
+                    <div class="registration-requests">
+                        {% for registration in pending_registrations %}
+                            <div class="registration-request">
+                                <div>
+                                    <strong>{{ registration.name }}</strong>
+                                    <p>Email: {{ registration.email }}</p>
+                                    <p>Department: {{ registration.department }}</p>
+                                </div>
+                                <div class="actions">
+                                    <form action="{{ url_for('approve_registration') }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="registration_id" value="{{ registration._id }}">
+                                        <input type="hidden" name="action" value="approve">
+                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                    </form>
+                                    <form action="{{ url_for('approve_registration') }}" method="POST" style="display:inline;">
+                                        <input type="hidden" name="registration_id" value="{{ registration._id }}">
+                                        <input type="hidden" name="action" value="reject">
+                                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                    </form>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No pending registration requests.</p>
+                {% endif %}
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="footer">
     <p>&copy; 2025 HOD Dashboard. All Rights Reserved.</p>
 </div>
@@ -235,6 +390,22 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
+    $('#selectStudentsModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var jobId = button.data('job-id');
+        var modal = $(this);
+        modal.find('#modalJobId').val(jobId);
+    });
+
+    $('#assignStudentsModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var projectId = button.data('project-id');
+        var modal = $(this);
+        modal.find('#modalProjectId').val(projectId);
+    });
+</script>
+<script>
+    // Existing modal scripts
     $('#selectStudentsModal').on('show.bs.modal', function (event) {
         var button = $(event.relatedTarget);
         var jobId = button.data('job-id');

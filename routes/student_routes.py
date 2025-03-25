@@ -38,7 +38,8 @@ def register_student():
         "courses": "",  # Initialize courses field
         "gpa": "",      # Initialize gpa field
         "projects": "", # Initialize projects field
-        "skills": ""    # Initialize skills field
+        "skills": ""  ,  # Initialize skills field
+        "approved": False  # Mark as pending approval
     }).inserted_id
 
     return redirect(url_for('student_login'))
@@ -52,6 +53,10 @@ def student_login():
         student = students_collection.find_one({"email": email, "password": password})
 
         if student:
+            if not student.get('approved', False):
+                return render_template('student_login.html', error="Your registration is pending approval.")
+              
+
             session['student_id'] = str(student['_id'])
             session['student_name'] = student['name']
             return redirect(url_for('student_dashboard'))
@@ -92,7 +97,7 @@ def save_academic_details():
     courses = data.get('courses')
     projects = data.get('projects')
 
-    if gpa and courses and projects:
+    if gpa or courses or projects:
         students_collection.update_one(
             {"_id": ObjectId(session['student_id'])},
             {"$set": {"gpa": gpa, "courses": courses, "projects": projects}}

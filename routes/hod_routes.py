@@ -58,7 +58,10 @@ def hod_login():
         if not hod.get('approved', False):
             flash("Your registration is pending approval.", "warning")
             return redirect(url_for('hod_login'))
-        
+        elif hod.get('approved') == False:
+            flash("Your registration has been rejected.", "danger")
+            return redirect(url_for('hod_login'))
+
         session['hod_id'] = str(hod['_id'])
         session['hod_email'] = email
         session['university_name'] = hod['university_name']
@@ -77,22 +80,40 @@ def hod_dashboard():
     if not university_name or not department:
         return jsonify({"message": "University name and department are required"}), 400
 
+    # Fetch job listings for the department
     job_listings = list(jobs.find({
         "university_name": university_name,
         "departments": department,
         "flag": 1
     }))
-
     for job in job_listings:
         job['_id'] = str(job['_id'])
 
+    # Fetch assigned projects
     assigned_projects = list(projects_collection.find({"assigned_hods": ObjectId(hod_id)}))
     for project in assigned_projects:
         project['_id'] = str(project['_id'])
 
+    # Fetch pending student registrations
+    pending_registrations = list(students_collection.find({
+        "university_name": university_name,
+        "department": department,
+        "approved": False
+    }))
+    for registration in pending_registrations:
+        registration['_id'] = str(registration['_id'])
+
+    # Fetch students in the department
     students = list(students_collection.find({"department": department}))
 
-    return render_template('hod_dashboard.html', university_name=university_name, department=department, job_listings=job_listings, students=students,assigned_projects = assigned_projects)
+    return render_template('hod_dashboard.html', 
+        university_name=university_name, 
+        department=department, 
+        job_listings=job_listings, 
+        students=students,
+        assigned_projects=assigned_projects,
+        pending_registrations=pending_registrations
+    )
 
 @app.route('/submit_students', methods=['POST'])
 def submit_students():
@@ -131,3 +152,38 @@ def assign_students_to_project():
 
     flash("Students assigned to project successfully!", "success")
     return redirect(url_for('hod_dashboard'))
+
+# New route to handle registration approval
+@app.route('/approve_registration', methods=['POST'])
+def approve_registration():
+    hod_id = session.get('hod_id', '')
+    if not hod_id:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    registration_id = request.form.get('registration_id')
+    action = request.form.get('action')  # 'approve' or 'reject'
+
+    if not registration_id or not action:
+        return jsonify({"message": "Invalid request"}), 400
+
+    try:
+        registration = students_collection.find_one({"_id": ObjectId(registration_id)})
+        
+        if not registration:
+            return jsonify({"message": "Registration not found"}), 404
+
+        if action == 'approve':
+            # Update registration status to approved
+            students_collection.update_one(
+                {"_id": ObjectId(registration_id)},
+                {"$set": {"approved": True}}
+            )
+            # TODO: Add the student to the students collection or update their status
+        elif action == 'reject':
+            # Update registration status to rejected
+         students_collection.delete_one({"_id": ObjectId(registration_id)})
+
+        return redirect(url_for('hod_dashboard'))
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
