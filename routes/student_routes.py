@@ -1,5 +1,5 @@
 from flask import render_template, request, session, redirect, url_for, jsonify
-from app import app, students_collection, universities_collection
+from app import app, students_collection, universities_collection,projects_collection
 from bson.objectid import ObjectId
 import os
 
@@ -62,6 +62,11 @@ def student_dashboard():
         return redirect(url_for('student_login'))
 
     student = students_collection.find_one({"_id": ObjectId(session['student_id'])})
+    student_id = session['student_id']
+    assigned_project = projects_collection.find_one({"assigned_students": ObjectId(student_id)})
+
+    if assigned_project:
+        assigned_project['_id'] = str(assigned_project['_id'])
 
     if not student:
         return redirect(url_for('student_login'))

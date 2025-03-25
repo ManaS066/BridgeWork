@@ -1,6 +1,6 @@
 import bson
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
-from app import app, universities_collection, jobs, students_collection, pending_universities_collection, projects_collection
+from app import app, universities_collection, jobs, students_collection, pending_universities_collection, projects_collection,hod_collection,jobs
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 
@@ -123,10 +123,15 @@ def university_dashboard():
     pending_review_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "done"}))
     completed_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "completed"}))
 
+    # Fetch all HODs
+    hod_list = list(hod_collection.find({}))
+    for hod in hod_list:
+        hod['_id'] = str(hod['_id'])
+
     # Convert ObjectId to string for JSON serialization
     university['_id'] = str(university['_id'])
 
-    return render_template('university_dashboard.html', university=university, job_listings=job_listings, students=students, student_count=student_count, job_count=job_count, project_count=project_count, current_projects=current_projects, pending_review_projects=pending_review_projects, completed_projects=completed_projects)
+    return render_template('university_dashboard.html', university=university, job_listings=job_listings, students=students, student_count=student_count, job_count=job_count, project_count=project_count, current_projects=current_projects, pending_review_projects=pending_review_projects, completed_projects=completed_projects, hod_list=hod_list)
 
 @app.route('/approve_job/<job_id>', methods=['POST'])
 def approve_job(job_id):
@@ -183,7 +188,10 @@ def accept_project(project_id):
     project = projects_collection.find_one({"_id": ObjectId(project_id)})
 
     if project:
-        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "assigned", "assigned_to": university_name, "assigned_to_id":ObjectId(university_id)}})
+        projects_collection.update_one(
+            {"_id": ObjectId(project_id)},
+            {"$set": {"status": "assigned", "assigned_to": university_name, "assigned_to_id": ObjectId(university_id)}}
+        )
         flash("Project accepted successfully!", "success")
     else:
         flash("Project not found!", "danger")
@@ -195,7 +203,10 @@ def reject_project(project_id):
     project = projects_collection.find_one({"_id": ObjectId(project_id)})
 
     if project:
-        projects_collection.update_one({"_id": ObjectId(project_id)}, {"$set": {"status": "rejected"}})
+        projects_collection.update_one(
+            {"_id": ObjectId(project_id)},
+            {"$set": {"status": "rejected"}}
+        )
         flash("Project rejected successfully!", "success")
     else:
         flash("Project not found!", "danger")
@@ -242,29 +253,25 @@ def university_info():
 @app.route('/get_project_requests', methods=['GET'])
 def get_project_requests():
     university_id = session.get('university_id')
-    university_name = session.get('university_name')
     if not university_id:
         return jsonify({"message": "University ID is required"}), 400
 
-    # Debug print to check university ID
-    
+    # Debugging: Print the university_id
+    print(f"University ID: {university_id}")
 
-    # Query the projects collection to find projects for the university
     project_requests = list(projects_collection.find({
-        "$or": [
-            {"university1": (university_id)},
-            {"university2": (university_id)},
-            {"university3": (university_id)}
-        ],
+        "universities": ObjectId(university_id),
         "status": "not_assigned"
     }))
 
-    # Debug print to check fetched project requests
-   
-
-    # Convert ObjectId to string for each project
     for project in project_requests:
         project['_id'] = str(project['_id'])
+        project['universities'] = [str(univ_id) for univ_id in project['universities']]
+        if project['assigned_to'] is not None:
+            project['assigned_to'] = str(project['assigned_to'])
+
+    # Debugging: Print the project requests
+    print(f"Project Requests: {project_requests}")
 
     # Return the project requests as JSON
     return jsonify(project_requests)
@@ -275,7 +282,7 @@ def get_job_history():
     if not university_id:
         return jsonify({"message": "University ID is required"}), 400
 
-    job_history = list(jobs_collection.find({"university_id": ObjectId(university_id), "status": "completed"}))
+    job_history = list(jobs.find({"university_id": ObjectId(university_id), "status": "completed"}))
     for job in job_history:
         job['_id'] = str(job['_id'])
     return jsonify(job_history)
@@ -376,6 +383,26 @@ def get_selected_students():
             })
 
     return jsonify(student_details)
+
+@app.route('/assign_to_hod', methods=['POST'])
+def assign_to_hod():
+    project_id = request.form['project_id']
+    hod_ids = request.form.getlist('hods[]')
+
+    project = projects_collection.find_one({"_id": ObjectId(project_id)})
+
+    if not project:
+        flash("Project not found", "danger")
+        return redirect(url_for('university_dashboard'))
+
+    # Update the project with the assigned HODs
+    projects_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": {"assigned_hods": [ObjectId(hod_id) for hod_id in hod_ids], "status": "assigned_to_hod"}}
+    )
+
+    flash("Project assigned to HODs successfully!", "success")
+    return redirect(url_for('university_dashboard'))
 
 @app.route('/', methods=['GET'])
 def index():

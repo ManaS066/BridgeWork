@@ -1,196 +1,919 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .dashboard-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 600px;
-            text-align: center;
-        }
-        h2 {
-            color: #333;
-        }
-        p {
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        .logout-btn {
-            display: block;
-            margin-top: 20px;
-            padding: 10px;
-            background: #dc3545;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-        }
-        .logout-btn:hover {
-            background: #c82333;
-        }
-        .section {
-            margin-top: 20px;
-            text-align: left;
-        }
-        .section h3 {
-            color: #007bff;
-            margin-bottom: 10px;
-        }
-        .section p {
-            font-size: 14px;
-            margin: 5px 0;
-        }
-        .section input, .section textarea {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        .section button {
-            margin-top: 10px;
-            padding: 10px;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .section button:hover {
-            background: #0056b3;
-        }
-        .edit-btn {
-            background: #ffc107;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            padding: 5px 10px;
-            margin-top: 10px;
-        }
-        .edit-btn:hover {
-            background: #e0a800;
-        }
-        .profile-picture {
-            width: 150px;
-            height: 150px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 20px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dashboard</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    /* Reset and base styles */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 0 0% 3.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 0 0% 3.9%;
+      --popover: 0 0% 100%;
+      --popover-foreground: 0 0% 3.9%;
+      --primary: 0 0% 9%;
+      --primary-foreground: 0 0% 98%;
+      --secondary: 0 0% 96.1%;
+      --secondary-foreground: 0 0% 9%;
+      --muted: 0 0% 96.1%;
+      --muted-foreground: 0 0% 45.1%;
+      --accent: 0 0% 96.1%;
+      --accent-foreground: 0 0% 9%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 89.8%;
+      --input: 0 0% 89.8%;
+      --ring: 0 0% 3.9%;
+      --radius: 0.5rem;
+    }
+
+    .dark {
+      --background: 0 0% 3.9%;
+      --foreground: 0 0% 98%;
+      --card: 0 0% 3.9%;
+      --card-foreground: 0 0% 98%;
+      --popover: 0 0% 3.9%;
+      --popover-foreground: 0 0% 98%;
+      --primary: 0 0% 98%;
+      --primary-foreground: 0 0% 9%;
+      --secondary: 0 0% 14.9%;
+      --secondary-foreground: 0 0% 98%;
+      --muted: 0 0% 14.9%;
+      --muted-foreground: 0 0% 63.9%;
+      --accent: 0 0% 14.9%;
+      --accent-foreground: 0 0% 98%;
+      --destructive: 0 62.8% 30.6%;
+      --destructive-foreground: 0 0% 98%;
+      --border: 0 0% 14.9%;
+      --input: 0 0% 14.9%;
+      --ring: 0 0% 83.1%;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* Utility classes */
+    .container {
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .min-h-screen {
+      min-height: 100vh;
+    }
+
+    .bg-gradient-to-br {
+      background-image: linear-gradient(to bottom right, hsl(var(--background)), hsl(var(--secondary) / 0.2));
+    }
+
+    .p-4 {
+      padding: 1rem;
+    }
+
+    .md\:p-8 {
+      padding: 2rem;
+    }
+
+    .mx-auto {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .max-w-6xl {
+      max-width: 72rem;
+    }
+
+    .grid {
+      display: grid;
+    }
+
+    .grid-cols-1 {
+      grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    @media (min-width: 768px) {
+      .md\:grid-cols-3 {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+      .md\:col-span-1 {
+        grid-column: span 1 / span 1;
+      }
+      .md\:col-span-2 {
+        grid-column: span 2 / span 2;
+      }
+    }
+
+    .gap-6 {
+      gap: 1.5rem;
+    }
+
+    .gap-4 {
+      gap: 1rem;
+    }
+
+    .gap-2 {
+      gap: 0.5rem;
+    }
+
+    .gap-1 {
+      gap: 0.25rem;
+    }
+
+    .space-y-6 > * + * {
+      margin-top: 1.5rem;
+    }
+
+    .space-y-4 > * + * {
+      margin-top: 1rem;
+    }
+
+    .space-y-1 > * + * {
+      margin-top: 0.25rem;
+    }
+
+    .flex {
+      display: flex;
+    }
+
+    .flex-col {
+      flex-direction: column;
+    }
+
+    .flex-wrap {
+      flex-wrap: wrap;
+    }
+
+    .items-center {
+      align-items: center;
+    }
+
+    .justify-between {
+      justify-content: space-between;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .text-right {
+      text-align: right;
+    }
+
+    .text-2xl {
+      font-size: 1.5rem;
+    }
+
+    .text-xl {
+      font-size: 1.25rem;
+    }
+
+    .text-lg {
+      font-size: 1.125rem;
+    }
+
+    .text-sm {
+      font-size: 0.875rem;
+    }
+
+    .text-xs {
+      font-size: 0.75rem;
+    }
+
+    .font-bold {
+      font-weight: 700;
+    }
+
+    .font-semibold {
+      font-weight: 600;
+    }
+
+    .font-medium {
+      font-weight: 500;
+    }
+
+    /* Card styles */
+    .card {
+      background-color: hsl(var(--card) / 0.8);
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--border));
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(4px);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem 1.5rem 0.5rem;
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-footer {
+      padding: 1.5rem;
+      border-top: 1px solid hsl(var(--border));
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .card-description {
+      color: hsl(var(--muted-foreground));
+      font-size: 0.875rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Avatar styles */
+    .avatar {
+      position: relative;
+      width: 8rem;
+      height: 8rem;
+      border-radius: 9999px;
+      overflow: hidden;
+      margin: 0 auto;
+      border: 4px solid hsl(var(--primary) / 0.2);
+    }
+
+    .avatar-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .avatar-fallback {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: hsl(var(--primary) / 0.1);
+      color: hsl(var(--primary));
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+
+    /* Button styles */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--radius);
+      font-weight: 500;
+      font-size: 0.875rem;
+      line-height: 1;
+      height: 2.5rem;
+      padding: 0 1rem;
+      transition: all 0.2s;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    .btn-primary:hover {
+      background-color: hsl(var(--primary) / 0.9);
+    }
+
+    .btn-destructive {
+      background-color: hsl(var(--destructive));
+      color: hsl(var(--destructive-foreground));
+    }
+
+    .btn-destructive:hover {
+      background-color: hsl(var(--destructive) / 0.9);
+    }
+
+    .btn-outline {
+      background-color: transparent;
+      border: 1px solid hsl(var(--border));
+      color: hsl(var(--foreground));
+    }
+
+    .btn-outline:hover {
+      background-color: hsl(var(--accent));
+      color: hsl(var(--accent-foreground));
+    }
+
+    .btn-sm {
+      height: 2rem;
+      padding: 0 0.75rem;
+      font-size: 0.75rem;
+    }
+
+    .w-full {
+      width: 100%;
+    }
+
+    /* Badge styles */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 9999px;
+      padding: 0.25rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      line-height: 1;
+      background-color: hsl(var(--primary));
+      color: hsl(var(--primary-foreground));
+    }
+
+    .badge-secondary {
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--secondary-foreground));
+    }
+
+    /* Form elements */
+    .input, .textarea {
+      width: 100%;
+      border-radius: var(--radius);
+      border: 1px solid hsl(var(--input));
+      background-color: hsl(var(--background));
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      transition: border-color 0.2s;
+    }
+
+    .input:focus, .textarea:focus {
+      outline: none;
+      border-color: hsl(var(--ring));
+      box-shadow: 0 0 0 2px hsl(var(--ring) / 0.3);
+    }
+
+    .textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    /* Tabs */
+    .tabs {
+      width: 100%;
+    }
+
+    .tabs-list {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      margin-bottom: 1rem;
+      background-color: hsl(var(--muted));
+      border-radius: var(--radius);
+      padding: 0.25rem;
+    }
+
+    .tab-trigger {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      border-radius: calc(var(--radius) - 2px);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: hsl(var(--muted-foreground));
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab-trigger[aria-selected="true"] {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content[data-state="active"] {
+      display: block;
+    }
+
+    /* Project card */
+    .project-card {
+      background-image: linear-gradient(to right, hsl(var(--primary) / 0.1), hsl(var(--primary) / 0.05));
+      border: 1px solid hsl(var(--primary) / 0.2);
+    }
+
+    /* List styles */
+    .list-disc {
+      list-style-type: disc;
+      padding-left: 1.25rem;
+    }
+
+    /* Icon styles */
+    .icon {
+      width: 1rem;
+      height: 1rem;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    .icon-sm {
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+
+    .icon-lg {
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    /* Toast notification */
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 50;
+    }
+
+    .toast {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      border: 1px solid hsl(var(--border));
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1rem;
+      margin-top: 0.5rem;
+      max-width: 350px;
+      animation: slideIn 0.3s ease-out;
+      pointer-events: auto;
+    }
+
+    .toast-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .toast-description {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+    }
+
+    .toast.hide {
+      animation: slideOut 0.3s ease-out forwards;
+    }
+
+    /* Grid layout for student info */
+    .grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .grid-cols-\[1fr_auto\] {
+      grid-template-columns: 1fr auto;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      .md\:p-8 {
+        padding: 2rem;
+      }
+    }
+  </style>
 </head>
 <body>
+    <div class="min-h-screen bg-gradient-to-br p-4 md:p-8">
+      <div class="container mx-auto max-w-6xl">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <!-- Profile Section -->
+          <div class="card md:col-span-1">
+            <div class="card-header text-center">
+              <div class="avatar">
+                <img src="https://gietuerp.in//StudentDocuments/{{ student.rollno }}/{{ student.rollno }}.JPG?v=WhphMn0i-ZchO0tW4CBxwEWKnU4gOyo2Xm26wiifU6c" alt="Profile Picture" class="avatar-image">
+                <div class="avatar-fallback">{{ student.name[0] }}</div>
+              </div>
+              <h2 class="card-title mt-4 text-2xl font-bold">{{ student.name }}</h2>
+              <p class="card-description">{{ student.department }} • {{ student.university_name }}</p>
+            </div>
+            <div class="card-content space-y-4">
+              <p><strong>Email:</strong> {{ student.email }}</p>
+              <p><strong>Mobile No:</strong> {{ student.mobile_no }}</p>
+              <p><strong>Roll Number:</strong> {{ student.rollno }}</p>
+              <p><strong>Registration Number:</strong> {{ student.registration_no }}</p>
+            </div>
+          </div>
 
-    <div class="dashboard-container">
-        <img src="https://gietuerp.in//StudentDocuments/{{ student.rollno }}/{{ student.rollno }}.JPG?v=WhphMn0i-ZchO0tW4CBxwEWKnU4gOyo2Xm26wiifU6c" alt="Profile Picture" class="profile-picture">
-        <h2>Welcome, {{ student.name }}</h2>
-        <p><strong>University:</strong> {{ student.university_name }}</p>
-        <p><strong>Department:</strong> {{ student.department }}</p>
-        <p><strong>Email:</strong> {{ student.email }}</p>
-        <p><strong>Mobile No:</strong>{{student.mobile_no}}</p>
-        <p><strong>Roll Number:</strong> {{ student.rollno }}</p>
-        <p><strong>Registration Number:</strong> {{ student.registration_no }}</p>
-
-        <div class="section">
-            <h3>Academic Details</h3>
-            {% if student.gpa and student.courses and student.projects %}
-                <p><strong>GPA:</strong> {{ student.gpa }}</p>
-                <p><strong>Courses:</strong> {{ student.courses }}</p>
-                <p><strong>Projects:</strong> {{ student.projects }}</p>
-                <button class="edit-btn" onclick="toggleEdit('academic')">Edit Academic Details</button>
+          <!-- Main Content Section -->
+          <div class="md:col-span-2 space-y-6">
+            {% if assigned_project %}
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title text-xl font-bold">Congratulations!</h3>
+              </div>
+              <div class="card-content space-y-4">
+                <p>You have been assigned to the following project:</p>
+                <p><strong>Project Title:</strong> {{ assigned_project.project_title }}</p>
+                <p><strong>Problem Statement:</strong> {{ assigned_project.problem_statement }}</p>
+                <p><strong>Project Description:</strong> {{ assigned_project.project_desc }}</p>
+                <p><strong>Reward:</strong> {{ assigned_project.reward }}</p>
+                <p><strong>Duration:</strong> {{ assigned_project.duration }}</p>
+                <p><strong>Company:</strong> {{ assigned_project.company_name }}</p>
+              </div>
+            </div>
             {% endif %}
-            <form id="academic-form" style="display: {% if student.gpa and student.courses and student.projects %}none{% else %}block{% endif %};">
-                <label for="gpa">GPA:</label>
-                <input type="text" id="gpa" name="gpa" placeholder="Enter your GPA" value="{{ student.gpa }}">
-                
-                <label for="courses">Courses:</label>
-                <textarea id="courses" name="courses" rows="4" placeholder="List your courses here...">{{ student.courses }}</textarea>
-                
-                <label for="projects">Projects:</label>
-                <textarea id="projects" name="projects" rows="4" placeholder="Describe your projects here...">{{ student.projects }}</textarea>
-                
-                <button type="submit">Save Academic Details</button>
-            </form>
-        </div>
 
-        <div class="section">
-            <h3>Skills</h3>
-            {% if student.skills %}
-                <p><strong>Skills:</strong> {{ student.skills }}</p>
-                <button class="edit-btn" onclick="toggleEdit('skills')">Edit Skills</button>
-            {% endif %}
-            <form id="skills-form" style="display: {% if student.skills %}none{% else %}block{% endif %};">
-                <label for="skills">Add Skills:</label>
-                <textarea id="skills" name="skills" rows="4" placeholder="List your skills here...">{{ student.skills }}</textarea>
-                <button type="submit">Save Skills</button>
-            </form>
-        </div>
+            <!-- Tabs for Academic & Skills -->
+            <div class="tabs">
+              <div class="tabs-list" role="tablist">
+                <button class="tab-trigger" role="tab" aria-selected="true" data-tab="academic">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                  </svg>
+                  Academic Details
+                </button>
+                <button class="tab-trigger" role="tab" aria-selected="false" data-tab="skills">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                  Skills
+                </button>
+              </div>
 
-        <a href="{{ url_for('logout') }}" class="logout-btn">Logout</a>
+              <!-- Academic Tab -->
+              <div class="tab-content" data-state="active" data-tab="academic">
+                <div class="card">
+                  <div class="card-header flex flex-row items-center justify-between pb-2">
+                    <div>
+                      <h3 class="card-title text-xl flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-lg">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                        </svg>
+                        Academic Profile
+                      </h3>
+                    </div>
+                    <button class="btn btn-outline btn-sm edit-academic-btn gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                      </svg>
+                      Edit
+                    </button>
+                    <div class="flex gap-2 save-academic-controls" style="display: none;">
+                      <button class="btn btn-outline btn-sm cancel-academic-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+                          <line x1="18" y1="6" x2="6" y2="18"></line>
+                          <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                      </button>
+                      <button class="btn btn-primary btn-sm save-academic-btn gap-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+                          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                          <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                          <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                  <div class="card-content">
+                    <div class="academic-view space-y-4">
+                      <div>
+                        <h4 class="text-sm font-medium text-muted-foreground mb-1">GPA</h4>
+                        <p class="text-sm">{{ student.gpa }}</p>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-medium text-muted-foreground mb-1">Courses</h4>
+                        <ul class="list-disc pl-5 space-y-1 courses-list">
+                          {% for course in student.courses.split(',') %}
+                          <li class="text-sm">{{ course }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                      <div>
+                        <h4 class="text-sm font-medium text-muted-foreground mb-1">Projects</h4>
+                        <ul class="list-disc pl-5 space-y-1 projects-list">
+                          {% for project in student.projects.split(',') %}
+                          <li class="text-sm">{{ project }}</li>
+                          {% endfor %}
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="academic-edit space-y-4" style="display: none;">
+                      <div>
+                        <label for="gpa" class="text-sm font-medium text-muted-foreground block mb-1">GPA</label>
+                        <input type="text" id="gpa" class="input" value="{{ student.gpa }}">
+                      </div>
+                      <div>
+                        <label for="courses" class="text-sm font-medium text-muted-foreground block mb-1">Courses</label>
+                        <textarea id="courses" class="textarea" rows="3" placeholder="List your courses, separated by commas">{{ student.courses }}</textarea>
+                      </div>
+                      <div>
+                        <label for="projects" class="text-sm font-medium text-muted-foreground block mb-1">Projects</label>
+                        <textarea id="projects" class="textarea" rows="3" placeholder="List your projects, separated by commas">{{ student.projects }}</textarea>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Skills Tab -->
+            <div class="tab-content" data-tab="skills" style="display: none;">
+              <div class="card">
+                <div class="card-header flex flex-row items-center justify-between pb-2">
+                  <div>
+                    <h3 class="card-title text-xl flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-lg">
+                        <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
+                        <rect x="9" y="9" width="6" height="6"></rect>
+                        <line x1="9" y1="1" x2="9" y2="4"></line>
+                        <line x1="15" y1="1" x2="15" y2="4"></line>
+                        <line x1="9" y1="20" x2="9" y2="23"></line>
+                        <line x1="15" y1="20" x2="15" y2="23"></line>
+                        <line x1="20" y1="9" x2="23" y2="9"></line>
+                        <line x1="20" y1="14" x2="23" y2="14"></line>
+                        <line x1="1" y1="9" x2="4" y2="9"></line>
+                        <line x1="1" y1="14" x2="4" y2="14"></line>
+                      </svg>
+                      Technical Skills
+                    </h3>
+                    <p class="card-description">Your technical abilities and competencies</p>
+                  </div>
+                  <button class="btn btn-outline btn-sm edit-skills-btn gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                    </svg>
+                    Edit
+                  </button>
+                  <div class="flex gap-2 save-skills-controls" style="display: none;">
+                    <button class="btn btn-outline btn-sm cancel-skills-btn">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                      </svg>
+                    </button>
+                    <button class="btn btn-primary btn-sm save-skills-btn gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon-sm">
+                        <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                        <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                        <polyline points="7 3 7 8 15 8"></polyline>
+                      </svg>
+                      Save
+                    </button>
+                  </div>
+                </div>
+                <div class="card-content">
+                  <div class="skills-view">
+                    <div class="flex flex-wrap gap-2 skills-list">
+                      {% for skill in student.skills.split(',') %}
+                      <span class="badge text-xs py-1 px-3">{{ skill }}</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+                  <div class="skills-edit" style="display: none;">
+                    <label for="skills" class="text-sm font-medium text-muted-foreground block mb-1">Skills</label>
+                    <textarea id="skills" class="textarea" rows="4" placeholder="List your skills, separated by commas">{{ student.skills }}</textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-
+  </div>
+  
+    <!-- Toast container -->
+    <div class="toast-container"></div>
+  
     <script>
-        function toggleEdit(section) {
-            const form = document.getElementById(`${section}-form`);
-            form.style.display = form.style.display === 'none' ? 'block' : 'none';
-        }
-
-        document.getElementById('academic-form')?.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            let gpa = document.getElementById('gpa').value;
-            let courses = document.getElementById('courses').value;
-            let projects = document.getElementById('projects').value;
-
-            const response = await fetch('/save_academic_details', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ gpa: gpa, courses: courses, projects: projects })
-            });
-
-            if (response.ok) {
-                alert('Academic details saved successfully!');
-                location.reload();
+      // Student data
+      let student = {
+        name: "{{ student.name }}",
+        university_name: "{{ student.university_name }}",
+        department: "{{ student.department }}",
+        email: "{{ student.email }}",
+        mobile_no: "{{ student.mobile_no }}",
+        rollno: "{{ student.rollno }}",
+        registration_no: "{{ student.registration_no }}",
+        gpa: "{{ student.gpa }}",
+        courses: "{{ student.courses }}",
+        projects: "{{ student.projects }}",
+        skills: "{{ student.skills }}",
+      };
+  
+      // Tab functionality
+      const tabTriggers = document.querySelectorAll('.tab-trigger');
+      const tabContents = document.querySelectorAll('.tab-content');
+  
+      tabTriggers.forEach(trigger => {
+        trigger.addEventListener('click', () => {
+          const tabName = trigger.getAttribute('data-tab');
+          
+          // Update tab triggers
+          tabTriggers.forEach(t => {
+            t.setAttribute('aria-selected', 'false');
+          });
+          trigger.setAttribute('aria-selected', 'true');
+          
+          // Update tab contents
+          tabContents.forEach(content => {
+            if (content.getAttribute('data-tab') === tabName) {
+              content.style.display = 'block';
+              content.setAttribute('data-state', 'active');
             } else {
-                alert('Failed to save academic details.');
+              content.style.display = 'none';
+              content.setAttribute('data-state', 'inactive');
             }
+          });
         });
-
-        document.getElementById('skills-form')?.addEventListener('submit', async function(event) {
-            event.preventDefault();
-            let skills = document.getElementById('skills').value;
-
-            const response = await fetch('/save_skills', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ skills: skills })
-            });
-
-            if (response.ok) {
-                alert('Skills saved successfully!');
-                location.reload();
-            } else {
-                alert('Failed to save skills.');
-            }
+      });
+  
+      // Academic edit functionality
+      const editAcademicBtn = document.querySelector('.edit-academic-btn');
+      const saveAcademicControls = document.querySelector('.save-academic-controls');
+      const cancelAcademicBtn = document.querySelector('.cancel-academic-btn');
+      const saveAcademicBtn = document.querySelector('.save-academic-btn');
+      const academicView = document.querySelector('.academic-view');
+      const academicEdit = document.querySelector('.academic-edit');
+  
+      editAcademicBtn.addEventListener('click', () => {
+        editAcademicBtn.style.display = 'none';
+        saveAcademicControls.style.display = 'flex';
+        academicView.style.display = 'none';
+        academicEdit.style.display = 'block';
+      });
+  
+      cancelAcademicBtn.addEventListener('click', () => {
+        editAcademicBtn.style.display = 'inline-flex';
+        saveAcademicControls.style.display = 'none';
+        academicView.style.display = 'block';
+        academicEdit.style.display = 'none';
+        
+        // Reset form values
+        document.getElementById('gpa').value = student.gpa;
+        document.getElementById('courses').value = student.courses;
+        document.getElementById('projects').value = student.projects;
+      });
+  
+      saveAcademicBtn.addEventListener('click', () => {
+        // Get form values
+        const gpa = document.getElementById('gpa').value;
+        const courses = document.getElementById('courses').value;
+        const projects = document.getElementById('projects').value;
+        
+        // Update student data
+        student.gpa = gpa;
+        student.courses = courses;
+        student.projects = projects;
+        
+        // Update UI
+        document.querySelector('.academic-view .font-bold').textContent = gpa;
+        
+        // Update courses badges
+        const coursesList = document.querySelector('.courses-list');
+        coursesList.innerHTML = '';
+        courses.split(',').forEach(course => {
+          const badge = document.createElement('span');
+          badge.className = 'badge badge-secondary text-xs';
+          badge.textContent = course.trim();
+          coursesList.appendChild(badge);
         });
+        
+        // Update projects list
+        const projectsList = document.querySelector('.projects-list');
+        projectsList.innerHTML = '';
+        projects.split(',').forEach(project => {
+          const li = document.createElement('li');
+          li.className = 'text-sm';
+          li.textContent = project.trim();
+          projectsList.appendChild(li);
+        });
+        
+        // Show success toast
+        showToast('Success', 'Academic details saved successfully!');
+        
+        // Reset UI state
+        editAcademicBtn.style.display = 'inline-flex';
+        saveAcademicControls.style.display = 'none';
+        academicView.style.display = 'block';
+        academicEdit.style.display = 'none';
+      });
+  
+      // Skills edit functionality
+      const editSkillsBtn = document.querySelector('.edit-skills-btn');
+      const saveSkillsControls = document.querySelector('.save-skills-controls');
+      const cancelSkillsBtn = document.querySelector('.cancel-skills-btn');
+      const saveSkillsBtn = document.querySelector('.save-skills-btn');
+      const skillsView = document.querySelector('.skills-view');
+      const skillsEdit = document.querySelector('.skills-edit');
+  
+      editSkillsBtn.addEventListener('click', () => {
+        editSkillsBtn.style.display = 'none';
+        saveSkillsControls.style.display = 'flex';
+        skillsView.style.display = 'none';
+        skillsEdit.style.display = 'block';
+      });
+  
+      cancelSkillsBtn.addEventListener('click', () => {
+        editSkillsBtn.style.display = 'inline-flex';
+        saveSkillsControls.style.display = 'none';
+        skillsView.style.display = 'block';
+        skillsEdit.style.display = 'none';
+        
+        // Reset form value
+        document.getElementById('skills').value = student.skills;
+      });
+  
+      saveSkillsBtn.addEventListener('click', () => {
+        // Get form value
+        const skills = document.getElementById('skills').value;
+        
+        // Update student data
+        student.skills = skills;
+        
+        // Update UI
+        const skillsList = document.querySelector('.skills-list');
+        skillsList.innerHTML = '';
+        skills.split(',').forEach(skill => {
+          const badge = document.createElement('span');
+          badge.className = 'badge text-xs py-1 px-3';
+          badge.textContent = skill.trim();
+          skillsList.appendChild(badge);
+        });
+        
+        // Show success toast
+        showToast('Success', 'Skills saved successfully!');
+        
+        // Reset UI state
+        editSkillsBtn.style.display = 'inline-flex';
+        saveSkillsControls.style.display = 'none';
+        skillsView.style.display = 'block';
+        skillsEdit.style.display = 'none';
+      });
+  
+      // Toast functionality
+      function showToast(title, message) {
+        const toastContainer = document.querySelector('.toast-container');
+        
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        
+        const toastTitle = document.createElement('div');
+        toastTitle.className = 'toast-title';
+        toastTitle.textContent = title;
+        
+        const toastDescription = document.createElement('div');
+        toastDescription.className = 'toast-description';
+        toastDescription.textContent = message;
+        
+        toast.appendChild(toastTitle);
+        toast.appendChild(toastDescription);
+        toastContainer.appendChild(toast);
+        
+        // Auto-remove toast after 3 seconds
+        setTimeout(() => {
+          toast.classList.add('hide');
+          setTimeout(() => {
+            toastContainer.removeChild(toast);
+          }, 300);
+        }, 3000);
+      }
     </script>
-
-</body>
-</html>
+  </body>
+  </html>

@@ -466,6 +466,7 @@
             margin-bottom: 20px;
             border-radius: 8px;
         }
+        
     </style>
 </head>
 
@@ -823,54 +824,92 @@
             <div class="modal-body">
                 <form id="addProjectForm" action="{{ url_for('add_project') }}" method="POST">
                     <div class="form-group">
-                        <label for="university1" class="form-label">1st Preference University</label>
-                        <select id="university1" name="university1" class="form-control" required>
-                            <option value="">Select University</option>
-                            <!-- Universities will be populated here -->
-                        </select>
-                    </div>
+                        <label for="universities" class="form-label">Select Universities</label>
+                        <select id="universities" name="universities[]" class="form-control" multiple required>
+                            {% for university in university_list %}
+                                <option value="{{ university._id }}">{{ university.name }}</option>
+                            {% endfor %}
+                    </select>
+                    <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple universities</div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="university2" class="form-label">2nd Preference University</label>
-                        <select id="university2" name="university2" class="form-control" required>
-                            <option value="">Select University</option>
-                            <!-- Universities will be populated here -->
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="project_desc" class="form-label">Project Description</label>
+                    <textarea id="project_desc" name="project_desc" rows="4" class="form-control" required></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="university3" class="form-label">3rd Preference University</label>
-                        <select id="university3" name="university3" class="form-control" required>
-                            <option value="">Select University</option>
-                            <!-- Universities will be populated here -->
-                        </select>
-                    </div>
+                <div class="form-group">
+                    <label for="problem_statement" class="form-label">Project/Problem Statement</label>
+                    <textarea id="problem_statement" name="problem_statement" rows="4" class="form-control" required></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="project_desc" class="form-label">Project Description</label>
-                        <textarea id="project_desc" name="project_desc" rows="4" class="form-control" required></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="reward" class="form-label">Reward</label>
+                    <input type="text" id="reward" name="reward" class="form-control" required>
+                </div>
 
-                    <div class="form-group">
-                        <label for="problem_statement" class="form-label">Project/Problem Statement</label>
-                        <textarea id="problem_statement" name="problem_statement" rows="4" class="form-control" required></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="duration" class="form-label">Project Deadline</label>
+                    <input type="date" id="duration" name="duration" class="form-control" required>
+                </div>
+                <br>
 
-                    <div class="form-group">
-                        <label for="reward" class="form-label">Reward</label>
-                        <input type="text" id="reward" name="reward" class="form-control" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="duration" class="form-label">Project Deadline</label>
-                        <input type="date" id="duration" name="duration" class="form-control" required>
-                    </div>
-
-                    <button type="submit" class="submit-btn">Submit</button>
-                </form>
-            </div>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
         </div>
     </div>
+</div>
+
+<script>
+    // Function to open the project modal
+    function openProjectModal() {
+        document.getElementById("projectModal").style.display = "flex"; // Use flex to center the modal
+    }
+
+    // Function to close the project modal
+    function closeProjectModal() {
+        document.getElementById("projectModal").style.display = "none";
+    }
+
+    // Form validation for adding a project
+    document.getElementById('addProjectForm').addEventListener('submit', function(e) {
+        const universities = document.getElementById('universities').selectedOptions;
+        const projectDesc = document.getElementById('project_desc').value;
+        const problemStatement = document.getElementById('problem_statement').value;
+        const reward = document.getElementById('reward').value;
+        const duration = document.getElementById('duration').value;
+
+        if (universities.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one university');
+            return;
+        }
+
+        if (!projectDesc.trim()) {
+            e.preventDefault();
+            alert('Please enter a project description');
+            return;
+        }
+
+        if (!problemStatement.trim()) {
+            e.preventDefault();
+            alert('Please enter a project/problem statement');
+            return;
+        }
+
+        if (!reward.trim()) {
+            e.preventDefault();
+            alert('Please enter a reward');
+            return;
+        }
+
+        if (!duration) {
+            e.preventDefault();
+            alert('Please select a valid date for the project deadline');
+            return;
+        }
+    });
+</script>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1240,7 +1279,6 @@
         // Function to open the project modal
         function openProjectModal() {
             document.getElementById("projectModal").style.display = "flex"; // Use flex to center the modal
-            loadUniversitiesForProject();  // Load universities when modal opens
         }
 
         // Function to close the project modal
@@ -1248,50 +1286,17 @@
             document.getElementById("projectModal").style.display = "none";
         }
 
-        // Load universities for the project modal
-        function loadUniversitiesForProject() {
-            fetch('/get_universities')
-                .then(response => response.json())
-                .then(data => {
-                    const universitySelect1 = document.getElementById("university1");
-                    const universitySelect2 = document.getElementById("university2");
-                    const universitySelect3 = document.getElementById("university3");
-                    universitySelect1.innerHTML = `<option value="">Select University</option>`; // Clear previous options
-                    universitySelect2.innerHTML = `<option value="">Select University</option>`; // Clear previous options
-                    universitySelect3.innerHTML = `<option value="">Select University</option>`; // Clear previous options
-                    data.forEach(u => {
-                        const option1 = document.createElement("option");
-                        option1.value = u.id;
-                        option1.textContent = u.name;
-                        universitySelect1.appendChild(option1);
-
-                        const option2 = document.createElement("option");
-                        option2.value = u.id;
-                        option2.textContent = u.name;
-                        universitySelect2.appendChild(option2);
-
-                        const option3 = document.createElement("option");
-                        option3.value = u.id;
-                        option3.textContent = u.name;
-                        universitySelect3.appendChild(option3);
-                    });
-                })
-                .catch(error => console.error('Error fetching universities:', error));
-        }
-
         // Form validation for adding a project
         document.getElementById('addProjectForm').addEventListener('submit', function(e) {
-            const university1 = document.getElementById('university1').value;
-            const university2 = document.getElementById('university2').value;
-            const university3 = document.getElementById('university3').value;
+            const universities = document.getElementById('universities').selectedOptions;
             const projectDesc = document.getElementById('project_desc').value;
             const problemStatement = document.getElementById('problem_statement').value;
             const reward = document.getElementById('reward').value;
             const duration = document.getElementById('duration').value;
 
-            if (!university1 || !university2 || !university3) {
+            if (universities.length === 0) {
                 e.preventDefault();
-                alert('Please select all three universities');
+                alert('Please select at least one university');
                 return;
             }
 
@@ -1315,7 +1320,7 @@
 
             if (!duration) {
                 e.preventDefault();
-                alert('Please select a valid date for the time duration');
+                alert('Please select a valid date for the project deadline');
                 return;
             }
         });

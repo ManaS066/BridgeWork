@@ -108,7 +108,7 @@ def company_dashboard():
     ]
     project_listings_cursor = projects_collection.find({"company_name": company_name})
     project_listings = list(project_listings_cursor)
-
+    university_list = universities_collection.find({})
    
     return render_template('company_dashboard.html', 
                            company_name=company_name, 
@@ -121,35 +121,30 @@ def company_dashboard():
                            job_titles=job_titles,
                            job_applications=job_applications,
                            application_status=application_status,
-                          
+                           university_list=university_list,
                            project_listings=project_listings)
 
 
 
 @app.route('/add_project', methods=['POST'])
 def add_project():
-    university1 = request.form.get('university1')
-    university2 = request.form.get('university2')
-    university3 = request.form.get('university3')
+    universities = request.form.getlist('universities[]')
     project_desc = request.form.get('project_desc')
     problem_statement = request.form.get('problem_statement')
     reward = request.form.get('reward')
     duration = request.form.get('duration')
 
-    if not all([university1, project_desc, problem_statement, reward, duration]):
+    if not all([universities, project_desc, problem_statement, reward, duration]):
         flash('All fields are required', 'danger')
         return redirect(url_for('company_dashboard'))
 
     project = {
-        'university1': university1,
-        'university2': university2,
-        'university3': university3,
-        'count':0,
+        'universities': [ObjectId(university) for university in universities],
         'project_desc': project_desc,
         'problem_statement': problem_statement,
         'reward': reward,
         'duration': duration,
-        'created_at': datetime.utcnow(),
+        'created_at': datetime.utcnow(),  # Store only the date part
         'assigned_to': None,
         'status': 'not_assigned',
         'company_name': session['company_name']

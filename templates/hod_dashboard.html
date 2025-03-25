@@ -46,12 +46,12 @@
             margin: 30px auto;
         }
 
-        .job-listings {
+        .job-listings, .project-listings {
             list-style-type: none;
             padding: 0;
         }
 
-        .job-listings li {
+        .job-listings li, .project-listings li {
             background-color: #fff;
             margin-bottom: 15px;
             padding: 20px;
@@ -60,28 +60,28 @@
             position: relative;
         }
 
-        .job-listings li h3 {
+        .job-listings li h3, .project-listings li h3 {
             font-size: 1.5em;
             color: #333;
             margin: 0;
         }
 
-        .job-listings li p {
+        .job-listings li p, .project-listings li p {
             font-size: 1em;
             color: #555;
             margin: 10px 0;
         }
 
-        .job-listings li em {
+        .job-listings li em, .project-listings li em {
             font-size: 1.1em;
             color: #777;
         }
 
-        .job-listings li .departments {
+        .job-listings li .departments, .project-listings li .departments {
             font-weight: bold;
         }
 
-        .no-jobs {
+        .no-jobs, .no-projects {
             text-align: center;
             font-size: 1.2em;
             color: #888;
@@ -97,7 +97,7 @@
             width: 100%;
         }
 
-        .select-students-btn {
+        .select-students-btn, .assign-students-btn {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -110,7 +110,7 @@
             border-radius: 5px;
         }
 
-        .select-students-btn:hover {
+        .select-students-btn:hover, .assign-students-btn:hover {
             background-color: #0056b3;
         }
     </style>
@@ -146,9 +146,28 @@
     {% else %}
         <p class="no-jobs">No approved job postings available for this department.</p>
     {% endif %}
+
+    {% if assigned_projects %}
+        <h2>Assigned Projects</h2>
+        <ul class="project-listings">
+            {% for project in assigned_projects %}
+                <li>
+                    <h3>{{ project.project_title }}</h3>
+                    <em>{{ project.company_name }}</em>
+                    <p>{{ project.project_desc }}</p>
+                    <p><strong>Problem Statement:</strong> {{ project.problem_statement }}</p>
+                    <p><strong>Reward:</strong> {{ project.reward }}</p>
+                    <p><strong>Duration:</strong> {{ project.duration }}</p>
+                    <button class="assign-students-btn" data-toggle="modal" data-target="#assignStudentsModal" data-project-id="{{ project._id }}">Assign Students</button>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="no-projects">No projects assigned to you.</p>
+    {% endif %}
 </div>
 
-<!-- Modal -->
+<!-- Modal for Selecting Students -->
 <div class="modal fade" id="selectStudentsModal" tabindex="-1" role="dialog" aria-labelledby="selectStudentsModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -178,6 +197,36 @@
     </div>
 </div>
 
+<!-- Modal for Assigning Students to Projects -->
+<div class="modal fade" id="assignStudentsModal" tabindex="-1" role="dialog" aria-labelledby="assignStudentsModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignStudentsModalLabel">Assign Students to Project</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ url_for('assign_students_to_project') }}" method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="project_id" id="modalProjectId">
+                    <h4>Select Students:</h4>
+                    {% for student in students %}
+                        <div>
+                            <input type="checkbox" name="students" value="{{ student._id }}">
+                            {{ student.name }} - {{ student.skills }} - CGPA: {{ student.gpa }}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Assign Students</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <div class="footer">
     <p>&copy; 2025 HOD Dashboard. All Rights Reserved.</p>
 </div>
@@ -191,6 +240,13 @@
         var jobId = button.data('job-id');
         var modal = $(this);
         modal.find('#modalJobId').val(jobId);
+    });
+
+    $('#assignStudentsModal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var projectId = button.data('project-id');
+        var modal = $(this);
+        modal.find('#modalProjectId').val(projectId);
     });
 </script>
 

@@ -1,5 +1,5 @@
 from flask import render_template, request, session, redirect, url_for, flash, jsonify
-from app import app, hod_collection, jobs, universities_collection, students_collection
+from app import app, hod_collection, jobs, universities_collection, students_collection,projects_collection
 from bson.objectid import ObjectId
 
 @app.route('/hod_register', methods=['GET'])
@@ -49,6 +49,7 @@ def hod_login():
     hod = hod_collection.find_one({"email": email, "password": password})
     
     if hod:
+        session['hod_id'] = str(hod['_id'])
         session['hod_email'] = email
         session['university_name'] = hod['university_name']
         session['department'] = hod['department']
@@ -59,6 +60,7 @@ def hod_login():
 
 @app.route('/hod_dashboard', methods=['GET'])
 def hod_dashboard():
+    hod_id = session.get('hod_id', '')
     university_name = session.get('university_name', '')
     department = session.get('department', '')
 
@@ -74,9 +76,13 @@ def hod_dashboard():
     for job in job_listings:
         job['_id'] = str(job['_id'])
 
+    assigned_projects = list(projects_collection.find({"assigned_hods": ObjectId(hod_id)}))
+    for project in assigned_projects:
+        project['_id'] = str(project['_id'])
+
     students = list(students_collection.find({"department": department}))
 
-    return render_template('hod_dashboard.html', university_name=university_name, department=department, job_listings=job_listings, students=students)
+    return render_template('hod_dashboard.html', university_name=university_name, department=department, job_listings=job_listings, students=students,assigned_projects = assigned_projects)
 
 @app.route('/submit_students', methods=['POST'])
 def submit_students():
@@ -94,4 +100,24 @@ def submit_students():
     )
 
     flash("Students submitted successfully!", "success")
+    return redirect(url_for('hod_dashboard'))
+
+@app.route('/assign_students_to_project', methods=['POST'])
+def assign_students_to_project():
+    project_id = request.form['project_id']
+    student_ids = request.form.getlist('students')
+
+    project = projects_collection.find_one({"_id": ObjectId(project_id)})
+
+    if not project:
+        flash("Project not found", "danger")
+        return redirect(url_for('hod_dashboard'))
+
+    # Update the project with the assigned students
+    projects_collection.update_one(
+        {"_id": ObjectId(project_id)},
+        {"$set": {"assigned_students": [ObjectId(student_id) for student_id in student_ids]}}
+    )
+
+    flash("Students assigned to project successfully!", "success")
     return redirect(url_for('hod_dashboard'))
