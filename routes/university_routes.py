@@ -1,9 +1,14 @@
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib
 import bson
 from flask import render_template, request, session, redirect, url_for, jsonify, flash
 from app import app, universities_collection, jobs, students_collection, pending_universities_collection, projects_collection,hod_collection,jobs
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
 
+mail = "wrkbridge@gmail.com"
+code = "krro rnov pmii obtg"
 @app.route('/get_universities', methods=['GET'])
 def get_universities():
     universities = universities_collection.find({})
@@ -441,17 +446,118 @@ def get_hod_requests():
         hod['_id'] = str(hod['_id'])
     return jsonify(hod_requests)
 
+
 @app.route('/approve_hod/<hod_id>', methods=['POST'])
 def approve_hod(hod_id):
-    hod_collection.update_one({"_id": ObjectId(hod_id)}, {"$set": {"approved": True}})
-    flash("HOD approved successfully!", "success")
-    return redirect(url_for('university_dashboard'))
+    university_id = session.get('university_id', '')
+    if not university_id:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    try:
+        hod = hod_collection.find_one({"_id": ObjectId(hod_id)})
+
+        if not hod:
+            return jsonify({"message": "HOD registration not found"}), 404
+
+        # Update HOD status to approved
+        hod_collection.update_one(
+            {"_id": ObjectId(hod_id)},
+            {"$set": {"approved": True, "status": "approved"}}
+        )
+
+        # Send approval email to HOD
+        subject = "🎉 Your HOD Registration Has Been Approved!"
+        email_body = f"""
+Dear {hod['name']},
+
+🎉 Congratulations! Your registration as the **Head of Department (HOD)** has been approved by the university.
+
+📌 **University:** {hod['university_name']}
+📌 **Department:** {hod['department']}
+📌 **Employee Code:** {hod['employee_code']}
+
+🔗 [Login to WorkBridge](https://workbridge.com/login)
+
+You can now manage department registrations and explore opportunities for students.
+
+Best Regards,  
+**WorkBridge Team**
+"""
+
+        send_email(hod["email"], subject, email_body)
+
+        flash("HOD approved successfully!", "success")
+        return redirect(url_for('university_dashboard'))
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
+
+def send_email(to_email, subject, body):
+    """Sends an email using SMTP with proper UTF-8 encoding."""
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = mail
+        msg["To"] = to_email
+        msg["Subject"] = subject
+
+        # Attach UTF-8 encoded content
+        msg.attach(MIMEText(body, "plain", "utf-8"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+            connection.starttls()  # Secure the connection
+            connection.login(mail, code)
+            connection.sendmail(from_addr=mail, to_addrs=to_email, msg=msg.as_string())
+
+        print(f"✅ Email sent successfully to {to_email}")
+
+    except Exception as e:
+        print(f"❌ Error sending email: {e}")
+
+
 
 @app.route('/reject_hod/<hod_id>', methods=['POST'])
 def reject_hod(hod_id):
-    hod_collection.delete_one({"_id": ObjectId(hod_id)})
-    flash("HOD rejected successfully!", "success")
-    return redirect(url_for('university_dashboard'))
+    university_id = session.get('university_id', '')
+    if not university_id:
+        return jsonify({"message": "Unauthorized"}), 401
+
+    try:
+        hod = hod_collection.find_one({"_id": ObjectId(hod_id)})
+
+        if not hod:
+            return jsonify({"message": "HOD registration not found"}), 404
+
+        # Delete the HOD record from the database
+        hod_collection.delete_one({"_id": ObjectId(hod_id)})
+
+        # Send rejection email to HOD
+        subject = "⚠️ Your HOD Registration Has Been Rejected"
+        email_body = f"""
+Dear {hod['name']},
+
+We regret to inform you that your registration as the **Head of Department (HOD)** for:
+
+📌 **University:** {hod['university_name']}
+📌 **Department:** {hod['department']}
+📌 **Employee Code:** {hod['employee_code']}
+
+has been **rejected** by the university administration.
+
+For further clarification, you may contact the university administration.
+
+Best Regards,  
+**WorkBridge Team**
+"""
+
+        send_email(hod["email"], subject, email_body)
+
+        flash("HOD rejected successfully!", "success")
+        return redirect(url_for('university_dashboard'))
+
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
+
 
 @app.route('/', methods=['GET'])
 def index():

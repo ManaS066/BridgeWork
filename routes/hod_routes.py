@@ -1,6 +1,11 @@
+import smtplib
 from flask import render_template, request, session, redirect, url_for, flash, jsonify
 from app import app, hod_collection, jobs, universities_collection, students_collection,projects_collection
 from bson.objectid import ObjectId
+mail = "wrkbridge@gmail.com"
+code = "krro rnov pmii obtg"
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 @app.route('/hod_register', methods=['GET'])
 def hod_register_page():
@@ -152,8 +157,6 @@ def assign_students_to_project():
 
     flash("Students assigned to project successfully!", "success")
     return redirect(url_for('hod_dashboard'))
-
-# New route to handle registration approval
 @app.route('/approve_registration', methods=['POST'])
 def approve_registration():
     hod_id = session.get('hod_id', '')
@@ -162,6 +165,7 @@ def approve_registration():
 
     registration_id = request.form.get('registration_id')
     action = request.form.get('action')  # 'approve' or 'reject'
+    rejection_reason = request.form.get('reason', 'Not specified')  # Optional reason
 
     if not registration_id or not action:
         return jsonify({"message": "Invalid request"}), 400
@@ -172,18 +176,80 @@ def approve_registration():
         if not registration:
             return jsonify({"message": "Registration not found"}), 404
 
+        student_mail = registration['email']
+
         if action == 'approve':
             # Update registration status to approved
             students_collection.update_one(
                 {"_id": ObjectId(registration_id)},
-                {"$set": {"approved": True}}
+                {"$set": {"approved": True, "status": "approved"}}
             )
-            # TODO: Add the student to the students collection or update their status
+
+            subject = "🎉 Your WorkBridge Account Has Been Approved!"
+            email_body = f"""
+Dear {registration['name']},
+
+🎉 Congratulations! Your account has been approved by your HOD. You can now log in to WorkBridge and explore exciting opportunities.
+
+📌 University: {registration['university_name']}
+📌 Department: {registration['department']}
+📌 Roll No: {registration['rollno']}
+
+🔗 Login to WorkBridge: https://workbridge.com/login
+
+Start your journey today and make the most of these opportunities!
+
+Best Regards,  
+WorkBridge Team
+"""
+
+            send_email(student_mail, subject, email_body)
+
         elif action == 'reject':
-            # Update registration status to rejected
-         students_collection.delete_one({"_id": ObjectId(registration_id)})
+            # Delete the registration record
+            students_collection.delete_one({"_id": ObjectId(registration_id)})
+
+            subject = "⚠️ Your WorkBridge Registration Has Been Rejected"
+            email_body = f"""
+Dear {registration['name']},
+
+We regret to inform you that your registration for WorkBridge has been rejected by the HOD.
+
+📌 University: {registration['university_name']}
+📌 Department: {registration['department']}
+📌 Roll No: {registration['rollno']}
+
+❌ **Reason for Rejection:** {rejection_reason}
+
+If you believe this is an error or would like to apply again, please contact your HOD.
+
+Best Regards,  
+WorkBridge Team
+"""
+
+            send_email(student_mail, subject, email_body)
 
         return redirect(url_for('hod_dashboard'))
 
     except Exception as e:
         return jsonify({"message": str(e)}), 500
+
+
+def send_email(to_email, subject, body):
+    """Sends an email using SMTP with proper UTF-8 encoding."""
+    try:
+        msg = MIMEMultipart()
+        msg["From"] = mail
+        msg["To"] = to_email
+        msg["Subject"] = subject
+
+        # Attach UTF-8 encoded content
+        msg.attach(MIMEText(body, "plain", "utf-8"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as connection:
+            connection.starttls()  # Secure the connection
+            connection.login(mail, code)
+            connection.sendmail(from_addr=mail, to_addrs=to_email, msg=msg.as_string())
+
+    except Exception as e:
+        print(f"❌ Error sending email: {e}")

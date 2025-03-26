@@ -53,7 +53,7 @@ def student_login():
         student = students_collection.find_one({"email": email, "password": password})
 
         if student:
-            if not student.get('approved', False):
+            if not student.get('approved',False):
                 return render_template('student_login.html', error="Your registration is pending approval.")
               
 

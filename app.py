@@ -10,6 +10,8 @@ app.secret_key = os.urandom(24)
 MONGO_URI = "mongodb+srv://manasranjanpradhan2004:pRZ0F9oyRoY1FHxs@university.m80kj.mongodb.net/University?retryWrites=true&w=majority"
 app.config["MONGO_URI"] = MONGO_URI
 
+mail = "wrkbridge@gmail.com"
+code = "krro rnov pmii obtg"
 mongo = PyMongo(app)
 
 # Initialize APScheduler
