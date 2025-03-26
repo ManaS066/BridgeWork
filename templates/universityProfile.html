@@ -160,6 +160,87 @@
                     </div>
                 </div>
             </div>
+            <div class="mt-5">
+               
+                <div class="container-fluid">
+                    <h2 class="mb-4">Past University Projects</h2>
+                    <table class="table table-hover table-bordered">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Project Title</th>
+                                <!-- <th>Assigned University</th> -->
+                                <th>Problem Statement</th>
+                                <!-- <th>Reward</th> -->
+                                <th>Duration</th>
+                                <th>Posted On</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in project_listings %}
+                            <tr>
+                                <td>{{ project['project_desc'] }}</td>
+                                <!-- <td>{{ project['assigned_to'] }}</td> -->
+                                <td>{{ project['problem_statement'] }}</td>
+                                <!-- <td>₹{{ project['reward'] }}</td> -->
+                                <td>{{ project['duration'] }}</td>
+                                <td>{{ project.get('created_at', 'Unknown') }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if project['status'] == 'assigned' %}badge-info
+                                        {% elif project['status'] == 'completed' %}badge-success
+                                        {% elif project['status'] == 'in_progress' %}badge-warning
+                                        {% else %}badge-secondary
+                                        {% endif %} 
+                                        text-white p-2">
+                                        {{ project['status'].replace('_', ' ').title() }}
+                                    </span>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                    {% if project_listings|length == 0 %}
+                    <div class="alert alert-info text-center">
+                        No projects have been assigned yet.
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <style>
+                    /* Enhanced color visibility */
+                    .badge-info {
+                        background-color: #17a2b8 !important;
+                        color: white !important;
+                    }
+                    .badge-success {
+                        background-color: #28a745 !important;
+                        color: white !important;
+                    }
+                    .badge-warning {
+                        background-color: #ffc107 !important;
+                        color: black !important;
+                    }
+                    .badge-secondary {
+                        background-color: #6c757d !important;
+                        color: white !important;
+                    }
+                    
+                    /* Additional styling for better readability */
+                    .table-bordered {
+                        border: 1px solid #dee2e6;
+                    }
+                    .thead-dark {
+                        background-color: #343a40;
+                        color: white;
+                    }
+                    .table-hover tbody tr:hover {
+                        background-color: rgba(0,0,0,0.075);
+                    }
+                </style>
+                
+        </div>
         </div>
     </div>
 

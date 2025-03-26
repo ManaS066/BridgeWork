@@ -83,7 +83,8 @@ def hod_dashboard():
     department = session.get('department', '')
 
     if not university_name or not department:
-        return jsonify({"message": "University name and department are required"}), 400
+         return redirect(url_for('hod_login'))
+
 
     # Fetch job listings for the department
     job_listings = list(jobs.find({
@@ -138,6 +139,7 @@ def submit_students():
     flash("Students submitted successfully!", "success")
     return redirect(url_for('hod_dashboard'))
 
+
 @app.route('/assign_students_to_project', methods=['POST'])
 def assign_students_to_project():
     project_id = request.form['project_id']
@@ -155,8 +157,54 @@ def assign_students_to_project():
         {"$set": {"assigned_students": [ObjectId(student_id) for student_id in student_ids]}}
     )
 
-    flash("Students assigned to project successfully!", "success")
+    # Fetch selected students' emails
+    selected_students = students_collection.find({"_id": {"$in": [ObjectId(sid) for sid in student_ids]}})
+
+    for student in selected_students:
+        student_email = student["email"]
+        student_name = student["name"]
+
+        subject = "Congratulations! You Have Been Selected for a Project"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <p>Dear <strong>{student_name}</strong>,</p>
+
+            <p>We are pleased to inform you that you have been selected for the project: <strong>{project['project_desc']}</strong> on WorkBridge.</p>
+
+            <h3>Project Details:</h3>
+            <ul>
+                <li><strong>Company:</strong> {project['company_name']}</li>
+               
+                <li><strong>Deadline:</strong> {project['duration']}</li>
+            </ul>
+
+            <p>To get started, please log in to your WorkBridge account:</p>
+
+            <p style="text-align: center; margin: 20px 0;">
+                <a href="https://workbridge.com/login" style="padding: 12px 25px; font-size: 16px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px;">
+                    Access Your Project
+                </a>
+            </p>
+
+            <p>We look forward to your participation and wish you success in this project!</p>
+
+            <br>
+            <hr>
+            <p style="font-size: 14px; text-align: center; color: #666;">
+                This is an automated email from WorkBridge. Please do not reply to this email.<br>
+                For support, contact us at <a href="mailto:support@workbridge.com">support@workbridge.com</a>.
+            </p>
+        </body>
+        </html>
+        """
+
+        # Send email
+        send_email(student_email, subject, body)
+
+    flash("Students assigned to project successfully! Emails have been sent.", "success")
     return redirect(url_for('hod_dashboard'))
+
 @app.route('/approve_registration', methods=['POST'])
 def approve_registration():
     hod_id = session.get('hod_id', '')
@@ -234,22 +282,28 @@ WorkBridge Team
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
-
 def send_email(to_email, subject, body):
-    """Sends an email using SMTP with proper UTF-8 encoding."""
     try:
+        smtp_server = "smtp.gmail.com"
+        smtp_port = 587
+        sender_email = mail
+        sender_password = code
+
         msg = MIMEMultipart()
-        msg["From"] = mail
+        msg["From"] = sender_email
         msg["To"] = to_email
         msg["Subject"] = subject
 
-        # Attach UTF-8 encoded content
-        msg.attach(MIMEText(body, "plain", "utf-8"))
+        # Attach the email body as HTML
+        msg.attach(MIMEText(body, "html"))
 
-        with smtplib.SMTP("smtp.gmail.com", 587) as connection:
-            connection.starttls()  # Secure the connection
-            connection.login(mail, code)
-            connection.sendmail(from_addr=mail, to_addrs=to_email, msg=msg.as_string())
+        server = smtplib.SMTP(smtp_server, smtp_port)
+        server.starttls()
+        server.login(sender_email, sender_password)
+        server.sendmail(sender_email, to_email, msg.as_string())
+        server.quit()
+        
+        print(f"Email sent successfully to {to_email}")
 
     except Exception as e:
-        print(f"❌ Error sending email: {e}")
+        print(f"Failed to send email: {e}")

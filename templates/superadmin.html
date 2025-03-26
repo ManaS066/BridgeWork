@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard | WORK Bridge</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary-color: #3a86ff;
+            --secondary-color: #8338ec;
+            --success-color: #06d6a0;
+            --danger-color: #ef476f;
+            --warning-color: #ffd166;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7fc;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding-top: 20px;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .sidebar-header {
+            padding: 10px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-header h3 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .sidebar-menu {
+            padding: 20px 0;
+        }
+        
+        .sidebar-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-menu li {
+            padding: 10px 20px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .sidebar-menu li:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .sidebar-menu li.active {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-left: 4px solid white;
+        }
+        
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+        
+        .navbar {
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .notification-bell {
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .notification-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            padding: 3px 6px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card {
+            padding: 20px;
+            text-align: center;
+            height: 100%;
+        }
+        
+        .stat-card i {
+            font-size: 40px;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .stat-card h3 {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-card p {
+            font-size: 16px;
+            color: #6c757d;
+            margin: 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .table-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .table-container h4 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--dark-color);
+            font-weight: 600;
+        }
+        
+        .table {
+            width: 100%;
+            margin-bottom: 0;
+        }
+        
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: #6c757d;
+        }
+        
+        .badge {
+            padding: 5px 10px;
+            font-weight: 500;
+            border-radius: 30px;
+        }
+        
+        .badge-pending {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+        
+        .badge-approved {
+            background-color: var(--success-color);
+            color: white;
+        }
+        
+        .badge-rejected {
+            background-color: var(--danger-color);
+            color: white;
+        }
+        
+        .btn-action {
+            padding: 5px 10px;
+            margin: 0 2px;
+            font-size: 14px;
+            border-radius: 5px;
+        }
+        
+        .section-title {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: #333;
+            border-left: 4px solid var(--primary-color);
+            padding-left: 10px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+        }
+        
+        .activity-icon.bg-primary {
+            background-color: var(--primary-color);
+        }
+        
+        .activity-icon.bg-success {
+            background-color: var(--success-color);
+        }
+        
+        .activity-icon.bg-warning {
+            background-color: var(--warning-color);
+        }
+        
+        .activity-icon.bg-danger {
+            background-color: var(--danger-color);
+        }
+        
+        .activity-content {
+            flex: 1;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .activity-time {
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .modal-content {
+            border-radius: 10px;
+            border: none;
+        }
+        
+        .modal-header {
+            background-color: var(--primary-color);
+            color: white;
+            border-radius: 10px 10px 0 0;
+        }
+        
+        .modal-footer {
+            border-top: none;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 70px;
+                overflow: hidden;
+            }
+            
+            .sidebar-header h3, .sidebar-menu span {
+                display: none;
+            }
+            
+            .main-content {
+                margin-left: 70px;
+            }
+            
+            .sidebar-menu li {
+                text-align: center;
+                padding: 10px;
+            }
+            
+            .sidebar-menu i {
+                margin-right: 0;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <h3>WORK Bridge</h3>
+        </div>
+        <div class="sidebar-menu">
+            <ul>
+                <li class="active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Dashboard</span>
+                </li>
+                <li data-tab="universities">
+                    <i class="fas fa-university"></i>
+                    <span>Universities</span>
+                </li>
+                <li data-tab="companies">
+                    <i class="fas fa-building"></i>
+                    <span>Companies</span>
+                </li>
+                <li data-tab="students">
+                    <i class="fas fa-user-graduate"></i>
+                    <span>Students</span>
+                </li>
+                <li data-tab="requests">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span>Pending Requests</span>
+                </li>
+                <li data-tab="analytics">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Analytics</span>
+                </li>
+                <li data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </li>
+                <li onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span>Logout</span>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Navbar -->
+        <div class="navbar d-flex justify-content-between">
+            <div>
+                <h4 class="mb-0">Super Admin Dashboard</h4>
+                <small class="text-muted">Welcome back, Admin</small>
+            </div>
+            <div class="d-flex align-items-center">
+                <div class="notification-bell mr-4" onclick="showPendingRequests()">
+                    <i class="fas fa-bell fa-lg"></i>
+                    <span id="notificationCount" class="notification-count">0</span>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-user-circle mr-2"></i>Admin
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                        <a class="dropdown-item" href="#"><i class="fas fa-user mr-2"></i>Profile</a>
+                        <a class="dropdown-item" href="#"><i class="fas fa-cog mr-2"></i>Settings</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" onclick="logout()"><i class="fas fa-sign-out-alt mr-2"></i>Logout</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <!-- Stats Row -->
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="stat-card">
+                            <i class="fas fa-building"></i>
+                            <h3 id="companyCount">{{ num_companies }}</h3>
+                            <p>Companies</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="stat-card">
+                            <i class="fas fa-university"></i>
+                            <h3 id="universityCount">{{ num_universities }}</h3>
+                            <p>Universities</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="stat-card">
+                            <i class="fas fa-user-graduate"></i>
+                            <h3 id="studentCount">{{ num_students }}</h3>
+                            <p>Students</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card h-100">
+                        <div class="stat-card">
+                            <i class="fas fa-handshake"></i>
+                            <h3 id="collaborationCount">0</h3>
+                            <p>Collaborations</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">User Growth</h5>
+                            <div class="chart-container">
+                                <canvas id="userGrowthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Platform Distribution</h5>
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- More Charts Row -->
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Monthly Registrations</h5>
+                            <div class="chart-container">
+                                <canvas id="registrationsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Collaboration Types</h5>
+                            <div class="chart-container">
+                                <canvas id="collaborationChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Recent Activity</h5>
+                            <div class="activity-list">
+                                <div class="activity-item">
+                                    <div class="activity-icon bg-primary">
+                                        <i class="fas fa-university"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">New University Registered</div>
+                                        <div class="activity-time">2 hours ago</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon bg-success">
+                                        <i class="fas fa-building"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">Company Registration Approved</div>
+                                        <div class="activity-time">5 hours ago</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon bg-warning">
+                                        <i class="fas fa-handshake"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">New Collaboration Started</div>
+                                        <div class="activity-time">1 day ago</div>
+                                    </div>
+                                </div>
+                                <div class="activity-item">
+                                    <div class="activity-icon bg-danger">
+                                        <i class="fas fa-times-circle"></i>
+                                    </div>
+                                    <div class="activity-content">
+                                        <div class="activity-title">University Registration Rejected</div>
+                                        <div class="activity-time">2 days ago</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">System Performance</h5>
+                            <div class="mb-4">
+                                <p class="mb-1">Server Load</p>
+                                <div class="progress">
+                                    <div class="progress-bar bg-success" role="progressbar" style="width: 25%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">25%</div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="mb-1">Database Usage</p>
+                                <div class="progress">
+                                    <div class="progress-bar bg-info" role="progressbar" style="width: 50%" aria-valuenow="50" aria-valuemin="0" aria-valuemax="100">50%</div>
+                                </div>
+                            </div>
+                            <div class="mb-4">
+                                <p class="mb-1">Memory Usage</p>
+                                <div class="progress">
+                                    <div class="progress-bar bg-warning" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-1">CPU Usage</p>
+                                <div class="progress">
+                                    <div class="progress-bar bg-danger" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100">60%</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universities Tab -->
+        <div id="universities" class="tab-content">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">Universities</h5>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addUniversityModal">
+                            <i class="fas fa-plus mr-2"></i>Add University
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="universitiesTable">
+                            <thead>
+                                <tr>
+                                    <th>University Name</th>
+                                    <th>Email</th>
+                                    <th>Address</th>
+                                    <th>Departments</th>
+                                    <th>Students</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="universitiesTableBody">
+                                <!-- Universities will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Companies Tab -->
+        <div id="companies" class="tab-content">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">Companies</h5>
+                        <button class="btn btn-primary" data-toggle="modal" data-target="#addCompanyModal">
+                            <i class="fas fa-plus mr-2"></i>Add Company
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="companiesTable">
+                            <thead>
+                                <tr>
+                                    <th>Company Name</th>
+                                    <th>Email</th>
+                                    <th>Employee Size</th>
+                                    <th>Jobs Posted</th>
+                                    <th>Projects</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="companiesTableBody">
+                                <!-- Companies will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="card-title">Students</h5>
+                        <div class="input-group w-25">
+                            <input type="text" class="form-control" placeholder="Search students..." id="studentSearch">
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-secondary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover" id="studentsTable">
+                            <thead>
+                                <tr>
+                                    <th>Student Name</th>
+                                    <th>Email</th>
+                                    <th>University</th>
+                                    <th>Department</th>
+                                    <th>GPA</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentsTableBody">
+                                <!-- Students will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pending Requests Tab -->
+        <div id="requests" class="tab-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending University Requests</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>University Name</th>
+                                            <th>Email</th>
+                                            <th>Departments</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingUniversitiesTableBody">
+                                        <!-- Pending universities will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Pending Company Requests</h5>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Company Name</th>
+                                            <th>Email</th>
+                                            <th>Employee Size</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pendingCompaniesTableBody">
+                                        <!-- Pending companies will be populated here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Tab -->
+        <div id="analytics" class="tab-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">University-Company Collaborations</h5>
+                            <div class="chart-container">
+                                <canvas id="collaborationsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Student Placement Rate</h5>
+                            <div class="chart-container">
+                                <canvas id="placementChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Platform Growth Metrics</h5>
+                            <div class="chart-container">
+                                <canvas id="growthMetricsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Top Universities by Student Placement</h5>
+                            <div class="chart-container">
+                                <canvas id="topUniversitiesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Top Companies by Hiring</h5>
+                            <div class="chart-container">
+                                <canvas id="topCompaniesChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings" class="tab-content">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">System Settings</h5>
+                            <form id="systemSettingsForm">
+                                <div class="form-group">
+                                    <label for="siteName">Site Name</label>
+                                    <input type="text" class="form-control" id="siteName" value="WORK Bridge">
+                                </div>
+                                <div class="form-group">
+                                    <label for="siteEmail">Admin Email</label>
+                                    <input type="email" class="form-control" id="siteEmail" value="admin@workbridge.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="maintenanceMode">Maintenance Mode</label>
+                                    <select class="form-control" id="maintenanceMode">
+                                        <option value="0">Disabled</option>
+                                        <option value="1">Enabled</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registrationApproval">Registration Approval</label>
+                                    <select class="form-control" id="registrationApproval">
+                                        <option value="automatic">Automatic</option>
+                                        <option value="manual" selected>Manual Approval</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Email Settings</h5>
+                            <form id="emailSettingsForm">
+                                <div class="form-group">
+                                    <label for="smtpServer">SMTP Server</label>
+                                    <input type="text" class="form-control" id="smtpServer" value="smtp.gmail.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtpPort">SMTP Port</label>
+                                    <input type="text" class="form-control" id="smtpPort" value="587">
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtpUsername">SMTP Username</label>
+                                    <input type="text" class="form-control" id="smtpUsername" value="wrkbridge@gmail.com">
+                                </div>
+                                <div class="form-group">
+                                    <label for="smtpPassword">SMTP Password</label>
+                                    <input type="password" class="form-control" id="smtpPassword" value="********">
+                                </div>
+                                <div class="form-group">
+                                    <label for="emailEncryption">Email Encryption</label>
+                                    <select class="form-control" id="emailEncryption">
+                                        <option value="tls" selected>TLS</option>
+                                        <option value="ssl">SSL</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Save Email Settings</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-4">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Backup & Restore</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Create Backup</h6>
+                                    <p>Create a backup of your database and settings.</p>
+                                    <button class="btn btn-primary" id="createBackupBtn">Create Backup</button>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Restore Backup</h6>
+                                    <p>Restore from a previous backup file.</p>
+                                    <div class="input-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input" id="backupFile">
+                                            <label class="custom-file-label" for="backupFile">Choose file</label>
+                                        </div>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button" id="restoreBackupBtn">Restore</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add University Modal -->
+    <div class="modal fade" id="addUniversityModal" tabindex="-1" aria-labelledby="addUniversityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addUniversityModalLabel">Add University</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addUniversityForm">
+                        <div class="form-group">
+                            <label for="universityName">University Name</label>
+                            <input type="text" class="form-control" id="universityName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="universityEmail">Email</label>
+                            <input type="email" class="form-control" id="universityEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="universityPassword">Password</label>
+                            <input type="password" class="form-control" id="universityPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="universityDepartments">Departments (comma separated)</label>
+                            <input type="text" class="form-control" id="universityDepartments" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveUniversityBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Company Modal -->
+    <div class="modal fade" id="addCompanyModal" tabindex="-1" aria-labelledby="addCompanyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCompanyModalLabel">Add Company</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="addCompanyForm">
+                        <div class="form-group">
+                            <label for="companyName">Company Name</label>
+                            <input type="text" class="form-control" id="companyName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="companyEmail">Email</label>
+                            <input type="email" class="form-control" id="companyEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="companyPassword">Password</label>
+                            <input type="password" class="form-control" id="companyPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="employeeSize">Employee Size</label>
+                            <input type="number" class="form-control" id="employeeSize" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveCompanyBtn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Requests Modal -->
+    <div class="modal fade" id="pendingRequestsModal" tabindex="-1" aria-labelledby="pendingRequestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pendingRequestsModalLabel">Pending Requests</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs" id="requestsTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link active" id="universities-tab" data-toggle="tab" href="#universitiesTab" role="tab">Universities</a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a class="nav-link" id="companies-tab" data-toggle="tab" href="#companiesTab" role="tab">Companies</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content mt-3" id="requestsTabContent">
+                        <div class="tab-pane fade show active" id="universitiesTab" role="tabpanel">
+                            <div id="pendingUniversitiesContent">
+                                <!-- Pending universities will be populated here -->
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="companiesTab" role="tabpanel">
+                            <div id="pendingCompaniesContent">
+                                <!-- Pending companies will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.sidebar-menu li').forEach(item => {
+            item.addEventListener('click', function() {
+                // Remove active class from all tabs
+                document.querySelectorAll('.sidebar-menu li').forEach(i => i.classList.remove('active'));
+                // Add active class to clicked tab
+                this.classList.add('active');
+                
+                // Hide all tab contents
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                
+                // Show the corresponding tab content
+                const tabId = this.getAttribute('data-tab');
+                if (tabId) {
+                    document.getElementById(tabId).classList.add('active');
+                }
+            });
+        });
+
+        // Fetch data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateNotificationCount();
+            fetchUniversities();
+            fetchCompanies();
+            fetchStudents();
+            initializeCharts();
+        });
+
+        // Update notification count
+        async function updateNotificationCount() {
+            try {
+                const response = await fetch('/get_pending_requests_count');
+                const data = await response.json();
+                const notificationCount = document.getElementById('notificationCount');
+                notificationCount.textContent = data.count;
+                notificationCount.style.display = data.count > 0 ? 'block' : 'none';
+            } catch (error) {
+                console.error('Error updating notification count:', error);
+            }
+        }
+
+        // Show pending requests
+        async function showPendingRequests() {
+            try {
+                const response = await fetch('/get_pending_requests');
+                const data = await response.json();
+                
+                // Populate universities tab
+                const pendingUniversitiesContent = document.getElementById('pendingUniversitiesContent');
+                pendingUniversitiesContent.innerHTML = '';
+                
+                if (data.pending_universities.length === 0) {
+                    pendingUniversitiesContent.innerHTML = '<p>No pending university requests.</p>';
+                } else {
+                    const universityTable = document.createElement('table');
+                    universityTable.className = 'table table-bordered';
+                    universityTable.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>University Name</th>
+                                <th>Email</th>
+                                <th>Departments</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.pending_universities.map(university => `
+                                <tr>
+                                    <td>${university.name}</td>
+                                    <td>${university.email}</td>
+                                    <td>${university.departments.join(', ')}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" onclick="approveUniversity('${university._id}')">Approve</button>
+                                        <button class="btn btn-danger btn-sm" onclick="rejectUniversity('${university._id}')">Reject</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    pendingUniversitiesContent.appendChild(universityTable);
+                }
+                
+                // Populate companies tab
+                const pendingCompaniesContent = document.getElementById('pendingCompaniesContent');
+                pendingCompaniesContent.innerHTML = '';
+                
+                if (data.pending_companies.length === 0) {
+                    pendingCompaniesContent.innerHTML = '<p>No pending company requests.</p>';
+                } else {
+                    const companyTable = document.createElement('table');
+                    companyTable.className = 'table table-bordered';
+                    companyTable.innerHTML = `
+                        <thead>
+                            <tr>
+                                <th>Company Name</th>
+                                <th>Email</th>
+                                <th>Employee Size</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.pending_companies.map(company => `
+                                <tr>
+                                    <td>${company.company_name}</td>
+                                    <td>${company.email}</td>
+                                    <td>${company.employee_size}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm" onclick="approveCompany('${company._id}')">Approve</button>
+                                        <button class="btn btn-danger btn-sm" onclick="rejectCompany('${company._id}')">Reject</button>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    `;
+                    pendingCompaniesContent.appendChild(companyTable);
+                }
+                
+                $('#pendingRequestsModal').modal('show');
+            } catch (error) {
+                console.error('Error fetching pending requests:', error);
+            }
+        }
+
+        // Approve university
+        async function approveUniversity(universityId) {
+            try {
+                const response = await fetch(`/approve_university/${universityId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                alert(result.message);
+                showPendingRequests();
+                updateNotificationCount();
+                fetchUniversities();
+            } catch (error) {
+                console.error('Error approving university:', error);
+            }
+        }
+
+        // Reject university
+        async function rejectUniversity(universityId) {
+            try {
+                const response = await fetch(`/reject_university/${universityId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                alert(result.message);
+                showPendingRequests();
+                updateNotificationCount();
+            } catch (error) {
+                console.error('Error rejecting university:', error);
+            }
+        }
+
+        // Approve company
+        async function approveCompany(companyId) {
+            try {
+                const response = await fetch(`/approve_company/${companyId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                alert(result.message);
+                showPendingRequests();
+                updateNotificationCount();
+                fetchCompanies();
+            } catch (error) {
+                console.error('Error approving company:', error);
+            }
+        }
+
+        // Reject company
+        async function rejectCompany(companyId) {
+            try {
+                const response = await fetch(`/reject_company/${companyId}`, {
+                    method: 'POST'
+                });
+                const result = await response.json();
+                alert(result.message);
+                showPendingRequests();
+                updateNotificationCount();
+            } catch (error) {
+                console.error('Error rejecting company:', error);
+            }
+        }
+
+        // Fetch universities
+        async function fetchUniversities() {
+            try {
+                const response = await fetch('/get_universities');
+                const universities = await response.json();
+                const universitiesTableBody = document.getElementById('universitiesTableBody');
+                universitiesTableBody.innerHTML = '';
+                
+                universities.forEach(university => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${university.name}</td>
+                        <td>${university.email}</td>
+                        <td>${university.address || 'N/A'}</td>
+                        <td>${university.departments ? university.departments.join(', ') : 'N/A'}</td>
+                        <td>0</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                        <td>
+                            <button class="btn btn-info btn-sm" onclick="viewUniversity('${university.id}')">View</button>
+                            <button class="btn btn-warning btn-sm" onclick="editUniversity('${university.id}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteUniversity('${university.id}')">Delete</button>
+                        </td>
+                    `;
+                    universitiesTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching universities:', error);
+            }
+        }
+
+        // Fetch companies
+        async function fetchCompanies() {
+            try {
+                const response = await fetch('/get_companies');
+                const companies = await response.json();
+                const companiesTableBody = document.getElementById('companiesTableBody');
+                companiesTableBody.innerHTML = '';
+                
+                companies.forEach(company => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${company.company_name}</td>
+                        <td>${company.email}</td>
+                        <td>${company.employee_size}</td>
+                        <td>0</td>
+                        <td>0</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                        <td>
+                            <button class="btn btn-info btn-sm" onclick="viewCompany('${company.company_name}')">View</button>
+                            <button class="btn btn-warning btn-sm" onclick="editCompany('${company.company_name}')">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteCompany('${company.company_name}')">Delete</button>
+                        </td>
+                    `;
+                    companiesTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching companies:', error);
+            }
+        }
+
+        // Fetch students
+        async function fetchStudents() {
+            try {
+                const response = await fetch('/get_students');
+                const students = await response.json();
+                const studentsTableBody = document.getElementById('studentsTableBody');
+                studentsTableBody.innerHTML = '';
+                
+                students.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${student.email}</td>
+                        <td>${student.university_name}</td>
+                        <td>${student.department || 'N/A'}</td>
+                        <td>${student.gpa || 'N/A'}</td>
+                        <td><span class="badge badge-success">Active</span></td>
+                        <td>
+                            <button class="btn btn-info btn-sm" onclick="viewStudent('${student.email}')">View</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student.email}')">Delete</button>
+                        </td>
+                    `;
+                    studentsTableBody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error fetching students:', error);
+            }
+        }
+
+        // Initialize charts
+        function initializeCharts() {
+            // User Growth Chart
+            const userGrowthCtx = document.getElementById('userGrowthChart').getContext('2d');
+            const userGrowthChart = new Chart(userGrowthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Students',
+                            data: [50, 75, 120, 160, 200, 250, 280, 320, 350, 400, 450, 500],
+                            borderColor: '#3a86ff',
+                            backgroundColor: 'rgba(58, 134, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Universities',
+                            data: [5, 8, 12, 15, 18, 20, 22, 25, 28, 30, 32, 35],
+                            borderColor: '#8338ec',
+                            backgroundColor: 'rgba(131, 56, 236, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Companies',
+                            data: [10, 15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115],
+                            borderColor: '#ff006e',
+                            backgroundColor: 'rgba(255, 0, 110, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Distribution Chart
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            const distributionChart = new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Students', 'Universities', 'Companies'],
+                    datasets: [{
+                        data: [500, 35, 115],
+                        backgroundColor: ['#3a86ff', '#8338ec', '#ff006e'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    }
+                }
+            });
+
+            // Monthly Registrations Chart
+            const registrationsCtx = document.getElementById('registrationsChart').getContext('2d');
+            const registrationsChart = new Chart(registrationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Students',
+                            data: [30, 40, 35, 50, 45, 60, 55, 65, 70, 80, 75, 90],
+                            backgroundColor: '#3a86ff'
+                        },
+                        {
+                            label: 'Universities',
+                            data: [3, 4, 2, 5, 3, 4, 2, 5, 3, 4, 2, 5],
+                            backgroundColor: '#8338ec'
+                        },
+                        {
+                            label: 'Companies',
+                            data: [8, 10, 12, 15, 10, 12, 15, 18, 12, 15, 10, 20],
+                            backgroundColor: '#ff006e'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Collaboration Chart
+            const collaborationCtx = document.getElementById('collaborationChart').getContext('2d');
+            const collaborationChart = new Chart(collaborationCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Internships', 'Projects', 'Research', 'Workshops'],
+                    datasets: [{
+                        data: [45, 25, 15, 15],
+                        backgroundColor: ['#3a86ff', '#8338ec', '#ff006e', '#06d6a0'],
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                        }
+                    }
+                }
+            });
+
+            // Collaborations Chart
+            const collaborationsCtx = document.getElementById('collaborationsChart').getContext('2d');
+            const collaborationsChart = new Chart(collaborationsCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [
+                        {
+                            label: 'University-Company Collaborations',
+                            data: [15, 25, 35, 45],
+                            backgroundColor: '#3a86ff'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+            // Placement Chart
+            const placementCtx = document.getElementById('placementChart').getContext('2d');
+            const placementChart = new Chart(placementCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                    datasets: [
+                        {
+                            label: 'Placement Rate (%)',
+                            data: [60, 62, 65, 68, 70, 72, 75, 78, 80, 82, 85, 88],
+                            borderColor: '#06d6a0',
+                            backgroundColor: 'rgba(6, 214, 160, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 50,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Growth Metrics Chart
+            const growthMetricsCtx = document.getElementById('growthMetricsChart').getContext('2d');
+            const growthMetricsChart = new Chart(growthMetricsCtx, {
+                type: 'line',
+                data: {
+                    labels: ['2020', '2021', '2022', '2023', '2024'],
+                    datasets: [
+                        {
+                            label: 'User Base',
+                            data: [100, 300, 600, 1000, 1500],
+                            borderColor: '#3a86ff',
+                            backgroundColor: 'rgba(58, 134, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Collaborations',
+                            data: [10, 30, 60, 100, 150],
+                            borderColor: '#ff006e',
+                            backgroundColor: 'rgba(255, 0, 110, 0.1)',
+                            tension: 0.4,
+                            fill: true,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'User Base'
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: false
+                            },
+                            title: {
+                                display: true,
+                                text: 'Collaborations'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Top Universities Chart
+            const topUniversitiesCtx = document.getElementById('topUniversitiesChart').getContext('2d');
+            const topUniversitiesChart = new Chart(topUniversitiesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['University A', 'University B', 'University C', 'University D', 'University E'],
+                    datasets: [
+                        {
+                            label: 'Placement Rate (%)',
+                            data: [92, 88, 85, 82, 80],
+                            backgroundColor: '#8338ec'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+
+            // Top Companies Chart
+            const topCompaniesCtx = document.getElementById('topCompaniesChart').getContext('2d');
+            const topCompaniesChart = new Chart(topCompaniesCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Company A', 'Company B', 'Company C', 'Company D', 'Company E'],
+                    datasets: [
+                        {
+                            label: 'Students Hired',
+                            data: [45, 40, 35, 30, 25],
+                            backgroundColor: '#ff006e'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        }
+                    },
+                    scales: {
+                        x: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Add University
+        document.getElementById('saveUniversityBtn').addEventListener('click', async function() {
+            const universityName = document.getElementById('universityName').value;
+            const universityEmail = document.getElementById('universityEmail').value;
+            const universityPassword = document.getElementById('universityPassword').value;
+            const universityDepartments = document.getElementById('universityDepartments').value.split(',').map(dept => dept.trim());
+            
+            if (!universityName || !universityEmail || !universityPassword || !universityDepartments) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/add_university', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: universityName,
+                        email: universityEmail,
+                        password: universityPassword,
+                        departments: universityDepartments
+                    })
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    $('#addUniversityModal').modal('hide');
+                    fetchUniversities();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error adding university:', error);
+                alert('Failed to add university');
+            }
+        });
+
+        // Add Company
+        document.getElementById('saveCompanyBtn').addEventListener('click', async function() {
+            const companyName = document.getElementById('companyName').value;
+            const companyEmail = document.getElementById('companyEmail').value;
+            const companyPassword = document.getElementById('companyPassword').value;
+            const employeeSize = document.getElementById('employeeSize').value;
+            
+            if (!companyName || !companyEmail || !companyPassword || !employeeSize) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/add_company', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        company_name: companyName,
+                        email: companyEmail,
+                        password: companyPassword,
+                        employee_size: employeeSize
+                    })
+                });
+                
+                const result = await response.json();
+                if (response.ok) {
+                    alert(result.message);
+                    $('#addCompanyModal').modal('hide');
+                    fetchCompanies();
+                } else {
+                    alert(result.message);
+                }
+            } catch (error) {
+                console.error('Error adding company:', error);
+                alert('Failed to add company');
+            }
+        });
+
+        // View University
+        function viewUniversity(universityId) {
+            window.location.href = `/university_profile/${universityId}`;
+        }
+
+        // Edit University
+        function editUniversity(universityId) {
+            // Implement edit university functionality
+            alert('Edit university functionality to be implemented');
+        }
+
+        // Delete University
+        function deleteUniversity(universityId) {
+            if (confirm('Are you sure you want to delete this university?')) {
+                // Implement delete university functionality
+                alert('Delete university functionality to be implemented');
+            }
+        }
+
+        // View Company
+        function viewCompany(companyName) {
+            window.location.href = `/company_profile/${companyName}`;
+        }
+
+        // Edit Company
+        function editCompany(companyName) {
+            // Implement edit company functionality
+            alert('Edit company functionality to be implemented');
+        }
+
+        // Delete Company
+        function deleteCompany(companyName) {
+            if (confirm('Are you sure you want to delete this company?')) {
+                // Implement delete company functionality
+                alert('Delete company functionality to be implemented');
+            }
+        }
+
+        // View Student
+        function viewStudent(studentEmail) {
+            // Implement view student functionality
+            alert('View student functionality to be implemented');
+        }
+
+        // Delete Student
+        function deleteStudent(studentEmail) {
+            if (confirm('Are you sure you want to delete this student?')) {
+                // Implement delete student functionality
+                alert('Delete student functionality to be implemented');
+            }
+        }
+
+        // Logout
+        function logout() {
+            window.location.href = '/logout';
+        }
+
+        // System Settings Form
+        document.getElementById('systemSettingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('System settings saved successfully!');
+        });
+
+        // Email Settings Form
+        document.getElementById('emailSettingsForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Email settings saved successfully!');
+        });
+
+        // Create Backup
+        document.getElementById('createBackupBtn').addEventListener('click', function() {
+            alert('Backup created successfully!');
+        });
+
+        // Restore Backup
+        document.getElementById('restoreBackupBtn').addEventListener('click', function() {
+            alert('Backup restored successfully!');
+        });
+
+        // Student Search
+        document.getElementById('studentSearch').addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            const rows = document.querySelectorAll('#studentsTableBody tr');
+            
+            rows.forEach(row => {
+                const name = row.cells[0].textContent.toLowerCase();
+                const email = row.cells[1].textContent.toLowerCase();
+                const university = row.cells[2].textContent.toLowerCase();
+                
+                if (name.includes(searchTerm) || email.includes(searchTerm) || university.includes(searchTerm)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+

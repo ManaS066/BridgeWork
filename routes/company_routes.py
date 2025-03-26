@@ -93,7 +93,7 @@ from datetime import datetime
 @app.route('/company_dashboard', methods=['GET'])
 def company_dashboard():
     if 'company_name' not in session:
-        return redirect(url_for('company_login'))
+        return redirect(url_for('login_company'))
 
     company_name = session.get('company_name', '')
     job_listings_cursor = jobs.find({"company_name": company_name})
@@ -290,37 +290,18 @@ def varify_project(project_id):
 @app.route('/company_profile/<name>', methods=['GET'])
 def company_profile(name):
     try:
-        # Convert the id to ObjectId
-        company_obj = companies_collection.find_one({"company_name": name})
-        
-        # Check if company exists
+        company_obj = companies_collection.find_one({"company_name": name}, {"_id": 0, "company_name": 1})
         if not company_obj:
             flash('Company not found', 'error')
-            return redirect(url_for('index'))  # Assume you have an index route
-        
-        # Extract company name
+            return redirect(url_for('index'))
+
         company_name = company_obj['company_name']
-        
-        # Fetch job listings
-        job_listings_cursor = jobs.find({"company_name": company_name})
-        job_listings = list(job_listings_cursor)
-        
-        # Calculate job-related statistics
+        job_listings = list(jobs.find({"company_name": company_name}, {"_id": 0, "job_title": 1, "num_openings": 1, "university_name": 1}))
+        project_listings = list(projects_collection.find({"company_name": company_name}, {"_id": 0, "project_title": 1, "university_name": 1}))
+
         total_job_postings = len(job_listings)
-        total_applications = sum([
-            int(job.get('num_openings', 0)) for job in job_listings
-        ])
-        
-        # Get unique universities
-        total_universities = len(set([
-            job.get('university_name', '') 
-            for job in job_listings 
-            if job.get('university_name')
-        ]))
-        
-        # Fetch project listings
-        project_listings_cursor = projects_collection.find({"company_name": company_name})
-        project_listings = list(project_listings_cursor)
+        total_applications = sum(int(job.get('num_openings', 0)) for job in job_listings)
+        total_universities = len(set(job.get('university_name', '') for job in job_listings if job.get('university_name')))
         
         return render_template('companyProfile.html',
                                company_name=company_name,
@@ -329,13 +310,7 @@ def company_profile(name):
                                total_universities=total_universities,
                                job_listings=job_listings,
                                project_listings=project_listings)
-    
     except Exception as e:
-        # Log the error for debugging
         app.logger.error(f"Error in company profile route: {str(e)}")
-        
-        # Flash a user-friendly error message
         flash('An error occurred while fetching company profile', 'error')
-        
-        # Redirect to a safe page
-        return redirect(url_for('index'))  # Assume you have an index route
+        return redirect(url_for('index'))

@@ -315,15 +315,15 @@ def university_profile(university_id):
         return "University not found", 404
 
     # Fetch the number of projects for the university
-    project_count = projects_collection.count_documents({"assigned_to_id": ObjectId(university_id)})
-
+    project_listings = list(projects_collection.find({"assigned_to_id": ObjectId(university_id)}))
+    project_count = len(project_listings)
     # Fetch the number of jobs assigned to the university
     job_count = jobs.count_documents({"university_name": university['name']})
 
     # Convert ObjectId to string for JSON serialization
     university['_id'] = str(university['_id'])
 
-    return render_template('universityProfile.html', university=university, project_count=project_count, job_count=job_count)
+    return render_template('universityProfile.html', university=university, project_count=project_count, job_count=job_count,project_listings = project_listings)
 
 @app.route("/done_project/<project_id>",methods=['POST'])
 def done_project(project_id):
