@@ -256,7 +256,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             width: 90%;
             max-width: 600px;
-            position: relative;
+            position:relative;
             animation: modalFadeIn 0.3s;
         }
 
@@ -396,6 +396,7 @@
 }
 
 
+
         .student-list li:last-child {
             border-bottom: none;
         }
@@ -472,6 +473,8 @@
             }
         }
 
+        
+        
         /* Flash Messages */
         .alert {
             margin-bottom: 20px;
@@ -824,9 +827,9 @@
                 <button type="button" class="close" onclick="closeStudentsModal()">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="studentsLoading" class="spinner-container">
+                <!-- <div id="studentsLoading" class="spinner-container">
                     <div class="spinner"></div>
-                </div>
+                </div> -->
                 <ul id="studentDetailsList" class="student-list" style="display: none;">
                     <!-- Student details will be populated here -->
                 </ul>
@@ -1215,35 +1218,42 @@
 
         // Function to show students modal
         function showStudents(jobId) {
-            fetch(`/get_selected_students/${jobId}`)
-                .then(response => response.json())
-                .then(data => {
-                    const studentDetailsList = document.getElementById("studentDetailsList");
-                    studentDetailsList.innerHTML = ""; // Clear previous details
-                    if (data.length === 0) {
-                        document.getElementById("noStudentsMessage").style.display = "block";
-                        studentDetailsList.style.display = "none";
-                    } else {
-                        document.getElementById("noStudentsMessage").style.display = "none";
-                        studentDetailsList.style.display = "block";
-                        data.forEach(student => {
-                            const li = document.createElement("li");
-                            const a = document.createElement("a");
-                            a.href = `/student_details/${student._id}`;
-                            a.target = "_blank";
-                            a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
-                            li.appendChild(a);
-                            studentDetailsList.appendChild(li);
-                        });
-                    }
-                    document.getElementById("studentsModal").style.display = "block";
-                })
-                .catch(error => {
-                    console.error('Error fetching students:', error);
-                    alert('Failed to load students. Please try again later.');
+    fetch(`/get_selected_students/${jobId}`)  // Note the path parameter
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Failed to fetch students');
+            }
+            return response.json();
+        })
+        .then(data => {
+            const studentDetailsList = document.getElementById("studentDetailsList");
+            studentDetailsList.innerHTML = ""; // Clear previous details
+            
+            if (data.length === 0 || data.error) {
+                document.getElementById("noStudentsMessage").style.display = "block";
+                studentDetailsList.style.display = "none";
+            } else {
+                document.getElementById("noStudentsMessage").style.display = "none";
+                studentDetailsList.style.display = "block";
+                
+                data.forEach(student => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.href = `/showStudent /${student._id}`;
+                    a.target = "_blank";
+                    a.textContent = `${student.name} (${student.email}) - ${student.course} - GPA: ${student.gpa}`;
+                    li.appendChild(a);
+                    studentDetailsList.appendChild(li);
                 });
-        }
-
+            }
+            
+            document.getElementById("studentsModal").style.display = "flex";
+        })
+        .catch(error => {
+            console.error('Error fetching students:', error);
+            alert('Failed to load students. Please try again later.');
+        });
+}
         // Function to close the students modal
         function closeStudentsModal() {
             document.getElementById("studentsModal").style.display = "none";
@@ -1289,7 +1299,7 @@
                         </div>
                     `;
 
-                    document.getElementById("studentProfileDetails").style.display = "block";
+                    document.getElementById("studentProfileDetails").style.display = "flex";
                 })
                 .catch(error => {
                     console.error('Error fetching student profile:', error);

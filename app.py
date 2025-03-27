@@ -39,5 +39,9 @@ from routes.company_routes import *
 from routes.university_routes import *
 from routes.superadmin_routes import *
 
+# # Print all registered routes
+# with app.test_request_context():
+#     print(app.url_map)
+
 if __name__ == '__main__':
     app.run(debug=True)

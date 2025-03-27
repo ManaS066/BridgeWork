@@ -77,7 +77,14 @@ def get_all_students():
     if 'user_role' not in session or session['user_role'] != 'super_admin':
         return jsonify([])
 
-    students = list(students_collection.find({}, {"_id": 0, "name": 1, "email": 1, "university_name": 1, "department": 1, "gpa": 1}))
+    # Find all students, excluding the _id field from results by default
+    students = list(students_collection.find({}, {"name": 1, "email": 1, "university_name": 1, "department": 1, "gpa": 1}))
+    
+    # Convert ObjectId to string for each student
+    for student in students:
+        student['id'] = str(student['_id'])
+        del student['_id']  # Remove the original _id field
+    
     return jsonify(students)
 
 @app.route('/get_pending_requests', methods=['GET'])

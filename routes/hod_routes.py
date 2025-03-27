@@ -62,10 +62,10 @@ def hod_login():
     if hod:
         if not hod.get('approved', False):
             flash("Your registration is pending approval.", "warning")
-            return redirect(url_for('hod_login'))
+            return redirect(url_for('login'))
         elif hod.get('approved') == False:
             flash("Your registration has been rejected.", "danger")
-            return redirect(url_for('hod_login'))
+            return redirect(url_for('login'))
 
         session['hod_id'] = str(hod['_id'])
         session['hod_email'] = email
@@ -74,7 +74,7 @@ def hod_login():
         return redirect(url_for('hod_dashboard'))
     else:
         flash("Invalid email or password", "danger")
-        return redirect(url_for('hod_login'))
+        return redirect(url_for('login'))
 
 @app.route('/hod_dashboard', methods=['GET'])
 def hod_dashboard():
@@ -83,8 +83,7 @@ def hod_dashboard():
     department = session.get('department', '')
 
     if not university_name or not department:
-         return redirect(url_for('hod_login'))
-
+         return redirect(url_for('login'))
 
     # Fetch job listings for the department
     job_listings = list(jobs.find({
@@ -111,6 +110,10 @@ def hod_dashboard():
 
     # Fetch students in the department
     students = list(students_collection.find({"department": department}))
+    
+    # Correct way to add ID to each student
+    for student in students:
+        student['id'] = str(student['_id'])
 
     return render_template('hod_dashboard.html', 
         university_name=university_name, 
@@ -156,6 +159,7 @@ def assign_students_to_project():
         {"_id": ObjectId(project_id)},
         {"$set": {"assigned_students": [ObjectId(student_id) for student_id in student_ids]}}
     )
+    
 
     # Fetch selected students' emails
     selected_students = students_collection.find({"_id": {"$in": [ObjectId(sid) for sid in student_ids]}})
@@ -209,7 +213,7 @@ def assign_students_to_project():
 def approve_registration():
     hod_id = session.get('hod_id', '')
     if not hod_id:
-        return jsonify({"message": "Unauthorized"}), 401
+        return redirect(url_for('login'))
 
     registration_id = request.form.get('registration_id')
     action = request.form.get('action')  # 'approve' or 'reject'

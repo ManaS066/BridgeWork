@@ -1,4 +1,4 @@
-from flask import render_template, request, session, redirect, url_for, jsonify
+from flask import flash, render_template, request, session, redirect, url_for, jsonify
 from app import app, students_collection, universities_collection,projects_collection
 from bson.objectid import ObjectId
 import os
@@ -42,7 +42,7 @@ def register_student():
         "approved": False  # Mark as pending approval
     }).inserted_id
 
-    return redirect(url_for('student_login'))
+    return redirect(url_for('login'))
 
 @app.route('/student_login', methods=['GET', 'POST'])
 def student_login():
@@ -54,21 +54,22 @@ def student_login():
 
         if student:
             if not student.get('approved',False):
-                return render_template('student_login.html', error="Your registration is pending approval.")
+                flash("Your registration is pending for approval.", "warning")
+                return render_template('login.html')
               
 
             session['student_id'] = str(student['_id'])
             session['student_name'] = student['name']
             return redirect(url_for('student_dashboard'))
         else:
-            return render_template('student_login.html', error="Invalid Email or Password")
+            return render_template('login.html', error="Invalid Email or Password")
 
-    return render_template('student_login.html')
+    return render_template('login.html', error="Invalid Email or Password")
 
 @app.route('/student_dashboard')
 def student_dashboard():
     if 'student_id' not in session:
-        return redirect(url_for('student_login'))
+        return redirect(url_for('login'))
 
     student = students_collection.find_one({"_id": ObjectId(session['student_id'])})
     student_id = session['student_id']
@@ -78,7 +79,7 @@ def student_dashboard():
         assigned_project['_id'] = str(assigned_project['_id'])
 
     if not student:
-        return redirect(url_for('student_login'))
+        return redirect(url_for('login'))
 
     return render_template('student_dashboard.html', student=student, assigned_project=assigned_project)
 
@@ -136,3 +137,13 @@ def student_details(student_id):
 
     return render_template('student_details.html', student=student)
 
+@app.route('/showStudent/<student_id>', methods=['GET'])
+def showStudent(student_id):
+    student = students_collection.find_one({"_id": ObjectId(student_id)})
+    if not student:
+        return jsonify({"message": "Student not found"}), 404
+    assigned_project = projects_collection.find_one({"assigned_students": ObjectId(student_id)})
+    if assigned_project:
+        assigned_project['_id'] = str(assigned_project['_id'])
+    student['_id'] = str(student['_id'])
+    return render_template('studentProfile.html', student=student, assigned_project=assigned_project)

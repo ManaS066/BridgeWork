@@ -3,142 +3,284 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOD Registration</title>
+    <title>WorkBridge - HOD Registration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary: #4361ee;
+            --primary-hover: #3a56d4;
+            --secondary: #f8f9fa;
+            --text-dark: #333;
+            --text-light: #6c757d;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f9;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 2rem 0;
         }
-        .container {
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            width: 350px;
+        
+        .registration-container {
+            background-color: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            margin: 2rem auto;
+            transform: translateY(0);
+            transition: all 0.3s ease;
         }
-        h2 {
+        
+        .registration-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        .registration-header {
             text-align: center;
-            color: #333;
+            margin-bottom: 2rem;
         }
-        label {
-            font-weight: bold;
-            display: block;
-            margin-top: 10px;
+        
+        .registration-header h2 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
         }
-        select, input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 5px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        
+        .registration-header p {
+            color: var(--text-light);
+            font-size: 1rem;
         }
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #007bff;
-            color: white;
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.15);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
             border: none;
-            border-radius: 5px;
-            margin-top: 15px;
-            cursor: pointer;
-            font-size: 16px;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.2);
         }
-        button:hover {
-            background: #0056b3;
+        
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(67, 97, 238, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+        .form-group:nth-child(6) { animation-delay: 0.6s; }
+        .form-group:nth-child(7) { animation-delay: 0.7s; }
+        
+        .login-link {
+            display: block;
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-light);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        
+        .login-link a {
+            color: var(--primary);
+            font-weight: 600;
+            text-decoration: none;
+            position: relative;
+        }
+        
+        .login-link a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary);
+            transition: width 0.3s ease;
+        }
+        
+        .login-link a:hover:after {
+            width: 100%;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .registration-container {
+                padding: 1.5rem;
+                margin: 1rem;
+            }
         }
     </style>
+</head>
+<body>
+    <div class="registration-container">
+        <div class="registration-header">
+            <h2>HOD Registration</h2>
+            <p>Create your Head of Department account</p>
+        </div>
+        
+        <form onsubmit="registerHOD(event)">
+            <div class="form-group">
+                <label for="university" class="form-label">Select University</label>
+                <select class="form-select" id="university" name="university" onchange="fetchDepartments()" required>
+                    <option value="">Select University</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="department" class="form-label">Select Department</label>
+                <select class="form-select" id="department" name="department" required>
+                    <option value="">Select Department</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="name" class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required>
+            </div>
+
+            <div class="form-group">
+                <label for="contact" class="form-label">Contact Number</label>
+                <input type="text" class="form-control" id="contact" name="contact" placeholder="Enter your contact number" required>
+            </div>
+
+            <div class="form-group">
+                <label for="employee_code" class="form-label">Employee Code</label>
+                <input type="text" class="form-control" id="employee_code" name="employee_code" placeholder="Enter your employee code" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Create a strong password" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Register as HOD</button>
+            
+            <div class="login-link">
+                Already have an account? <a href="{{ url_for('login') }}">Login</a>
+            </div>
+        </form>
+    </div>
+
     <script>
         async function fetchUniversities() {
-            const response = await fetch('/get_universities');
-            const universities = await response.json();
-            let universitySelect = document.getElementById('university');
-            universities.forEach(univ => {
-                let option = document.createElement('option');
-                option.value = univ.id;
-                option.textContent = univ.name;
-                universitySelect.appendChild(option);
-            });
+            try {
+                const response = await fetch('/get_universities');
+                const universities = await response.json();
+                let universitySelect = document.getElementById('university');
+                universities.forEach(univ => {
+                    let option = document.createElement('option');
+                    option.value = univ.id;
+                    option.textContent = univ.name;
+                    universitySelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching universities:', error);
+            }
         }
 
         async function fetchDepartments() {
-            let universityId = document.getElementById('university').value;
-            if (!universityId) return;
-            const response = await fetch(`/get_departments/${universityId}`);
-            const departments = await response.json();
-            let deptSelect = document.getElementById('department');
-            deptSelect.innerHTML = '<option value="">Select Department</option>';
-            departments.forEach(dept => {
-                let option = document.createElement('option');
-                option.value = dept;
-                option.textContent = dept;
-                deptSelect.appendChild(option);
-            });
+            try {
+                let universityId = document.getElementById('university').value;
+                if (!universityId) return;
+                
+                const response = await fetch(`/get_departments/${universityId}`);
+                const departments = await response.json();
+                let deptSelect = document.getElementById('department');
+                deptSelect.innerHTML = '<option value="">Select Department</option>';
+                
+                departments.forEach(dept => {
+                    let option = document.createElement('option');
+                    option.value = dept;
+                    option.textContent = dept;
+                    deptSelect.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error fetching departments:', error);
+            }
         }
 
         async function registerHOD(event) {
             event.preventDefault();
-            let universityId = document.getElementById('university').value;
-            let department = document.getElementById('department').value;
-            let name = document.getElementById('name').value;
-            let contact = document.getElementById('contact').value;
-            let employeeCode = document.getElementById('employee_code').value;
-            let email = document.getElementById('email').value;
-            let password = document.getElementById('password').value;
+            
+            try {
+                let universityId = document.getElementById('university').value;
+                let department = document.getElementById('department').value;
+                let name = document.getElementById('name').value;
+                let contact = document.getElementById('contact').value;
+                let employeeCode = document.getElementById('employee_code').value;
+                let email = document.getElementById('email').value;
+                let password = document.getElementById('password').value;
 
-            if (!universityId || !department || !name || !contact || !employeeCode || !email || !password) {
-                alert('Please fill out all fields!');
-                return;
+                if (!universityId || !department || !name || !contact || !employeeCode || !email || !password) {
+                    alert('Please fill out all fields!');
+                    return;
+                }
+
+                const response = await fetch('/register_hod', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ universityId, department, name, contact, employeeCode, email, password })
+                });
+
+                const result = await response.json();
+                alert(result.message);
+                
+                if (result.success) {
+                    window.location.href = '/login';
+                }
+            } catch (error) {
+                console.error('Error registering HOD:', error);
+                alert('An error occurred during registration. Please try again.');
             }
-
-            const response = await fetch('/register_hod', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ universityId, department, name, contact, employeeCode, email, password })
-            });
-
-            const result = await response.json();
-            alert(result.message);
         }
 
         window.onload = fetchUniversities;
     </script>
-</head>
-<body>
-    <div class="container">
-        <h2>HOD Registration</h2>
-        <form onsubmit="registerHOD(event)">
-            <label for="university">Select University:</label>
-            <select id="university" name="university" onchange="fetchDepartments()" required>
-                <option value="">Select University</option>
-            </select>
-
-            <label for="department">Select Department:</label>
-            <select id="department" name="department" required>
-                <option value="">Select Department</option>
-            </select>
-
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="contact">Contact Number:</label>
-            <input type="text" id="contact" name="contact" required>
-
-            <label for="employee_code">Employee Code:</label>
-            <input type="text" id="employee_code" name="employee_code" required>
-
-            <label for="email">Email:</label>
-            <input type="email" id="email" name="email" required>
-
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" required>
-
-            <button type="submit">Register HOD</button>
-        </form>
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

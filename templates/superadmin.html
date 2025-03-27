@@ -1242,33 +1242,32 @@
 
         // Fetch students
         async function fetchStudents() {
-            try {
-                const response = await fetch('/get_students');
-                const students = await response.json();
-                const studentsTableBody = document.getElementById('studentsTableBody');
-                studentsTableBody.innerHTML = '';
-                
-                students.forEach(student => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${student.name}</td>
-                        <td>${student.email}</td>
-                        <td>${student.university_name}</td>
-                        <td>${student.department || 'N/A'}</td>
-                        <td>${student.gpa || 'N/A'}</td>
-                        <td><span class="badge badge-success">Active</span></td>
-                        <td>
-                            <button class="btn btn-info btn-sm" onclick="viewStudent('${student.email}')">View</button>
-                            <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student.email}')">Delete</button>
-                        </td>
-                    `;
-                    studentsTableBody.appendChild(row);
-                });
-            } catch (error) {
-                console.error('Error fetching students:', error);
-            }
-        }
-
+    try {
+        const response = await fetch('/get_students');
+        const students = await response.json();
+        const studentsTableBody = document.getElementById('studentsTableBody');
+        studentsTableBody.innerHTML = '';
+        
+        students.forEach(student => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${student.name}</td>
+                <td>${student.email}</td>
+                <td>${student.university_name}</td>
+                <td>${student.department || 'N/A'}</td>
+                <td>${student.gpa || 'N/A'}</td>
+                <td><span class="badge badge-success">Active</span></td>
+                <td>
+                    <a href="/showStudent/${student.id}" class="btn btn-info btn-sm">View</a>
+                    <button class="btn btn-danger btn-sm" onclick="deleteStudent('${student.email}')">Delete</button>
+                </td>
+            `;
+            studentsTableBody.appendChild(row);
+        });
+    } catch (error) {
+        console.error('Error fetching students:', error);
+    }
+}
         // Initialize charts
         function initializeCharts() {
             // User Growth Chart

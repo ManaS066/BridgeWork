@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -47,12 +48,14 @@
             margin: 30px auto;
         }
 
-        .job-listings, .project-listings {
+        .job-listings,
+        .project-listings {
             list-style-type: none;
             padding: 0;
         }
 
-        .job-listings li, .project-listings li {
+        .job-listings li,
+        .project-listings li {
             background-color: #fff;
             margin-bottom: 15px;
             padding: 20px;
@@ -61,28 +64,33 @@
             position: relative;
         }
 
-        .job-listings li h3, .project-listings li h3 {
+        .job-listings li h3,
+        .project-listings li h3 {
             font-size: 1.5em;
             color: #333;
             margin: 0;
         }
 
-        .job-listings li p, .project-listings li p {
+        .job-listings li p,
+        .project-listings li p {
             font-size: 1em;
             color: #555;
             margin: 10px 0;
         }
 
-        .job-listings li em, .project-listings li em {
+        .job-listings li em,
+        .project-listings li em {
             font-size: 1.1em;
             color: #777;
         }
 
-        .job-listings li .departments, .project-listings li .departments {
+        .job-listings li .departments,
+        .project-listings li .departments {
             font-weight: bold;
         }
 
-        .no-jobs, .no-projects {
+        .no-jobs,
+        .no-projects {
             text-align: center;
             font-size: 1.2em;
             color: #888;
@@ -98,7 +106,8 @@
             width: 100%;
         }
 
-        .select-students-btn, .assign-students-btn {
+        .select-students-btn,
+        .assign-students-btn {
             position: absolute;
             top: 20px;
             right: 20px;
@@ -111,7 +120,8 @@
             border-radius: 5px;
         }
 
-        .select-students-btn:hover, .assign-students-btn:hover {
+        .select-students-btn:hover,
+        .assign-students-btn:hover {
             background-color: #0056b3;
         }
 
@@ -164,6 +174,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="navbar">
@@ -173,14 +184,14 @@
             <div class="notification-bell" data-toggle="modal" data-target="#registrationRequestsModal">
                 <i class="fas fa-bell"></i>
                 {% if pending_registrations %}
-                    <span class="badge">{{ pending_registrations|length }}</span>
+                <span class="badge">{{ pending_registrations|length }}</span>
                 {% endif %}
             </div>
             <!-- New Students Icon -->
             <div class="students-icon ml-3" data-toggle="modal" data-target="#studentsDetailsModal">
                 <i class="fas fa-users"></i>
                 {% if students %}
-                    <span class="badge badge-info">{{ students|length }}</span>
+                <span class="badge badge-info">{{ students|length }}</span>
                 {% endif %}
             </div>
             <a href="{{ url_for('logout') }}">
@@ -189,27 +200,28 @@
         </div>
     </div>
 
-<div class="dashboard-container">
-    {% if job_listings %}
+    <div class="dashboard-container">
+        {% if job_listings %}
         <h2>Approved Job Postings</h2>
         <ul class="job-listings">
             {% for job in job_listings %}
-                <li>
-                    <h3>{{ job.job_title }}</h3>
-                    <em>{{ job.company_name }}</em>
-                    <p>{{ job.job_desc }}</p>
-                    <p><span class="departments">Departments: </span>{{ job.departments|join(', ') }}</p>
-                    <p><strong>Number of Openings:</strong> {{ job.num_openings }}</p>
-                    <p><strong>Job Mode:</strong> {{ job.job_mode }}</p>
-                    <button class="select-students-btn" data-toggle="modal" data-target="#selectStudentsModal" data-job-id="{{ job._id }}">Select Students</button>
-                </li>
+            <li>
+                <h3>{{ job.job_title }}</h3>
+                <em>{{ job.company_name }}</em>
+                <p>{{ job.job_desc }}</p>
+                <p><span class="departments">Departments: </span>{{ job.departments|join(', ') }}</p>
+                <p><strong>Number of Openings:</strong> {{ job.num_openings }}</p>
+                <p><strong>Job Mode:</strong> {{ job.job_mode }}</p>
+                <button class="select-students-btn" data-toggle="modal" data-target="#selectStudentsModal"
+                    data-job-id="{{ job._id }}">Select Students</button>
+            </li>
             {% endfor %}
         </ul>
-    {% else %}
+        {% else %}
         <p class="no-jobs">No approved job postings available for this department.</p>
-    {% endif %}
+        {% endif %}
 
-    {% if assigned_projects %}
+        {% if assigned_projects %}
         <h2>Assigned Projects</h2>
         <ul class="project-listings">
             {% for project in assigned_projects %}
@@ -220,206 +232,242 @@
                     <p><strong>Problem Statement:</strong> {{ project.problem_statement }}</p>
                     <p><strong>Reward:</strong> {{ project.reward }}</p>
                     <p><strong>Duration:</strong> {{ project.duration }}</p>
-                    <button class="assign-students-btn" data-toggle="modal" data-target="#assignStudentsModal" data-project-id="{{ project._id }}">Assign Students</button>
+                    
+                    {% if project.assigned_students and project.assigned_students|length > 0 %}
+                        <div class="assigned-students">
+                            <strong>Assigned Students:</strong>
+                            <ul>
+                                {% for assigned_student_id in project.assigned_students %}
+                                    {% set student_found = false %}
+                                    {% for student in students %}
+                                        {% if student._id == assigned_student_id and not student_found %}
+                                            <li>
+                                                {{ student.name }} ({{ student.email }})
+                                                {% if student.department %} - {{ student.department }}{% endif %}
+                                                {% if student.contact_number %} | {{ student.contact_number }}{% endif %}
+                                            </li>
+                                            {% set student_found = true %}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% else %}
+                        <button class="assign-students-btn" 
+                                data-toggle="modal" 
+                                data-target="#assignStudentsModal" 
+                                data-project-id="{{ project._id }}">
+                            Assign Students
+                        </button>
+                    {% endif %}
                 </li>
             {% endfor %}
         </ul>
     {% else %}
         <p class="no-projects">No projects assigned to you.</p>
     {% endif %}
-</div>
-
-<!-- Modal for Selecting Students -->
-<div class="modal fade" id="selectStudentsModal" tabindex="-1" role="dialog" aria-labelledby="selectStudentsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="selectStudentsModalLabel">Select Students</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="{{ url_for('submit_students') }}" method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="job_id" id="modalJobId">
-                    <h4>Select Students:</h4>
-                    {% for student in students %}
-                        <div>
-                            <input type="checkbox" name="students" value="{{ student._id }}">
-                            {{ student.name }} - {{ student.skills }} - CGPA: {{ student.gpa }}
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Submit Selected Students</button>
-                </div>
-            </form>
-        </div>
     </div>
-</div>
 
-<!-- Modal for Assigning Students to Projects -->
-<div class="modal fade" id="assignStudentsModal" tabindex="-1" role="dialog" aria-labelledby="assignStudentsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="assignStudentsModalLabel">Assign Students to Project</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form action="{{ url_for('assign_students_to_project') }}" method="POST">
-                <div class="modal-body">
-                    <input type="hidden" name="project_id" id="modalProjectId">
-                    <h4>Select Students:</h4>
-                    {% for student in students %}
-                        <div>
-                            <input type="checkbox" name="students" value="{{ student._id }}">
-                            {{ student.name }} - {{ student.skills }} - CGPA: {{ student.gpa }}
-                        </div>
-                    {% endfor %}
+    <!-- Modal for Selecting Students -->
+    <div class="modal fade" id="selectStudentsModal" tabindex="-1" role="dialog"
+        aria-labelledby="selectStudentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="selectStudentsModalLabel">Select Students</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Assign Students</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="studentsDetailsModal" tabindex="-1" role="dialog" aria-labelledby="studentsDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="studentsDetailsModalLabel">Department Students</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-striped table-hover">
-                    <thead class="thead-dark">
-                        <tr>
-                            <th>Name</th>
-                            <th>Email</th>
-                            <th>Skills</th>
-                            <th>CGPA</th>
-                            <th>Department</th>
-                            <th>Batch</th>
-                            <th>Contact</th>
-                        </tr>
-                    </thead>
-                    <tbody>
+                <form action="{{ url_for('submit_students') }}" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="job_id" id="modalJobId">
+                        <h4>Select Students:</h4>
                         {% for student in students %}
-                        <tr>
-                            <td>{{ student.name }}</td>
-                            <td>{{ student.email }}</td>
-                            <td>{{ student.skills }}</td>
-                            <td>{{ student.gpa }}</td>
-                            <td>{{ student.department }}</td>
-                            <td>{{ student.batch }}</td>
-                            <td>{{ student.contact }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-                {% if not students %}
-                    <p class="text-center">No students found in the department.</p>
-                {% endif %}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal for Registration Requests -->
-<div class="modal fade" id="registrationRequestsModal" tabindex="-1" role="dialog" aria-labelledby="registrationRequestsModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="registrationRequestsModalLabel">Registration Requests</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                {% if pending_registrations %}
-                    <div class="registration-requests">
-                        {% for registration in pending_registrations %}
-                            <div class="registration-request">
-                                <div>
-                                    <strong>{{ registration.name }}</strong>
-                                    <p>Email: {{ registration.email }}</p>
-                                    <p>Department: {{ registration.department }}</p>
-                                </div>
-                                <div class="actions">
-                                    <form action="{{ url_for('approve_registration') }}" method="POST" style="display:inline;">
-                                        <input type="hidden" name="registration_id" value="{{ registration._id }}">
-                                        <input type="hidden" name="action" value="approve">
-                                        <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                                    </form>
-                                    <form action="{{ url_for('approve_registration') }}" method="POST" style="display:inline;">
-                                        <input type="hidden" name="registration_id" value="{{ registration._id }}">
-                                        <input type="hidden" name="action" value="reject">
-                                        <button type="submit" class="btn btn-danger btn-sm">Reject</button>
-                                    </form>
-                                </div>
-                            </div>
+                        <div>
+                            <input type="checkbox" name="students" value="{{ student._id }}">
+                            {{ student.name }} - {{ student.skills }} - CGPA: {{ student.gpa }}
+                        </div>
                         {% endfor %}
                     </div>
-                {% else %}
-                    <p>No pending registration requests.</p>
-                {% endif %}
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit Selected Students</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 
-<div class="footer">
-    <p>&copy; 2025 HOD Dashboard. All Rights Reserved.</p>
-</div>
+    <!-- Modal for Assigning Students to Projects -->
+    <div class="modal fade" id="assignStudentsModal" tabindex="-1" role="dialog"
+        aria-labelledby="assignStudentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="assignStudentsModalLabel">Assign Students to Project</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{{ url_for('assign_students_to_project') }}" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="project_id" id="modalProjectId">
+                        <h4>Select Students:</h4>
+                        {% for student in students %}
+                        <div>
+                            <input type="checkbox" name="students" value="{{ student._id }}">
+                            {{ student.name }} - {{ student.skills }} - CGPA: {{ student.gpa }}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Assign Students</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-<script>
-    $('#selectStudentsModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var jobId = button.data('job-id');
-        var modal = $(this);
-        modal.find('#modalJobId').val(jobId);
-    });
+    <div class="modal fade" id="studentsDetailsModal" tabindex="-1" role="dialog"
+        aria-labelledby="studentsDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="studentsDetailsModalLabel">Department Students</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-striped table-hover">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Skills</th>
+                                <th>CGPA</th>
+                                <th>Department</th>
+                                <th>Batch</th>
+                                <th>Contact</th>
+                                <th>Profile</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for student in students %}
+                            <tr>
+                                <td>{{ student.name }}</td>
+                                <td>{{ student.email }}</td>
+                                <td>{{ student.skills }}</td>
+                                <td>{{ student.gpa }}</td>
+                                <td>{{ student.department }}</td>
+                                <td>{{ student.batch }}</td>
+                                <td>{{ student.contact }}</td>
+                                <td><a href="showStudent/{{ student.id }}">View Profile</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% if not students %}
+                    <p class="text-center">No students found in the department.</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    $('#assignStudentsModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var projectId = button.data('project-id');
-        var modal = $(this);
-        modal.find('#modalProjectId').val(projectId);
-    });
-</script>
-<script>
-    // Existing modal scripts
-    $('#selectStudentsModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var jobId = button.data('job-id');
-        var modal = $(this);
-        modal.find('#modalJobId').val(jobId);
-    });
+    <!-- Modal for Registration Requests -->
+    <div class="modal fade" id="registrationRequestsModal" tabindex="-1" role="dialog"
+        aria-labelledby="registrationRequestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="registrationRequestsModalLabel">Registration Requests</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    {% if pending_registrations %}
+                    <div class="registration-requests">
+                        {% for registration in pending_registrations %}
+                        <div class="registration-request">
+                            <div>
+                                <strong>{{ registration.name }}</strong>
+                                <p>Email: {{ registration.email }}</p>
+                                <p>Department: {{ registration.department }}</p>
+                            </div>
+                            <div class="actions">
+                                <form action="{{ url_for('approve_registration') }}" method="POST"
+                                    style="display:inline;">
+                                    <input type="hidden" name="registration_id" value="{{ registration._id }}">
+                                    <input type="hidden" name="action" value="approve">
+                                    <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                </form>
+                                <form action="{{ url_for('approve_registration') }}" method="POST"
+                                    style="display:inline;">
+                                    <input type="hidden" name="registration_id" value="{{ registration._id }}">
+                                    <input type="hidden" name="action" value="reject">
+                                    <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p>No pending registration requests.</p>
+                    {% endif %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    $('#assignStudentsModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);
-        var projectId = button.data('project-id');
-        var modal = $(this);
-        modal.find('#modalProjectId').val(projectId);
-    });
-</script>
+    <div class="footer">
+        <p>&copy; 2025 HOD Dashboard. All Rights Reserved.</p>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        $('#selectStudentsModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var jobId = button.data('job-id');
+            var modal = $(this);
+            modal.find('#modalJobId').val(jobId);
+        });
+
+        $('#assignStudentsModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var projectId = button.data('project-id');
+            var modal = $(this);
+            modal.find('#modalProjectId').val(projectId);
+        });
+    </script>
+    <script>
+        // Existing modal scripts
+        $('#selectStudentsModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var jobId = button.data('job-id');
+            var modal = $(this);
+            modal.find('#modalJobId').val(jobId);
+        });
+
+        $('#assignStudentsModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var projectId = button.data('project-id');
+            var modal = $(this);
+            modal.find('#modalProjectId').val(projectId);
+        });
+    </script>
 
 </body>
+
 </html>

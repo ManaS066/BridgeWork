@@ -528,36 +528,47 @@
                     </div>
                 </div>
 
-                <!-- Current Projects Section -->
-                <div class="card mb-4">
-                    <div class="card-header bg-warning text-dark">
-                        <h4><i class="fas fa-project-diagram me-2"></i>Current Projects</h4>
-                    </div>
-                    <div class="card-body">
-                        {% if current_projects %}
-                            {% for project in current_projects %}
-                                <div class="project-card mb-3">
-                                    <div class="project-title">{{ project.project_title }}</div>
-                                    <div class="project-details">
-                                        <div><strong>Problem Statement:</strong> {{ project.problem_statement }}</div>
-                                        <div><strong>Project Description:</strong> {{ project.project_desc }}</div>
-                                        <div><strong>Reward:</strong> {{ project.reward }}</div>
-                                        <div><strong>Duration:</strong> {{ project.duration }}</div>
-                                        <div><strong>Company:</strong> {{ project.company_name }}</div>
-                                    </div>
-                                    <div class="d-flex flex-wrap">
-                                        <form action="{{ url_for('done_project', project_id=project._id) }}" method="POST" class="me-2">
-                                            <button type="submit" class="complete-btn"><i class="fas fa-check me-1"></i> Complete</button>
-                                        </form>
-                                        <button type="button" class="assign-btn" data-bs-toggle="modal" data-bs-target="#assignHodModal" data-project-id="{{ project._id }}">
-                                            <i class="fas fa-user-tie me-1"></i> Assign to HOD
-                                        </button>
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2>Current Projects</h2>
+                            <div class="row">
+                                {% for project in current_projects %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ project.project_title }}</h5>
+                                            <p class="card-text">
+                                                <strong>Company:</strong> {{ project.company_name }}<br>
+                                                <strong>Description:</strong> {{ project.project_desc }}
+                                            </p>
+                                            <div class="project-status mb-3">
+                                              
+                                                {% if project.status == 'assigned_to_hod' %}
+                                                    <span class="badge bg-success">Assigned to HOD</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="project-actions"> 
+                                                {% if project.status == 'assigned' %}
+                                                    <button class="btn btn-primary btn-sm assign-hod-btn" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#assignHodModal"
+                                                            data-project-id="{{ project._id }}">
+                                                        <i class="fas fa-user-plus me-2"></i>Assign to HOD
+                                                    </button>
+                                               
+                                                {% else %}
+                                                <form action="{{ url_for('done_project', project_id=project._id) }}" method="POST" class="me-2">
+                                                    <button type="submit" class="complete-btn"><i class="fas fa-check me-1"></i> Complete</button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-center text-muted">No current projects assigned to this university.</p>
-                        {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -702,34 +713,50 @@
                 class="fas fa-history me-2"></i> View Job History</button>
     </div>
 
-    <!-- Modal for Assigning HODs -->
-    <div class="modal fade" id="assignHodModal" tabindex="-1" aria-labelledby="assignHodModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="assignHodModalLabel"><i class="fas fa-user-tie me-2"></i>Assign Project to HODs</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="assignHodForm" action="{{ url_for('assign_to_hod') }}" method="POST">
-                        <input type="hidden" name="project_id" id="project_id">
-                        <div class="mb-3">
-                            <label for="hods" class="form-label">Select HODs:</label>
-                            <select multiple class="form-select" id="hods" name="hods[]" size="5">
-                                {% for hod in hod_list %}
-                                    <option value="{{ hod._id }}">{{ hod.name }} - {{ hod.department }}</option>
-                                {% endfor %}
-                            </select>
-                            <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple HODs</div>
+ <!-- Modal for Assigning HODs -->
+<div class="modal fade" id="assignHodModal" tabindex="-1" aria-labelledby="assignHodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignHodModalLabel">
+                    <i class="fas fa-user-tie me-2"></i>Assign Project to HODs
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignHodForm" action="{{ url_for('assign_to_hod') }}" method="POST">
+                    <input type="hidden" name="project_id" id="project_id">
+                    <div class="mb-3">
+                        <label class="form-label">Select HODs:</label>
+                        <div class="row">
+                            {% for hod in hod_list %}
+                                <div class="col-md-4 col-sm-6 mb-2">
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            name="hods[]" 
+                                            id="hod_{{ hod._id }}" 
+                                            value="{{ hod._id }}"
+                                        >
+                                        <label class="form-check-label" for="hod_{{ hod._id }}">
+                                            {{ hod.name }} - {{ hod.department }}
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
                         </div>
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary">Assign Project</button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Assign Project</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
+
+
 
     <!-- Modal for Job History -->
     <div class="modal fade" id="jobHistoryModal" tabindex="-1" aria-labelledby="jobHistoryModalLabel" aria-hidden="true">
@@ -912,7 +939,7 @@
                 var jobId = button.data('job-id'); // Extract info from data-* attributes
 
                 $.ajax({
-                    url: "{{ url_for('get_selected_students') }}",
+                   url: "{{ url_for('get_selected_students', job_id='JOBID_PLACEHOLDER') }}".replace('JOBID_PLACEHOLDER', jobId),
                     method: "GET",
                     data: { job_id: jobId },
                     success: function (data) {

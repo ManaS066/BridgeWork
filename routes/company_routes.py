@@ -32,16 +32,14 @@ def company_register():
         })
 
         flash("Company registration request submitted successfully!", "success")
-        return redirect('/login_company')
+        return redirect('/login')
 
     return render_template('company_registration.html')
 
-@app.route('/login_company', methods=['GET'])
-def company_login_page():
-    return render_template('company_login.html')
 
-@app.route('/login_company', methods=['POST'])
-def login_company():
+
+@app.route('/logincompny', methods=['POST'])
+def logincompny():
     data = request.form
     email = data.get('email')
     password = data.get('password')
@@ -54,14 +52,14 @@ def login_company():
             session['company_name'] = company['company_name']
             return redirect(url_for('company_dashboard', company_name=company['company_name']))
         else:
-            return render_template("company_login.html", error="Invalid email or password.")
+            return render_template("login.html", error="Invalid email or password.")
     else:
-        return render_template("company_login.html", error="Invalid email or password.")
-
+        return render_template("login.html", error="Invalid email or password.")
+    return redirect(url_for('login'))
 @app.route('/add_job', methods=['POST'])
 def add_job():
     if 'company_name' not in session:
-        return redirect(url_for('login_company'))
+        return redirect(url_for('login'))
 
     university_id = request.form.get('university')
     departments = request.form.getlist('departments')
@@ -93,7 +91,7 @@ from datetime import datetime
 @app.route('/company_dashboard', methods=['GET'])
 def company_dashboard():
     if 'company_name' not in session:
-        return redirect(url_for('login_company'))
+        return redirect(url_for('login'))
 
     company_name = session.get('company_name', '')
     job_listings_cursor = jobs.find({"company_name": company_name})
@@ -259,7 +257,7 @@ def reject_unassigned_project(project_id):
 @app.route('/project_details', methods=['GET'])
 def project_details():
     if 'company_name' not in session:
-        return redirect(url_for('company_login'))
+        return redirect(url_for('login'))
 
     company_name = session.get('company_name', '')
     project_listings_cursor = projects_collection.find({"company_name": company_name})
@@ -297,7 +295,7 @@ def company_profile(name):
 
         company_name = company_obj['company_name']
         job_listings = list(jobs.find({"company_name": company_name}, {"_id": 0, "job_title": 1, "num_openings": 1, "university_name": 1}))
-        project_listings = list(projects_collection.find({"company_name": company_name}, {"_id": 0, "project_title": 1, "university_name": 1}))
+        project_listings = list(projects_collection.find({"company_name": company_name}))
 
         total_job_postings = len(job_listings)
         total_applications = sum(int(job.get('num_openings', 0)) for job in job_listings)
@@ -314,3 +312,25 @@ def company_profile(name):
         app.logger.error(f"Error in company profile route: {str(e)}")
         flash('An error occurred while fetching company profile', 'error')
         return redirect(url_for('index'))
+    
+@app.route('/get_selected_students/<job_id>', methods=['GET'])
+def get_selected_students(job_id):
+    try:
+        job = jobs.find_one({"_id": ObjectId(job_id)})
+        if job:
+            selected_students = job.get('selected_students', [])
+            student_details = []
+            for student_id in selected_students:
+                student = students_collection.find_one({"_id": ObjectId(student_id)})
+                if student:
+                    student_details.append({
+                        "name": student.get('name', ''),
+                        "email": student.get('email', ''),
+                        "course": student.get('course', ''),
+                        "cgpa": student.get('gpa', '')
+                    })
+            return jsonify(student_details)
+        return jsonify([]), 404
+    except Exception as e:
+        print(f"Error fetching selected students: {e}")
+        return jsonify([]), 500

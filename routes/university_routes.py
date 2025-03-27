@@ -37,9 +37,9 @@ def university_login():
             return redirect(url_for('university_dashboard'))
         else:
             flash("Invalid email or password", "danger")
-            return redirect(url_for('university_login'))
+            return redirect(url_for('login'))
 
-    return render_template('university_login.html')
+    return render_template('login.html', error="Invalid Email or Password")
 
 @app.route('/university_register', methods=['GET', 'POST'])
 def university_register():
@@ -65,7 +65,7 @@ def university_register():
         })
 
         flash("University registration request submitted successfully!", "success")
-        return redirect(url_for('university_login'))
+        return redirect(url_for('login'))
 
     return render_template('uniReg.html')
 
@@ -74,11 +74,11 @@ def university_dashboard():
     university_id = session.get('university_id', '')
     university_name = session.get('university_name', '')
     if not university_id or not university_name:
-        return jsonify({"message": "University ID and name are required"}), 400
+        return redirect(url_for('login'))
 
     university = universities_collection.find_one({"_id": ObjectId(university_id)})
     if not university:
-        return jsonify({"message": "University not found"}), 404
+         return redirect(url_for('login'))
 
     job_listings = list(jobs.find({"university_name": university_name}))
 
@@ -124,7 +124,10 @@ def university_dashboard():
     project_count = projects_collection.count_documents({"assigned_to_id": ObjectId(university_id)})
 
     # Fetch all projects assigned to the university
-    current_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "assigned"}))
+    current_projects = list(projects_collection.find({
+    "assigned_to_id": ObjectId(university_id), 
+    "status": {"$in": ["assigned", "assigned_to_hod"]}
+}))
     pending_review_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "done"}))
     completed_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "completed"}))
 
@@ -136,7 +139,14 @@ def university_dashboard():
     # Convert ObjectId to string for JSON serialization
     university['_id'] = str(university['_id'])
 
-    return render_template('university_dashboard.html', university=university, job_listings=job_listings, students=students, student_count=student_count, job_count=job_count, project_count=project_count, current_projects=current_projects, pending_review_projects=pending_review_projects, completed_projects=completed_projects, hod_list=hod_list)
+    return render_template('university_dashboard.html', 
+                           university=university, job_listings=job_listings, 
+                           students=students, student_count=student_count, 
+                           job_count=job_count, project_count=project_count,
+                             current_projects=current_projects, 
+                             pending_review_projects=pending_review_projects, 
+                             completed_projects=completed_projects, 
+                             hod_list=hod_list)
 
 @app.route('/approve_job/<job_id>', methods=['POST'])
 def approve_job(job_id):
@@ -366,28 +376,6 @@ def project_history():
 
     return render_template('project_history.html', completed_projects=completed_projects)
 
-@app.route('/get_selected_students', methods=['GET'])
-def get_selected_students():
-    job_id = request.args.get('job_id')
-    job = jobs.find_one({"_id": ObjectId(job_id)})
-
-    if not job:
-        return jsonify([])
-
-    selected_students = job.get('selected_students', [])
-    student_details = []
-
-    for student_id in selected_students:
-        student = students_collection.find_one({"_id": ObjectId(student_id)})
-        if student:
-            student_details.append({
-                "name": student.get('name', ''),
-                "email": student.get('email', ''),
-                "course": student.get('course', ''),
-                "gpa": student.get('gpa', '')
-            })
-
-    return jsonify(student_details)
 
 @app.route('/assign_to_hod', methods=['POST'])
 def assign_to_hod():
@@ -403,7 +391,8 @@ def assign_to_hod():
     # Update the project with the assigned HODs
     projects_collection.update_one(
         {"_id": ObjectId(project_id)},
-        {"$set": {"assigned_hods": [ObjectId(hod_id) for hod_id in hod_ids], "status": "assigned_to_hod"}}
+        {"$set": {"assigned_hods": [ObjectId(hod_id) for hod_id in hod_ids], "status": "assigned_to_hod"}},
+        
     )
 
     flash("Project assigned to HODs successfully!", "success")
@@ -558,6 +547,9 @@ Best Regards,
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+@app.route('/login', methods=['GET'])
+def login():
+    return render_template('login.html')
 
 @app.route('/', methods=['GET'])
 def index():
