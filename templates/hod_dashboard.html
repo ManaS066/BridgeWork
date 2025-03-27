@@ -348,8 +348,8 @@
                                 <th>Email</th>
                                 <th>Skills</th>
                                 <th>CGPA</th>
-                                <th>Department</th>
-                                <th>Batch</th>
+                                
+                                <th>Roll no</th>
                                 <th>Contact</th>
                                 <th>Profile</th>
                             </tr>
@@ -361,9 +361,9 @@
                                 <td>{{ student.email }}</td>
                                 <td>{{ student.skills }}</td>
                                 <td>{{ student.gpa }}</td>
-                                <td>{{ student.department }}</td>
-                                <td>{{ student.batch }}</td>
-                                <td>{{ student.contact }}</td>
+                               
+                                <td>{{ student.rollno }}</td>
+                                <td>{{ student.mobile_no }}</td>
                                 <td><a href="showStudent/{{ student.id }}">View Profile</a></td>
                             </tr>
                             {% endfor %}

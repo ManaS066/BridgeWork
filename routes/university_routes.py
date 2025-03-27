@@ -302,17 +302,42 @@ def get_job_history():
         job['_id'] = str(job['_id'])
     return jsonify(job_history)
 
-@app.route('/get_project_history', methods=['GET'])
+@app.route('/project_history', methods=['GET'])
 def get_project_history():
     university_id = session.get('university_id', '')
     if not university_id:
-        return jsonify({"message": "University ID is required"}), 400
+        return redirect(url_for('login'))  # Redirect to login if no university ID
 
-    completed_projects = list(projects_collection.find({"assigned_to_id": ObjectId(university_id), "status": "completed"}))
-    for project in completed_projects:
-        project['_id'] = str(project['_id'])
-        project['assigned_to_id'] = str(project['assigned_to_id'])
-    return jsonify(completed_projects)
+    try:
+        # Convert university_id to ObjectId
+        university_object_id = ObjectId(university_id)
+
+        # Find completed projects for the university
+        completed_projects = list(projects_collection.find({
+            "assigned_to_id": university_object_id, 
+            "status": "completed"
+        }))
+        
+        # Convert ObjectId fields to strings recursively
+        def convert_objectid(obj):
+            if isinstance(obj, ObjectId):
+                return str(obj)
+            elif isinstance(obj, dict):
+                return {k: convert_objectid(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_objectid(item) for item in obj]
+            return obj
+
+        # Apply conversion to each project
+        serializable_projects = [convert_objectid(project) for project in completed_projects]
+        
+        return render_template('project_history.html', completed_projects=serializable_projects)
+    
+    except Exception as e:
+        # Log the error and show a user-friendly message
+        print(f"Error fetching project history: {e}")
+        flash('An error occurred while fetching project history.', 'danger')
+        return redirect(url_for('university_dashboard'))
 
 @app.route('/university_profile/<university_id>', methods=['GET'])
 def university_profile(university_id):

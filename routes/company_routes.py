@@ -8,7 +8,7 @@ from bson.objectid import ObjectId
 from datetime import datetime, timezone, timedelta
 
 @app.route('/register_company', methods=['GET', 'POST'])
-def company_register():
+def register_company():
     if request.method == 'POST':
         company_name = request.form['company_name']
         employee_size = request.form['employee_size']
@@ -19,7 +19,7 @@ def company_register():
         existing_company = companies_collection.find_one({"email": email})
         if existing_company:
             flash("Company with this email already exists", "danger")
-            return redirect(url_for('company_registration'))
+            return redirect(url_for('register_company'))
 
         # Insert new company registration request with a timestamp
         pending_companies_collection.insert_one({
@@ -33,13 +33,12 @@ def company_register():
 
         flash("Company registration request submitted successfully!", "success")
         return redirect('/login')
-
+    
+    # For GET request, render the registration template
     return render_template('company_registration.html')
 
-
-
-@app.route('/logincompny', methods=['POST'])
-def logincompny():
+@app.route('/logincompany', methods=['POST'])
+def logincompany():
     data = request.form
     email = data.get('email')
     password = data.get('password')
