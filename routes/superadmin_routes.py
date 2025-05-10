@@ -3,7 +3,7 @@ from app import app, companies_collection, universities_collection, students_col
 from bson.objectid import ObjectId
 from datetime import datetime
 
-@app.route('/super_admin_login', methods=['GET', 'POST'])
+@app.route('/superadmin', methods=['GET', 'POST'])
 def super_admin_login():
     if request.method == 'POST':
         email = request.form['email']
@@ -26,7 +26,7 @@ def super_admin_login():
 def super_admin_dashboard():
     if 'user_role' not in session or session['user_role'] != 'super_admin':
         flash("You do not have permission to access this page.", "danger")
-        return redirect(url_for('super_admin_login'))
+        return redirect(url_for('superadmin'))
 
     num_companies = companies_collection.count_documents({})
     num_universities = universities_collection.count_documents({})
