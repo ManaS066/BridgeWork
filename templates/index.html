@@ -17,6 +17,30 @@
             --danger-color: #f44336;
             --gray-color: #6c757d;
         }
+
+        /* ScrollBar Edit */
+
+        /* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0); /* Fully transparent */
+    margin-block: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: var(--primary-color);
+    border-radius: 6px;
+    /* border: 1px solid transparent; */
+    background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent-color);
+}
+
         
         * {
             margin: 0;
@@ -61,7 +85,7 @@
         .btn-outline {
             background-color: transparent;
             border: 2px solid var(--primary-color);
-            color: var(--primary-color);
+            color: black;
         }
         
         .btn-outline:hover {
@@ -531,20 +555,60 @@ input, textarea {
     border-radius: 5px;
 }
 
+#scrollToTopBtn {
+    display: flex;
+    position: fixed;
+    right: 20px;
+    bottom: 30px;
+    width: 50px;
+    height: 50px;
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    opacity: 0;
+    transform: scale(0.5);
+    pointer-events: none;
+    z-index: 9999;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    color: white;
+    font-size: 24px;
+    align-items: center;
+    justify-content: center;
+}
+
+#scrollToTopBtn.show {
+    opacity: 1;
+    transform: scale(1);
+    pointer-events: auto;
+}
+
+#scrollToTopBtn:hover {
+    background-color: var(--accent-color);
+    opacity: 1;
+}
+
+
+
+
 
     </style>
 </head>
 <body>
+    <!-- top navigate button -->
+
+    <button id="scrollToTopBtn" title="Back to top">↑</button>
+
     <!-- Header -->
     <header>
         <div class="container">
             <nav class="navbar">
-                <a href="#" class="logo">Work<span>Bridge</span></a>
+                <a href="/" class="logo">Work<span>Bridge</span></a>
                 <ul class="nav-links">
-                    <li><a href="#how-it-works">How It Works</a></li>
-                    <li><a href="/login">Login</a></li>
-                    <li><a href="#testimonials">Testimonials</a></li>
-                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#how-it-works" class="btn">How It Works</a></li>
+                    <li><a href="/login" class="btn">Login</a></li>
+                    <!-- <li><a href="#testimonials">Testimonials</a></li> -->
+                    <li><a href="#faq" class="btn">FAQ</a></li>
                     <li><a href="#contact" class="btn btn-primary">Contact Us</a></li>
                 </ul>
                 <button class="mobile-menu-btn">☰</button>
@@ -559,7 +623,7 @@ input, textarea {
                 <h1 class="hero-title">Connecting Companies, Universities & Students</h1>
                 <p class="hero-subtitle">A seamless platform that bridges the gap between industry needs and academic talent</p>
                 <div class="hero-btns">
-                    <a href="#login-sections" class="btn btn-primary">Get Started</a>
+                    <a href="/login" class="btn btn-primary">Get Started</a>
                     <a href="#how-it-works" class="btn btn-outline">Learn More</a>
                 </div>
             </div>
@@ -607,13 +671,13 @@ input, textarea {
         <span class="close-btn">&times;</span>
         <h2>Contact Us</h2>
         <form>
-            <label for="name" align:left>Name:</label>
+            <label for="name" >Name:</label>
             <input type="text" id="name" required>
             
-            <label for="email" align:left>Email:</label>
+            <label for="email" >Email:</label>
             <input type="email" id="email" required>
             
-            <label for="message" align:left>Message:</label>
+            <label for="message" >Message:</label>
             <textarea id="message" rows="4" required></textarea>
             
             <button type="submit" class="btn btn-primary">Submit</button>
@@ -622,51 +686,7 @@ input, textarea {
 </div>
 
 
-    <!-- Testimonials Section -->
-    <section class="section testimonials" id="testimonials">
-        <div class="container">
-            <h2 class="section-title text-center">What Our Users Say</h2>
-            <p class="section-subtitle text-center">Hear from companies, universities, and students who have benefited from our platform</p>
-            
-            <div class="testimonial-slider">
-                <div class="testimonial-slide">
-                    <div class="testimonial-avatar">
-                        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="John Smith">
-                    </div>
-                    <p class="testimonial-text">"EduConnect has revolutionized our recruitment process. We've been able to find talented students who perfectly match our requirements, saving us time and resources."</p>
-                    <p class="testimonial-author">John Smith</p>
-                    <p class="testimonial-role">HR Manager, Tech Solutions Inc.</p>
-                </div>
-                
-                <div class="testimonial-slide" style="display: none;">
-                    <div class="testimonial-avatar">
-                        <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Johnson">
-                    </div>
-                    <p class="testimonial-text">"As a university administrator, this platform has streamlined our industry partnerships. The interface is intuitive, and the process is transparent for all stakeholders."</p>
-                    <p class="testimonial-author">Dr. Sarah Johnson</p>
-                    <p class="testimonial-role">Dean of Placements, National University</p>
-                </div>
-                
-                <div class="testimonial-slide" style="display: none;">
-                    <div class="testimonial-avatar">
-                        <img src="https://randomuser.me/api/portraits/men/67.jpg" alt="Michael Chen">
-                    </div>
-                    <p class="testimonial-text">"As a department head, I can now easily match the right students with the right opportunities. The platform has significantly improved our placement rates."</p>
-                    <p class="testimonial-author">Prof. Michael Chen</p>
-                    <p class="testimonial-role">HOD Computer Science, Tech University</p>
-                </div>
-                
-                <div class="testimonial-slide" style="display: none;">
-                    <div class="testimonial-avatar">
-                        <img src="https://randomuser.me/api/portraits/women/28.jpg" alt="Emily Rodriguez">
-                    </div>
-                    <p class="testimonial-text">"Thanks to EduConnect, I secured an internship at my dream company! The process was straightforward, and I received notifications at every step."</p>
-                    <p class="testimonial-author">Emily Rodriguez</p>
-                    <p class="testimonial-role">Computer Science Student</p>
-                </div>
-            </div>
-        </div>
-    </section>
+   
 
     <!-- FAQ Section -->
     <section class="section faq" id="faq">
@@ -724,8 +744,8 @@ input, textarea {
     <section class="section cta">
         <div class="container">
             <h2 class="section-title">Ready to Transform Your Recruitment Process?</h2>
-            <p class="section-subtitle">Join thousands of companies, universities, and students on our platform</p>
-            <a href="#login-sections" class="btn btn-outline">Get Started Today</a>
+            <p class="section-subtitle" style="color: #ffff;">Join thousands of companies, universities, and students on our platform</p>
+            <a href="/login" class="btn btn-outline">Get Started Today</a>
         </div>
     </section>
 
@@ -734,12 +754,12 @@ input, textarea {
         <div class="container">
             <div class="footer-content">
                 <div class="footer-column">
-                    <h3>EduConnect</h3>
+                    <h3>WorkBridge</h3>
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
                         <li><a href="#how-it-works">How It Works</a></li>
-                        <li><a href="#login-sections">Login</a></li>
-                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="/login">Login</a></li>
+                        <!-- <li><a href="#testimonials">Testimonials</a></li> -->
                         <li><a href="#faq">FAQ</a></li>
                     </ul>
                 </div>
@@ -747,7 +767,7 @@ input, textarea {
                 <div class="footer-column">
                     <h3>For Companies</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Post a Job</a></li>
+                        <li><a href="/register_company">Post a Job</a></li>
                         <li><a href="#">Browse Universities</a></li>
                         <li><a href="#">Success Stories</a></li>
                         <li><a href="#">Pricing</a></li>
@@ -757,7 +777,7 @@ input, textarea {
                 <div class="footer-column">
                     <h3>For Universities</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Join the Network</a></li>
+                        <li><a href="/university_register">Join the Network</a></li>
                         <li><a href="#">Partner Companies</a></li>
                         <li><a href="#">Department Management</a></li>
                         <li><a href="#">Resources</a></li>
@@ -767,7 +787,7 @@ input, textarea {
                 <div class="footer-column">
                     <h3>For Students</h3>
                     <ul class="footer-links">
-                        <li><a href="#">Create Profile</a></li>
+                        <li><a href="/student_register">Create Profile</a></li>
                         <li><a href="#">Browse Opportunities</a></li>
                         <li><a href="#">Career Resources</a></li>
                         <li><a href="#">Success Stories</a></li>
@@ -776,7 +796,7 @@ input, textarea {
             </div>
             
             <div class="footer-bottom">
-                <p>&copy; 2023 EduConnect. All rights reserved.</p>
+                <p>&copy; 2025 WorkBridge. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -878,6 +898,33 @@ document.addEventListener("DOMContentLoaded", function () {
         
         // Auto-advance slides every 5 seconds
         setInterval(nextSlide, 5000);
+
+        // Scroll to top function
+        // Show button only near the bottom
+const scrollBtn = document.getElementById("scrollToTopBtn");
+
+
+function toggleScrollBtn() {
+    const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = window.scrollY;
+
+    if (scrolled >= scrollableHeight - 100) {
+        scrollBtn.classList.add("show");
+    } else {
+        scrollBtn.classList.remove("show");
+    }
+}
+
+// Run on scroll and page load
+window.addEventListener("scroll", toggleScrollBtn);
+document.addEventListener("DOMContentLoaded", toggleScrollBtn);
+
+// Scroll to top on click
+scrollBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+
     </script>
 </body>
 </html>
