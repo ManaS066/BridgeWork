@@ -867,95 +867,154 @@
             </div>
             <div class="modal-body">
                 <form id="addProjectForm" action="{{ url_for('add_project') }}" method="POST">
-                    <div class="form-group">
-                        <label for="universities" class="form-label">Select Universities</label>
-                        <select id="universities" name="universities[]" class="form-control" multiple required>
+                    <div class="form-group mb-3">
+                    <label class="form-label">Select Universities</label>
+                    <div class="dropdown">
+                        <button class="form-control text-start" type="button" id="uniDropdownBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                            <span id="uniDropdownLabel">Choose universities...</span>
+                        </button>
+                        <ul class="dropdown-menu w-100 p-2" aria-labelledby="uniDropdownBtn" style="max-height: 350px; overflow-y: auto;">
                             {% for university in university_list %}
-                            <option value="{{ university._id }}">{{ university.name }}</option>
+                            <li>
+                                <div class="form-check mb-2 p-2 rounded border{% if loop.index0 %} mt-2{% endif %}" style="background: {% if university.selected %}#eaf4ff{% else %}#fff{% endif %}; border: 1px solid #b6d4fe;">
+                                    <input class="form-check-input uni-checkbox" type="checkbox" value="{{ university._id }}" id="uniCheck{{ loop.index }}" name="universities[]">
+                                    <label class="form-check-label w-100" for="uniCheck{{ loop.index }}">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span class="fw-semibold">{{ university.name or "University Name" }}</span>
+                                            <span class="badge bg-secondary ms-2" style="font-size: 0.85em;">
+                                                {{ university.projectsCompleted or university.projects_completed or 0 }} projects
+                                            </span>
+                                        </div>
+                                        <div class="d-flex align-items-center gap-3 mt-1 mb-1" style="font-size: 0.95em;">
+                                            <span class="me-2">
+                                                <i class="fas fa-star text-warning"></i>
+                                                {{ university.rating or "4.5" }}/5.0
+                                            </span>
+                                            <span class="me-2">
+                                                <i class="fas fa-chart-line text-success"></i>
+                                                {{ university.successRate or university.success_rate or "90" }}% Success
+                                            </span>
+                                            <span>
+                                                <i class="fas fa-calendar-alt text-primary"></i>
+                                                {{ university.avgCompletionTime or university.avg_completion_time or "2.5 months" }}
+                                            </span>
+                                        </div>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            {% set specialties = university.specialties or [] %}
+                                            {% for specialty in specialties[:2] %}
+                                            <span class="badge bg-light text-dark border" style="font-size: 0.85em;">{{ specialty }}</span>
+                                            {% endfor %}
+                                            {% if specialties|length > 2 %}
+                                            <span class="badge bg-light text-dark border" style="font-size: 0.85em;">+{{ specialties|length - 2 }}</span>
+                                            {% endif %}
+                                        </div>
+                                        <span class="badge {% if (university.rating or 0)|float >= 4.8 and (university.successRate or university.success_rate or 0)|int >= 95 %}bg-primary{% elif (university.rating or 0)|float >= 4.5 and (university.successRate or university.success_rate or 0)|int >= 90 %}bg-secondary{% else %}bg-light text-dark border{% endif %} ms-2 mt-1" style="font-size: 0.85em;">
+                                            {% if (university.rating or 0)|float >= 4.8 and (university.successRate or university.success_rate or 0)|int >= 95 %}
+                                                Highly Recommended
+                                            {% elif (university.rating or 0)|float >= 4.5 and (university.successRate or university.success_rate or 0)|int >= 90 %}
+                                                Recommended
+                                            {% else %}
+                                                Good Choice
+                                            {% endif %}
+                                        </span>
+                                    </label>
+                                </div>
+                            </li>
                             {% endfor %}
-                        </select>
-                        <div class="form-text">Hold Ctrl (or Cmd on Mac) to select multiple universities</div>
+                        </ul>
                     </div>
+                    <div class="form-text">You can select multiple universities.</div>
+                </div>
 
-                    <div class="form-group">
-                        <label for="project_desc" class="form-label">Project Description</label>
-                        <textarea id="project_desc" name="project_desc" rows="4" class="form-control"
-                            required></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="project_desc" class="form-label">Project Description</label>
+                    <textarea id="project_desc" name="project_desc" rows="4" class="form-control" required></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="problem_statement" class="form-label">Project/Problem Statement</label>
-                        <textarea id="problem_statement" name="problem_statement" rows="4" class="form-control"
-                            required></textarea>
-                    </div>
+                <div class="form-group">
+                    <label for="problem_statement" class="form-label">Project/Problem Statement</label>
+                    <textarea id="problem_statement" name="problem_statement" rows="4" class="form-control" required></textarea>
+                </div>
 
-                    <div class="form-group">
-                        <label for="reward" class="form-label">Reward</label>
-                        <input type="text" id="reward" name="reward" class="form-control" required>
-                    </div>
+                <div class="form-group">
+                    <label for="reward" class="form-label">Reward</label>
+                    <input type="text" id="reward" name="reward" class="form-control" required>
+                </div>
 
-                    <div class="form-group">
-                        <label for="duration" class="form-label">Project Deadline</label>
-                        <input type="date" id="duration" name="duration" class="form-control" required>
-                    </div>
-                    <br>
+                <div class="form-group">
+                    <label for="duration" class="form-label">Project Deadline</label>
+                    <input type="date" id="duration" name="duration" class="form-control" required>
+                </div>
+                <br>
 
-                    <button type="submit" class="submit-btn">Submit</button>
-                </form>
-            </div>
+                <button type="submit" class="submit-btn">Submit</button>
+            </form>
         </div>
     </div>
+</div>
 
-    <script>
-        // Function to open the project modal
-        function openProjectModal() {
-            document.getElementById("projectModal").style.display = "flex"; // Use flex to center the modal
-        }
+<!-- Add this JS after your modal -->
+<script>
+// Custom dropdown label update
+function updateUniDropdownLabel() {
+    const checked = document.querySelectorAll('.uni-checkbox:checked');
+    const label = document.getElementById('uniDropdownLabel');
+    if (checked.length === 0) {
+        label.textContent = 'Choose universities...';
+    } else if (checked.length === 1) {
+        label.textContent = checked[0].closest('label').querySelector('.fw-semibold').textContent;
+    } else {
+        label.textContent = checked.length + ' universities selected';
+    }
+}
+document.querySelectorAll('.uni-checkbox').forEach(cb => {
+    cb.addEventListener('change', updateUniDropdownLabel);
+});
+updateUniDropdownLabel();
 
-        // Function to close the project modal
-        function closeProjectModal() {
-            document.getElementById("projectModal").style.display = "none";
-        }
+// Modal open/close logic (already present in your code)
+function openProjectModal() {
+    document.getElementById("projectModal").style.display = "flex";
+}
+function closeProjectModal() {
+    document.getElementById("projectModal").style.display = "none";
+}
 
-        // Form validation for adding a project
-        document.getElementById('addProjectForm').addEventListener('submit', function (e) {
-            const universities = document.getElementById('universities').selectedOptions;
-            const projectDesc = document.getElementById('project_desc').value;
-            const problemStatement = document.getElementById('problem_statement').value;
-            const reward = document.getElementById('reward').value;
-            const duration = document.getElementById('duration').value;
+// Form validation for adding a project (already present in your code)
+document.getElementById('addProjectForm').addEventListener('submit', function (e) {
+    const universities = document.querySelectorAll('.uni-checkbox:checked');
+    const projectDesc = document.getElementById('project_desc').value;
+    const problemStatement = document.getElementById('problem_statement').value;
+    const reward = document.getElementById('reward').value;
+    const duration = document.getElementById('duration').value;
 
-            if (universities.length === 0) {
-                e.preventDefault();
-                alert('Please select at least one university');
-                return;
-            }
-
-            if (!projectDesc.trim()) {
-                e.preventDefault();
-                alert('Please enter a project description');
-                return;
-            }
-
-            if (!problemStatement.trim()) {
-                e.preventDefault();
-                alert('Please enter a project/problem statement');
-                return;
-            }
-
-            if (!reward.trim()) {
-                e.preventDefault();
-                alert('Please enter a reward');
-                return;
-            }
-
-            if (!duration) {
-                e.preventDefault();
-                alert('Please select a valid date for the project deadline');
-                return;
-            }
-        });
-    </script>
+    if (universities.length === 0) {
+        e.preventDefault();
+        alert('Please select at least one university');
+        return;
+    }
+    if (!projectDesc.trim()) {
+        e.preventDefault();
+        alert('Please enter a project description');
+        return;
+    }
+    if (!problemStatement.trim()) {
+        e.preventDefault();
+        alert('Please enter a project/problem statement');
+        return;
+    }
+    if (!reward.trim()) {
+        e.preventDefault();
+        alert('Please enter a reward');
+        return;
+    }
+    if (!duration) {
+        e.preventDefault();
+        alert('Please select a valid date for the project deadline');
+        return;
+    }
+});
+</script>
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
