@@ -1,29 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>University Dashboard</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f8f9fa;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
         }
+
         .navbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             background-color: #007bff;
             padding: 15px 20px;
             color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
         }
+
         .navbar .title {
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
         }
+
         .logout-btn {
             background-color: #dc3545;
             color: white;
@@ -32,179 +39,1038 @@
             cursor: pointer;
             font-size: 14px;
             border-radius: 5px;
+            transition: all 0.3s ease;
         }
+
         .logout-btn:hover {
             background-color: #c82333;
+            transform: translateY(-2px);
         }
-        .container {
+
+        .container,
+        .container-fluid {
             padding: 20px;
         }
-        .job-container {
+
+        .job-container,
+        .project-container {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
+            margin-bottom: 30px;
         }
-        .job-card {
+
+        .job-card,
+        .project-card {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-left: 4px solid #007bff;
         }
-        .job-title {
-            font-size: 18px;
+
+        .job-card:hover,
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .job-title,
+        .project-title {
+            font-size: 20px;
             font-weight: bold;
             color: #007bff;
+            margin-bottom: 10px;
         }
-        .job-desc {
+
+        .job-desc,
+        .project-desc {
             font-size: 14px;
             color: #555;
+            margin-bottom: 15px;
         }
-        .job-details {
+
+        .job-details,
+        .project-details {
             font-size: 14px;
             color: #333;
+            margin-bottom: 15px;
+            line-height: 1.6;
         }
+
+        .job-details div,
+        .project-details div {
+            margin-bottom: 6px;
+        }
+
+        .approve-btn,
+        .send-btn,
+        .view-btn,
+        .accept-btn,
+        .reject-btn,
+        .history-btn,
+        .complete-btn,
+        .assign-btn {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            border-radius: 5px;
+            border: none;
+            color: white;
+            transition: all 0.3s ease;
+            margin-right: 8px;
+            margin-top: 10px;
+        }
+
         .approve-btn {
             background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
         }
+
         .approve-btn:hover {
             background-color: #218838;
+            transform: translateY(-2px);
         }
+
         .send-btn {
             background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            cursor: pointer;
-            font-size: 14px;
-            border-radius: 5px;
         }
+
         .send-btn:hover {
             background-color: #0056b3;
+            transform: translateY(-2px);
         }
+
         .view-btn {
             background-color: #17a2b8;
+        }
+
+        .view-btn:hover {
+            background-color: #138496;
+            transform: translateY(-2px);
+        }
+
+        .accept-btn {
+            background-color: #28a745;
+            margin-right: 10px;
+        }
+
+        .accept-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .reject-btn {
+            background-color: #dc3545;
+        }
+
+        .reject-btn:hover {
+            background-color: #c82333;
+            transform: translateY(-2px);
+        }
+
+        .history-btn {
+            background-color: #6c757d;
+            margin: 20px auto;
+            display: block;
+            width: auto;
+            padding: 10px 20px;
+        }
+
+        .history-btn:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .complete-btn {
+            background-color: #28a745;
+        }
+
+        .complete-btn:hover {
+            background-color: #218838;
+            transform: translateY(-2px);
+        }
+
+        .assign-btn {
+            background-color: #6610f2;
+        }
+
+        .assign-btn:hover {
+            background-color: #520dc2;
+            transform: translateY(-2px);
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-card {
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+
+        .department-badge {
+            margin-right: 5px;
+            margin-bottom: 8px;
+            padding: 6px 10px;
+            display: inline-block;
+        }
+
+        .contact-info {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .contact-info h5 {
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .contact-info a {
+            color: #333;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .contact-info a:hover {
+            color: #3498db;
+        }
+
+        .card {
+            border: none;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .card-header {
+            padding: 15px 20px;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        .modal-content {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background-color: #007bff;
+            color: white;
+            border-bottom: none;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            border-top: none;
+            padding: 15px 20px;
+        }
+
+        footer {
+            background-color: #343a40;
+            padding: 30px 0;
+            margin-top: 50px;
+        }
+
+        h2 {
+            color: #007bff;
+            margin: 20px 0;
+            font-weight: 600;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .student-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            background-color: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .student-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .student-name {
+            font-weight: bold;
+            color: #007bff;
+            font-size: 18px;
+        }
+
+        .student-info {
+            margin-top: 10px;
+            color: #555;
+        }
+
+        .student-info p {
+            margin-bottom: 5px;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+
+            .profile-header {
+                padding: 2rem 0;
+            }
+
+            .stats-card {
+                margin-bottom: 15px;
+            }
+
+            .job-card,
+            .project-card {
+                padding: 15px;
+            }
+
+            .job-title,
+            .project-title {
+                font-size: 18px;
+            }
+
+            .approve-btn,
+            .send-btn,
+            .view-btn,
+            .accept-btn,
+            .reject-btn,
+            .complete-btn,
+            .assign-btn {
+                width: 100%;
+                margin-bottom: 8px;
+                margin-right: 0;
+            }
+
+            form {
+                width: 100%;
+            }
+        }
+
+        .notification-btn {
+            background-color: #ffc107;
             color: white;
             border: none;
             padding: 8px 15px;
             cursor: pointer;
             font-size: 14px;
             border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
         }
-        .view-btn:hover {
-            background-color: #138496;
+
+        .notification-btn:hover {
+            background-color: #e0a800;
+            transform: translateY(-2px);
+        }
+
+        .notification-count {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
         }
     </style>
 </head>
+
 <body>
-    <div class="navbar">
-        <div class="title">BridgeWork</div>
-        <span>University Dashboard - {{ university_name }}</span>
+    <div class="navbar d-flex justify-content-between align-items-center">
+        <div class="title">WorkBridge</div>
+        <span>University Dashboard - {{ university.name }}</span>
         <div>
-            <a href="{{ url_for('logout') }}">
-                <button class="logout-btn">Logout</button>
+            <button class="notification-btn" data-bs-toggle="modal" data-bs-target="#hodRequestsModal">
+                <i class="fas fa-bell"></i>
+                <span class="notification-count" id="notification-count">0</span>
+            </button>
+            <a href="{{ url_for('project_history') }}" class="btn btn-primary me-2"><i class="fas fa-history me-2"></i> View Projects</a>
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>
         </div>
     </div>
 
-    <div class="container">
-        {% if job_listings %}
-            <div class="job-container">
-                <h2>Pending Job Postings</h2>
-                {% for job in job_listings %}
-                    {% if job.flag == 0 %}
-                        <div class="job-card">
-                            <div class="job-title">{{ job.job_title }}</div>
-                            <div class="job-desc">{{ job.job_desc }}</div>
-                            <div class="job-details">
-                                <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
-                                <div><strong>Company:</strong> {{ job.company_name }}</div>
-                                <div><strong>Number of Openings:</strong> {{ job.num_openings }}</div>
-                                <div><strong>Job Mode:</strong> {{ job.job_mode }}</div>
-                            </div>
-                            <form action="{{ url_for('approve_job', job_id=job._id) }}" method="POST">
-                                <button type="submit" class="approve-btn">Proceed</button>
-                            </form>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-
-            <div class="job-container">
-                <h2>Jobs with Selected Students</h2>
-                {% for job in job_listings %}
-                    {% if job.selected_students %}
-                        <div class="job-card">
-                            <div class="job-title">{{ job.job_title }}</div>
-                            <div class="job-desc">{{ job.job_desc }}</div>
-                            <div class="job-details">
-                                <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
-                                <div><strong>Company:</strong> {{ job.company_name }}</div>
-                                <div><strong>Number of Openings:</strong> {{ job.num_openings }}</div>
-                                <div><strong>Job Mode:</strong> {{ job.job_mode }}</div>
-                                <button type="button" class="view-btn" data-toggle="modal" data-target="#viewStudentsModal" data-job-id="{{ job._id }}">View</button>
-                            </div>
-                            <form action="{{ url_for('send_students_to_company', job_id=job._id) }}" method="POST">
-                                <input type="hidden" name="job_id" value="{{ job._id }}">
-                                <button type="submit" class="send-btn">Send to Company</button>
-                            </form>
-                        </div>
-                    {% endif %}
-                {% endfor %}
-            </div>
-        {% else %}
-            <p>No job postings available for this university.</p>
-        {% endif %}
+    <div class="container-fluid profile-header">
+        <div class="container">
+            <h1>{{ university.name }}</h1>
+            <p><i class="fas fa-map-marker-alt me-2"></i> {{ university.address }}</p>
+        </div>
     </div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="viewStudentsModal" tabindex="-1" role="dialog" aria-labelledby="viewStudentsModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Project Requests Section -->
+                <div class="project-container" id="project-container">
+                    <h2 id="project-heading"><i class="fas fa-tasks me-2"></i>Project Requests</h2>
+                    <div id="project-requests" class="row"></div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4><i class="fas fa-university me-2"></i>University Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">University Name:</div>
+                            <div class="col-md-8">{{ university.name }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Email:</div>
+                            <div class="col-md-8">{{ university.email }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Address:</div>
+                            <div class="col-md-8">{{ university.address }}</div>
+                        </div>
+                        <div class="row mb-3">
+                            <div class="col-md-4 fw-bold">Departments:</div>
+                            <div class="col-md-8">
+                                {% for department in university.departments %}
+                                <a href="{{ url_for('dept_profile', dept_name=department) }}" class="badge bg-info department-badge">{{ department | upper }}</a>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mb-4">
+                    <div class="card-header bg-success text-white">
+                        <h4><i class="fas fa-users me-2"></i>Student Statistics</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-primary text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-white">First Year</h5>
+                                        <h2 class="text-white">{{ university.first_year }}</h2>
+                                        <p class="text-white">Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-success text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-white">Second Year</h5>
+                                        <h2 class="text-white">{{ university.second_year }}</h5>
+                                            <p class="text-white">Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-warning text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-white">Third Year</h5>
+                                        <h2 class="text-white">{{ university.third_year }}</h2>
+                                        <p class="text-white">Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3 mb-3">
+                                <div class="card stats-card bg-danger text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="text-white">Fourth Year</h5>
+                                        <h2 class="text-white">{{ university.fourth_year }}</h2>
+                                        <p class="text-white">Students</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card stats-card bg-dark text-white">
+                                    <div class="card-body text-center">
+                                        <h5 class="card-title">Total Students</h5>
+                                        <h3>{{ university.first_year|int + university.second_year|int +
+                                            university.third_year|int + university.fourth_year|int }}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4><i class="fas fa-chart-bar me-2"></i>Projects and Jobs Overview</h4>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="projectsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col-12">
+                            <h2>Current Projects</h2>
+                            <div class="row">
+                                {% for project in current_projects %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">{{ project.project_title }}</h5>
+                                            <p class="card-text">
+                                                <strong>Company:</strong> {{ project.company_name }}<br>
+                                                <strong>Description:</strong> {{ project.project_desc }}
+                                            </p>
+                                            <div class="project-status mb-3">
+                                              
+                                                {% if project.status == 'assigned_to_hod' %}
+                                                    <span class="badge bg-success">Assigned to HOD</span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="project-actions"> 
+                                                {% if project.status == 'assigned' %}
+                                                    <button class="btn btn-primary btn-sm assign-hod-btn" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#assignHodModal"
+                                                            data-project-id="{{ project._id }}">
+                                                        <i class="fas fa-user-plus me-2"></i>Assign to HOD
+                                                    </button>
+                                               
+                                                {% else %}
+                                                <form action="{{ url_for('done_project', project_id=project._id) }}" method="POST" class="me-2">
+                                                    <button type="submit" class="complete-btn"><i class="fas fa-check me-1"></i> Complete</button>
+                                                </form>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Review Projects Section -->
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h4><i class="fas fa-hourglass-half me-2"></i>Pending Review</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if pending_review_projects %}
+                        {% for project in pending_review_projects %}
+                        <div class="project-card mb-3">
+                            <div class="project-title">{{ project.project_title }}</div>
+                            <div class="project-details">
+                                <div><strong>Problem Statement:</strong> {{ project.problem_statement }}</div>
+                                <div><strong>Project Description:</strong> {{ project.project_desc }}</div>
+                                <div><strong>Reward:</strong> {{ project.reward }}</div>
+                                <div><strong>Duration:</strong> {{ project.duration }}</div>
+                                <div><strong>Company:</strong> {{ project.company_name }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-center text-muted">No projects pending review.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4><i class="fas fa-address-card me-2"></i>Contact Information</h4>
+                    </div>
+                    <div class="card-body contact-info">
+                        <div class="mb-3">
+                            <h5><i class="fas fa-user me-2"></i> Contact Person</h5>
+                            <p>{{ university.contact_person }}</p>
+                        </div>
+                        <div class="mb-3">
+                            <h5><i class="fas fa-envelope me-2"></i> Contact Email</h5>
+                            <p><a href="mailto:{{ university.contact_email }}">{{ university.contact_email }}</a></p>
+                        </div>
+                        <div class="mb-3">
+                            <h5><i class="fas fa-phone me-2"></i> Contact Phone</h5>
+                            <p><a href="tel:{{ university.contact_phone }}">{{ university.contact_phone }}</a></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- New section for displaying the number of projects and jobs -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-project-diagram fa-2x mb-2 text-primary"></i>
+                                <h5 class="card-title">Total Projects</h5>
+                                <h3>{{ project_count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card stats-card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-briefcase fa-2x mb-2 text-success"></i>
+                                <h5 class="card-title">Total Jobs</h5>
+                                <h3>{{ job_count }}</h3>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Job Listings Section -->
+        {% if job_listings %}
+        <div class="job-container" id="job-container">
+            <h2 id="job-heading"><i class="fas fa-briefcase me-2"></i>Pending Job Postings</h2>
+            <div class="row">
+                {% for job in job_listings %}
+                {% if job.flag == 0 %}
+                <div class="col-lg-6 mb-3">
+                    <div class="job-card">
+                        <div class="job-title">{{ job.job_title }}</div>
+                        <div class="job-desc">{{ job.job_desc }}</div>
+                        <div class="job-details">
+                            <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
+                            <div><strong>Company:</strong> {{ job.company_name }}</div>
+                            <div><strong>Number of Openings:</strong> {{ job.num_openings }}</div>
+                            <div><strong>Job Mode:</strong> {{ job.job_mode }}</div>
+                        </div>
+                        <form action="{{ url_for('approve_job', job_id=job._id) }}" method="POST">
+                            <button type="submit" class="approve-btn"><i class="fas fa-check me-1"></i> Proceed</button>
+                        </form>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="job-container" id="selected-job-container">
+            <h2 id="selected-job-heading"><i class="fas fa-user-check me-2"></i>Jobs with Selected Students</h2>
+            <div class="row">
+                {% for job in job_listings %}
+                {% if job.selected_students and job.flag!=3 %}
+                <div class="col-lg-6 mb-3">
+                    <div class="job-card">
+                        <div class="job-title">{{ job.job_title }}</div>
+                        <div class="job-desc">{{ job.job_desc }}</div>
+                        <div class="job-details">
+                            <div><strong>Departments:</strong> {{ ", ".join(job.departments) }}</div>
+                            <div><strong>Company:</strong> {{ job.company_name }}</div>
+                            <div><strong>Number of Openings:</strong> {{ job.num_openings }}</div>
+                            <div><strong>Job Mode:</strong> {{ job.job_mode }}</div>
+                        </div>
+                        <div class="d-flex flex-wrap mt-3">
+                            <button type="button" class="view-btn me-2 mb-2" data-bs-toggle="modal"
+                                data-bs-target="#viewStudentsModal" data-job-id="{{ job._id }}">
+                                <i class="fas fa-eye me-1"></i> View Students
+                            </button>
+                            <form action="{{ url_for('send_students_to_company', job_id=job._id) }}" method="POST">
+                                <input type="hidden" name="job_id" value="{{ job._id }}">
+                                <button type="submit" class="send-btn mb-2"><i class="fas fa-paper-plane me-1"></i> Send
+                                    to Company</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle me-2"></i> No job postings available for this university.
+        </div>
+        {% endif %}
+
+        <!-- History Button for Job History -->
+        <button type="button" class="history-btn btn-lg" data-bs-toggle="modal" data-bs-target="#jobHistoryModal"><i
+                class="fas fa-history me-2"></i> View Job History</button>
+    </div>
+
+ <!-- Modal for Assigning HODs -->
+<div class="modal fade" id="assignHodModal" tabindex="-1" aria-labelledby="assignHodModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="assignHodModalLabel">
+                    <i class="fas fa-user-tie me-2"></i>Assign Project to HODs
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="assignHodForm" action="{{ url_for('assign_to_hod') }}" method="POST">
+                    <input type="hidden" name="project_id" id="project_id">
+                    <div class="mb-3">
+                        <label class="form-label">Select HODs:</label>
+                        <div class="row">
+                            {% for hod in hod_list %}
+                                <div class="col-md-4 col-sm-6 mb-2">
+                                    <div class="form-check">
+                                        <input 
+                                            class="form-check-input" 
+                                            type="checkbox" 
+                                            name="hods[]" 
+                                            id="hod_{{ hod._id }}" 
+                                            value="{{ hod._id }}"
+                                        >
+                                        <label class="form-check-label" for="hod_{{ hod._id }}">
+                                            {{ hod.name }} - {{ hod.department }}
+                                        </label>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Assign Project</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    <!-- Modal for Job History -->
+    <div class="modal fade" id="jobHistoryModal" tabindex="-1" aria-labelledby="jobHistoryModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="viewStudentsModalLabel">Selected Students</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    <h5 class="modal-title" id="jobHistoryModalLabel"><i class="fas fa-history me-2"></i>Job History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <ul id="studentDetailsList"></ul>
+                    <div id="job-history"></div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <script type="application/json" id="jobListingsData">
-        {{ job_listings|tojson }}
-    </script>
+    <!-- Modal for Selected Students -->
+    <div class="modal fade" id="viewStudentsModal" tabindex="-1" aria-labelledby="viewStudentsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="viewStudentsModalLabel"><i class="fas fa-user-graduate me-2"></i>Selected Students</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="studentDetailsList" class="row"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for HOD Requests -->
+    <div class="modal fade" id="hodRequestsModal" tabindex="-1" aria-labelledby="hodRequestsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="hodRequestsModalLabel"><i class="fas fa-bell me-2"></i>HOD Requests</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="hod-requests-list" class="list-group"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>{{ university.name }}</h5>
+                    <p><i class="fas fa-map-marker-alt me-2"></i> {{ university.address }}</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <p>&copy; 2025 WorkBridge. All Rights Reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        $('#viewStudentsModal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var jobId = button.data('job-id');
-            var modal = $(this);
-            var studentDetailsList = modal.find('#studentDetailsList');
-            studentDetailsList.empty();
+        $(document).ready(function () {
+            // Fetch project requests
+            $.ajax({
+    url: "{{ url_for('get_project_requests') }}",
+    method: "GET",
+    success: function (data) {
+        var projectRequestsContainer = $('#project-requests');
+        var projectHeading = $('#project-heading');
+        projectRequestsContainer.empty();
 
-            var jobs = JSON.parse(document.getElementById('jobListingsData').textContent);
-            var selectedJob = jobs.find(j => j._id === jobId);
+        if (data.length > 0) {
+            data.forEach(function (project) {
+                var projectCard = `
+                    <div class="col-lg-6 mb-3">
+                        <div class="project-card">
+                            <div class="project-title">${project.problem_statement}</div>
+                            <div class="project-details">
+                                <div><strong>Project Description:</strong> ${project.project_desc}</div>
+                                <div><strong>Reward:</strong> ${project.reward}</div>
+                                <div><strong>Duration:</strong> ${project.duration}</div>
+                                <div><strong>Company:</strong> 
+                                    <a href="/company_profile/${project.company_name}" class="company-btn">
+                                        ${project.company_name}
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap">
+                                <form action="{{ url_for('accept_project', project_id='') }}${project._id}" method="POST" class="me-2">
+                                    <button type="submit" class="accept-btn"><i class="fas fa-check me-1"></i> Accept</button>
+                                </form>
+                                <form action="{{ url_for('reject_project', project_id='') }}${project._id}" method="POST">
+                                    <button type="submit" class="reject-btn"><i class="fas fa-times me-1"></i> Reject</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                projectRequestsContainer.append(projectCard);
+            });
+        } else {
+            projectHeading.hide();
+        }
+    },
+    error: function (error) {
+        console.log("Error fetching project requests:", error);
+    }
+});
 
-            if (selectedJob && selectedJob.selected_students) {
-                selectedJob.selected_students.forEach(student => {
-                    studentDetailsList.append('<li>' + student.name + ' (' + student.email + ') - ' + student.course + ' - GPA: ' + student.gpa + '</li>');
-                });
+            // Hide job headings if no jobs are available
+            var jobContainer = $('#job-container');
+            var jobHeading = $('#job-heading');
+            if (jobContainer.find('.job-card').length === 0) {
+                jobHeading.hide();
             }
+
+            var selectedJobContainer = $('#selected-job-container');
+            var selectedJobHeading = $('#selected-job-heading');
+            if (selectedJobContainer.find('.job-card').length === 0) {
+                selectedJobHeading.hide();
+            }
+
+            // Fetch job history when the modal is opened
+            $('#jobHistoryModal').on('show.bs.modal', function (e) {
+                $.ajax({
+                    url: "{{ url_for('get_job_history') }}",
+                    method: "GET",
+                    success: function (data) {
+                        var jobHistoryContainer = $('#job-history');
+                        jobHistoryContainer.empty();
+
+                        if (data.length > 0) {
+                            data.forEach(function (job) {
+                                var jobCard = `
+                                    <div class="job-card mb-3">
+                                        <div class="job-title">${job.job_title}</div>
+                                        <div class="job-details">
+                                            <div><strong>Job Description:</strong> ${job.job_desc}</div>
+                                            <div><strong>Departments:</strong> ${job.departments.join(', ')}</div>
+                                            <div><strong>Company:</strong> ${job.company_name}</div>
+                                            <div><strong>Number of Openings:</strong> ${job.num_openings}</div>
+                                            <div><strong>Job Mode:</strong> ${job.job_mode}</div>
+                                            <div><strong>Status:</strong> <span class="badge bg-${job.flag === 3 ? 'success' : 'warning'}">${job.flag === 3 ? 'Completed' : 'In Progress'}</span></div>
+                                        </div>
+                                    </div>
+                                `;
+                                jobHistoryContainer.append(jobCard);
+                            });
+                        } else {
+                            jobHistoryContainer.append('<p class="text-center text-muted">No job history available.</p>');
+                        }
+                    },
+                    error: function (error) {
+                        console.log("Error fetching job history:", error);
+                    }
+                });
+            });
+
+            // Set project ID when the Assign to HOD modal is opened
+            $('#assignHodModal').on('show.bs.modal', function (e) {
+                var button = $(e.relatedTarget); // Button that triggered the modal
+                var projectId = button.data('project-id'); // Extract info from data-* attributes
+                $('#project_id').val(projectId); // Update the modal's hidden input with the project ID
+            });
+
+            // Fetch student details when the modal is opened
+            $('#viewStudentsModal').on('show.bs.modal', function (e) {
+                var button = $(e.relatedTarget); // Button that triggered the modal
+                var jobId = button.data('job-id'); // Extract info from data-* attributes
+
+                $.ajax({
+                   url: "{{ url_for('get_selected_students', job_id='JOBID_PLACEHOLDER') }}".replace('JOBID_PLACEHOLDER', jobId),
+                    method: "GET",
+                    data: { job_id: jobId },
+                    success: function (data) {
+                        var studentDetailsList = $('#studentDetailsList');
+                        studentDetailsList.empty();
+
+                        if (data.length > 0) {
+                            data.forEach(function (student) {
+                                var studentCard = `
+                                    <div class="col-md-6 mb-3">
+                                        <div class="student-card">
+                                            <div class="student-name">${student.name}</div>
+                                            <div class="student-info">
+                                                <p><i class="fas fa-envelope me-2"></i> ${student.email}</p>
+                                                <p><i class="fas fa-graduation-cap me-2"></i> ${student.course}</p>
+                                                <p><i class="fas fa-star me-2"></i> GPA: ${student.gpa}</p>
+                                                <p><i class="fas fa-phone me-2"></i> ${student.phone || 'N/A'}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                `;
+                                studentDetailsList.append(studentCard);
+                            });
+                        } else {
+                            studentDetailsList.append('<div class="col-12"><p class="text-center text-muted">No students selected for this job.</p></div>');
+                        }
+                    },
+                    error: function (error) {
+                        console.log("Error fetching student details:", error);
+                    }
+                });
+            });
+
+            // Fetch HOD requests count
+            fetchHodRequestsCount();
+
+            // Fetch HOD requests when the modal is opened
+            $('#hodRequestsModal').on('show.bs.modal', function (e) {
+                fetchHodRequests();
+            });
+        });
+
+        function fetchHodRequestsCount() {
+            $.ajax({
+                url: "{{ url_for('get_hod_requests_count') }}",
+                method: "GET",
+                success: function (data) {
+                    $('#notification-count').text(data.count);
+                },
+                error: function (error) {
+                    console.log("Error fetching HOD requests count:", error);
+                }
+            });
+        }
+
+        function fetchHodRequests() {
+            $.ajax({
+                url: "{{ url_for('get_hod_requests') }}",
+                method: "GET",
+                success: function (data) {
+                    var hodRequestsList = $('#hod-requests-list');
+                    hodRequestsList.empty();
+
+                    if (data.length > 0) {
+                        data.forEach(function (hod) {
+                            var hodRequestItem = `
+                                <div class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-1">${hod.name}</h5>
+                                            <p class="mb-1">Department: ${hod.department}</p>
+                                            <p class="mb-1">Email: ${hod.email}</p>
+                                            <p class="mb-1">Contact: ${hod.contact}</p>
+                                        </div>
+                                        <div>
+                                            <form action="{{ url_for('approve_hod', hod_id='') }}${hod._id}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                                            </form>
+                                            <form action="{{ url_for('reject_hod', hod_id='') }}${hod._id}" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            hodRequestsList.append(hodRequestItem);
+                        });
+                    } else {
+                        hodRequestsList.append('<p class="text-center text-muted">No HOD requests available.</p>');
+                    }
+                },
+                error: function (error) {
+                    console.log("Error fetching HOD requests:", error);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var ctx = document.getElementById('projectsChart').getContext('2d');
+            var projectsChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Projects', 'Jobs'],
+                    datasets: [{
+                        label: 'Count',
+                        data: [{{ project_count }}, {{ job_count }}],
+                        backgroundColor: ['rgba(54, 162, 235, 0.2)', 'rgba(75, 192, 192, 0.2)'],
+                        borderColor: ['rgba(54, 162, 235, 1)', 'rgba(75, 192, 192, 1)'],
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            min: 0,
+                            max: Math.max({{ project_count }}, {{ job_count }}) + 5
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
         });
     </script>
 </body>
+
 </html>
